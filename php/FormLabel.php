@@ -1,0 +1,65 @@
+<?php
+
+// FST Application Framework, Version 5.4
+// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// All Rights Reserved
+//
+// The FST Application Framework, and its associated libraries, may
+// be used only with the expressed permission of the copyright holder.
+// Usage without permission is strictly prohibited.
+
+/// @cond
+namespace FST;
+/// @endcond
+
+/**
+ * @brief A form label.
+ *
+ * The Form class, when generating its HTML code, will generate a label for
+ * each control row. Objects of this class are returned from the
+ * FormControl::label method.
+ *
+ * Generally, there is not need to create objects from this class, as it is
+ * used internally by the Form and FormControl classes.
+ */
+class FormLabel {
+
+	/// @cond
+	protected $control;
+	protected $label;
+	/// @endcond
+
+	/**
+	 * @brief Constructor.
+	 * @param string $label Label text
+	 * @param object $control FormControl object with which label is associated
+	 *
+	 * Objects of this class are returned by FormControl::label, and are
+	 * used to print the HTML code for the label.
+	 *
+	 * The HTML code will include the "for" attribute to indicate the ID of
+	 * the control with which the label is associated. If $control is passed
+	 * as false, no "for" attribute is generated.
+	 */
+	public function __construct ($label, $control) {
+		$this->control = $control;
+		$this->label = $label;
+	}
+
+	/**
+	 * @brief Get HTML code for the label.
+	 * @retval string HTML code
+	 */
+	public function __toString () {
+		return $this->control ?
+			('<label for="' . $this->control->id() . '">' .
+				htmlspecialchars($this->label) . '</label>') :
+			('<label>' . htmlspecialchars($this->label) . '</label>');
+	}
+
+	/**
+	 * @brief Get the label text.
+	 * @retval string Label text string
+	 */
+	public function label () { return $this->label; }
+}

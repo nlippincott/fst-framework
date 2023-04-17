@@ -1,0 +1,788 @@
+<?php
+
+// FST Application Framework, Version 5.5
+// Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
+// All Rights Reserved
+//
+// The FST Application Framework, and its associated libraries, may
+// be used only with the expressed permission of the copyright holder.
+// Usage without permission is strictly prohibited.
+
+// Revisions, ver 5.3
+//	- Initial version of Mongo class
+// Revisions, ver 5.4
+//	- Modified MongoDoc::save method to remove all members with a leading
+//		underscore before saving to database (previously removed only _id,
+//		_id_refs, and _docs).
+//	- Bug fix in __set method to ensure value given is either a valid id
+//		or a valid object
+//	- Bug fix in Mongo::database when explicit database name not given
+//	- Re-defined functions find, find_all, and find_one, for consistency
+//		with other FST libraries (breaks compatibility with FST 5.3)
+//	- Use general FST exception classes, removed exception classes specific
+//		to this library
+//	- Allow find_by_* and find_all_by_* function calls to receive an optional
+//		parameter to specify sort order
+// Revisions, ver 5.5
+//	- Added read post-processing method.
+//	- Added write pre-processing method.
+//	- Convert DateTime objects to string prior to database write.
+//	- Method __isset now considers getters.
+//	- Method __call fixed bug in detecting query and sort criteria
+
+/// @cond
+namespace FST;
+/// @endcond
+
+/**
+ * @brief Database and connection management for MongoDB
+ *
+ * A class for managing Mongo databases and providing connections via the
+ * MongoDB Manager class. Allows definition of database aliases to multiple
+ * databases.
+ *
+ * This library is being introduced in FST version 5.3 and is to be
+ * considered experimental.
+ */
+final class Mongo {
+
+	/// @cond
+	static private $_databases = array(); // Mongo database connections
+	static private $_database_default = false; // Default database connection
+	static private $_manager = null; // Mongo database manager
+	static private $_uri = 'mongodb://localhost'; // Authentication URI
+	/// @endcond
+
+	/**
+	 * @brief Provides authorization string to database manager
+	 * @param string $user Database username
+	 * @param string $pass Database password
+	 * @param string $auth Authenticaion database
+	 * @param string $host Authentication database host name (optional)
+	 *
+	 * Provides the username, password, and authentication database to be
+	 * used for database connections. Optionally, the hostname of the
+	 * authentication database may be provided (default is localhost).
+	 */
+	static public function auth ($user, $pass, $auth, $host='localhost')
+		{ static::$_uri = "mongodb://$user:$pass@$host/$auth"; }
+
+	/**
+	 * @brief Specifies a database with a database alias name
+	 *
+	 * @param $alias string Database alias name
+	 * @param $database string Database name (optional)
+	 *
+	 * Specifies the database alias to be used to access the given database.
+	 * If the database name is not provided, the given alias is used also
+	 * as the database name. The first database defined with this function
+	 * becomes the default database. MongoDoc classes will indicate a
+	 * database alias to specify the database in which the documents
+	 * reside.
+	 */
+	static public function database ($alias, $database=false) {
+		if (!$database)
+			$database = $alias;
+		if (array_key_exists($alias, static::$_databases))
+			throw new DatabaseException('Database already defined');
+		static::$_databases[$alias] = $database;
+		if (!static::$_database_default)
+			static::$_database_default = $database;
+	}
+
+	/**
+	 * @brief Get database name
+	 *
+	 * @param $alias string Database alias
+	 * @retval string Database name
+	 *
+	 * Used to retrieve actual database name for a given alias name. This
+	 * function is provided for usage by the MongoDoc base class.
+	 */
+	static public function _db ($alias=false) {
+		if (!$alias && static::$_database_default)
+			return static::$_database_default;
+		if (!$alias || !array_key_exists($alias, static::$_databases))
+			throw new DatabaseException('Database not defined');
+		return static::$_databases[$alias];
+	}
+
+	/**
+	 * @brief Get database manager object
+	 *
+	 * @retval object A \\MongoDB\\Manager object
+	 *
+	 * Used to retrieve the database manager object. This function is provided
+	 * for usage by the MongoDoc base class.
+	 */
+	static public function _mgr () {
+		if (!isset(static::$_manager))
+			static::$_manager = new \MongoDB\Driver\Manager(static::$_uri);
+		return static::$_manager;
+	}
+}
+
+/**
+ * @brief Base class to represent documents in a Mongo collection
+ *
+ * Each collection is represented by a class that is derived from this
+ * abstract base class. Derived classes specify the database in which the
+ * class resides (or uses the default database if not specified), and the
+ * collection in which documents reside (or collection name may be derived
+ * from the class name).
+ *
+ * The MongoDoc::find static method is used to create objects of this class
+ * to represent individual documents from the collection. Instantiation of a
+ * new object of the derived class represents creation of a new document.
+ * Document properties correspond to properties of the object. Each object
+ * has an id property, corresponding to the string representation of the
+ * document id. This base class includes methods MongoDoc::save and
+ * MongoDoc::delete for saving and removing documents respectively.
+ */
+abstract class MongoModel {
+
+	/**
+	 * @brief Defines the collection name
+	 *
+	 * Derived classes may override this property to define the collection
+	 * name. If the derived class does not override this property, the
+	 * collection name is determined by preceeding all uppercase
+	 * characters in the name (except the first character) with an underscore,
+	 * converting all characters to lowercase, and adding 's'.
+	 */
+	static protected $collection = false;
+
+	/**
+	 * @brief Defines the database name
+	 *
+	 * Derived classes may override this property to specify the database
+	 * in which the collection resides. If the derived class does not
+	 * override this property, the default database is used. The database
+	 * must have been defined using Mongo::database prior to instantion of
+	 * the first object from the derived class.
+	 */
+	static protected $database = false;
+
+	/**
+	 * @brief Defines documents which reference this document
+	 *
+	 * Derived classes may specify an associative array to define other
+	 * derived classes that link to the current document. Key values are
+	 * used as virtual properties and functions of objects (via the __get
+	 * and __call magic methods) to retrieve all documents of another
+	 * collection that have references to this document. Values of the
+	 * associative array are either a class name or a class name followed
+	 * by a colon (":") followed by the name of the property in
+	 * that class that references a document from this class. If the name of
+	 * the property is not provided, it is assumed to be the name of this
+	 * class, converted to lowercase.
+	 */
+	static protected $referenced_by = array();
+
+	/**
+	 * @brief Defines referenced documents
+	 *
+	 * Derived classes may specify an associative array to link to documents
+	 * from other collections. Key values are used as virtual properties of
+	 * objects (via the __get magic method) to connect to a document from
+	 * another collection. Values of the associative array are the class name
+	 * corresponding to the referenced collection.
+	 */
+	static protected $references = array();
+
+	/// @cond
+	private $_id = null;
+	private $_id_refs = array();
+	private $_docs = array();
+	/// @endcond
+
+	/**
+	 * @brief Constructs a new document
+	 * @param mixed $properties Associative array or object of initial properties (optional)
+	 *
+	 * Creates a new (unsaved) document. Initial properties may optionally
+	 * be specified as an associative array. Each key in the array is assigned
+	 * as a property of the object.
+	 */
+	public function __construct ($properties=null)
+		{ if ($properties) $this->set($properties); }
+
+	/// @cond
+
+	// Magic method to define function for retrieval of objects of another
+	// derived class that reference a document from this class. Optional
+	// arguments to the function are the query and sort criteria.
+	public function __call ($fcn, $args) {
+		if (!array_key_exists($fcn, static::$referenced_by))
+			throw new UsageException("Call to undefined method: $fcn");
+
+		// If this object has no id (document is not saved), no other
+		// documents will reference it.
+		if (!isset($this->_id))
+			return array();
+
+		// Get class name and field name that references this class.
+//		list($cls, $fld, $tmp) = explode(':', static::$referenced_by[$fcn] .
+//			':' . strtolower(get_called_class()) . ':', 3);
+		list($cls, $fld, $tmp) = explode(':', static::$referenced_by[$fcn] .
+			':' . strtolower(preg_replace(
+				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . ':', 3);
+
+		// Optional arguments to this function are a query and sort criteria.
+		$qry = (count($args) > 0 && is_array($args[0])) ? $args[0] : [];
+		$srt = count($args) > 1 ? $args[1] : [];
+
+		// Include this object in criteria for the query
+		$qry[$fld] = $this;
+
+		return $cls::find_all($qry, $srt);
+	}
+
+	// Provides for cloning of objects. A cloned object is a copy but is
+	// unsaved in the collection.
+	public function __clone () { $this->_id = null; }
+
+	// Magic method to get properties of the object that are not directly
+	// saved in the document. Property 'id' is the string representation of
+	// the _id property (or null if document is not saved). If the requested
+	// property has a getter (method "get_" followed by property name), that
+	// function is called to retrieve the property. If the property is a
+	// referenced property, an object of the referenced class is created
+	// and returned if a document is referenced, or null if none referenced.
+	public function __get ($fld) {
+
+		// If getting '_id', return Mongo Object ID
+		if ($fld == '_id')
+			return $this->_id;
+
+		// If getting 'id', return string version of Mongo ID
+		if ($fld == 'id') {
+			if (!isset($this->_id))
+				return null;
+			return $this->_id->__toString();
+		}
+
+		// If getter exists for field, call it
+		if (method_exists($this, "get_$fld"))
+			return call_user_func(array($this, "get_$fld"));
+
+		// If getting a referenced document, return object for document.
+		if (array_key_exists($fld, static::$references)) {
+			if (array_key_exists($fld, $this->_docs))
+				return $this->_docs[$fld];
+			if (isset($this->_id_refs[$fld])) {
+				$cls = static::$references[$fld];
+				try {
+					$obj = $cls::find("{$this->_id_refs[$fld]}");
+					$this->_docs[$fld] = $obj;
+					return $obj;
+				}
+				catch (NotFoundException $e) { }
+			}
+			return null;
+		}
+
+		// If getting documents which reference this document, call the
+		// function to get documents without parameters.
+		if (array_key_exists($fld, static::$referenced_by))
+			return $this->$fld();
+
+		// Field does not exist, return null.
+		return null;
+	}
+
+	// Magic method to indicate whether the id property is set or getter
+	// exists and has non-null return value
+	public function __isset ($fld) {
+		switch ($fld) {
+		case 'id':
+		case '_id':
+			return isset($this->_id);
+		}
+		return method_exists($this, "get_$fld") &&
+			!is_null(call_user_func(array($this, "get_$fld")));
+	}
+
+	// Magic method to set properties that are not already set. This method
+	// throws an exception on any attempt to set the id or _id properties,
+	// or properties beginning with "_id_" that refer to referenced objects.
+	// When setting referenced objects, the object being assigned must be
+	// of the designated referenced class, else an exception is thrown.
+	public function __set ($fld, $val) {
+
+		// May not assign 'id', '_id', or '_id_refs'
+		if ($fld == 'id' || $fld == '_id' || preg_match('/^_id_/', $fld))
+			throw new UsageException(
+				'Assignment to id member is not allowed');
+
+		// May not assign '_docs'
+		if ($fld == '_docs')
+			throw new UsageException(
+				'Assignment to _docs member is not allowed');
+
+		// If the field being assigned is a referenced field, value must be
+		//	a document object or an object id, in which case the object id
+		//	is saved. The object (or object to which the id refers) must be
+		//	of the correct collection (or an exception is thrown). Also, the
+		//	value may be specified as false, null, or blank, to remove an
+		//	existing reference.
+		if (array_key_exists($fld, static::$references)) {
+			// If $val is null, remove reference if exists.
+			if (!$val) {
+				if (isset($this->_docs[$fld]))
+					unset($this->_docs[$fld]);
+				if (isset($this->_id_refs[$fld]))
+					unset($this->_id_refs[$fld]);
+				return null;
+			}
+			// If $val is a string, attempt to convert to doc of expected type
+			if (is_string($val)) {
+				try {
+					$cls = static::$references[$fld];
+					$val = $cls::find($val);
+				}
+				catch (NotFoundException $e) { $val = null; }
+			}
+			// $val must be an object of type specified in $references.
+			if (!is_object($val) ||
+					get_class($val) != static::$references[$fld])
+				throw new UsageException(
+					"Inconsistent object assigned to referenced field");
+			// $val must be a saved object (i.e. must have an _id)
+			if (!isset($val->_id))
+				throw new UsageException(
+					"Unsaved object assigned to referenced field");
+			$this->_id_refs[$fld] = $val->_id;
+			$this->_docs[$fld] = $val;
+			return $val;
+		}
+
+		// If a setter exists for this object, call it and return
+		if (method_exists($this, "set_$fld")) {
+			call_user_func(array($this, "set_$fld"), $val);
+			return $this->$fld;
+		}
+
+		// Create public property, set, and return
+		return $this->$fld = $val;
+	}
+
+	// Magic method to unset referenced properties
+	public function __unset ($fld) {
+
+		// If a referenced object, remove its id from referenced id's.
+		if (array_key_exists($fld, static::$references))
+			unset($this->_id_refs[$fld]);
+	}
+
+	static public function __callStatic ($fcn, $args) {
+		// Implements 'find_by_*' and 'find_all_by_*' and 'count_by_*' static
+		//	methods.
+
+		// Determine mode (command), 'first', 'all', or 'count'.
+		if (substr($fcn, 0, 8) == 'find_by_')
+			$method = 'find_one';
+		else if (substr($fcn, 0, 12) == 'find_all_by_')
+			$method = 'find_all';
+		else if (substr($fcn, 0, 9) == 'count_by_')
+			$method = 'count';
+		else
+			throw new UsageException(
+				"Call to undefined static method: $fcn");
+
+		// Get field names for query
+		$fields = explode('_and_', substr($fcn, strpos($fcn, '_by_') + 4));
+
+		// Ensure match in number of arguments. Should be one argument for
+		//	each field. For find_by_* and find_all_by_*, an additional
+		//	argument may be specified for sorting.
+		if (count($args) == count($fields))
+			$sort = null;
+		else {
+			if ($method == 'count' || count($args) != count($fields) + 1)
+				throw new UsageException(
+					"Incorrect number of arguments: $fcn");
+			$sort = end($args);
+			$args = array_slice($args, 0, -1);
+		}
+
+		// Build the query
+		$query = array_combine($fields, $args);
+
+		// Execute query, return results.
+		if ($method == 'count')
+			return static::count($query);
+		return static::$method($query, $sort);
+	}
+
+	/// @endcond
+
+	/**
+	 * @brief Delete current document from the collection
+	 *
+	 * The document is removed from the collection. Upon deletion, the object
+	 * properties remain intact and represent an unsaved document.
+	 */
+	public function delete () {
+		// Remove the current document
+		if ($this->_id) {
+			$write = new \MongoDB\Driver\BulkWrite();
+			$write->delete(array('_id'=>$this->_id));
+			Mongo::_mgr()->executeBulkWrite(
+				static::_database() . '.' . static::_collection(), $write);
+		}
+		// Initialize document id
+		$this->_id = null;
+	}
+
+	/**
+	 * @brief Post-process database fields after read
+	 * @param array $rec Associative array of field values from database
+	 * @retval array Associative array of field values for the object model
+	 *
+	 * Derived classes may override this method to perform any post-processing
+	 * to be done to the document's data immediately after it was read from
+	 * the database, but before being passed to the set method to set the
+	 * document's properties.
+	 *
+	 * The parameter given is an associative array of actual values read
+	 * from the database, and should return an associative array of properties
+	 * to be set for the document.
+	 * 
+	 * Note that the set method does not set properties that lead with an
+	 * underscore. If such properties are needed for object context they
+	 * may be set directly in this method.
+	 */
+	protected function read ($rec) { return $rec; }
+
+	/**
+	 * @brief Save current document to database
+	 *
+	 * If the document was retrieved from the collection, replaces the
+	 * document. If an unsaved document, a new document is added to the
+	 * collection.
+	 */
+	public function save () {
+
+		// Create bulk write object
+		$write = new \MongoDB\Driver\BulkWrite();
+
+		// If an unsaved document, create a new empty document to get an id.
+		//	Taking this approach because when trying to insert a new document
+		//	that had reference fields set, such as _id_user, $write->insert
+		//	would return null as the inserted id when, in fact, an id was
+		//	actually created. Not sure if this is a bug in the driver or
+		//	something I was doing wrong. Creating an empty document to get
+		//	an id, however, worked consistently.
+		if (!($this->_id))
+			$this->_id = $write->insert(array());
+
+		// Convert document to an array, remove all properties leading with
+		// an underscore, and pass to the write method for pre-processing.
+		$doc = $this->write(array_filter(get_object_vars($this),
+			function ($key) { return substr($key, 0, 1) != '_'; },
+			ARRAY_FILTER_USE_KEY));
+
+		// Convert convert all DateTime objects to string form.
+		$doc = array_map(
+			function ($val) {
+					if (is_object($val) && get_class($val) == 'DateTime')
+						return $val->format('Y-m-d H:i:s');
+					return $val;
+				}, $doc);
+
+		// Set entries for referenced documents.
+		foreach ($this->_id_refs as $ref=>$obj_id)
+			$doc["_id_$ref"] = $obj_id;
+
+		// Save document
+		$write->update(array('_id'=>$this->_id), $doc);
+		Mongo::_mgr()->executeBulkWrite(
+			static::_database() . '.' . static::_collection(), $write);
+	}
+
+	/**
+	 * @brief Sets document properties from associative array or object
+	 * @param mixed $properties Associative array or object of key/value pairs
+	 *
+	 * Uses the given array or object to set properties for the current
+	 * document. If an array, each key which is a valid property name,
+	 * except those beginning with an underscore, is assigned to the
+	 * corresponding value. If an object, the object is converted to an
+	 * associative array and the array logic is used.
+	 */
+	public function set ($properties) {
+
+		if (!is_array($properties) && !is_object($properties))
+			throw new UsageException(
+				'Argument to Mongo::set must be array or object');
+
+		foreach (is_object($properties) ?
+				get_object_vars($properties) : $properties as $k=>$v)
+			if (preg_match('/^[a-z]\w*$/i', $k))
+				$this->$k = $v;
+	}
+
+	/**
+	 * @brief Pre-process database fields before write
+	 * @param array $rec Associative array of field values from the model
+	 * @retval array Associative array of field values for the database
+	 *
+	 * This method may be overridden in derived classes to perform any
+	 * pre-processing that should occur just before writing the document to
+	 * the database. The parameter given is an associative array of all
+	 * properties of the document (not including those that lead with an
+	 * underscore).
+	 *
+	 * The method should return an associative array
+	 * of actual values to be written (by either INSERT or UPDATE).
+	 */
+	protected function write ($rec) { return $rec; }
+
+	/**
+	 * @brief Runs an aggregation against the collection
+	 * @param array $pipeline A Mongo aggregation pipeline
+	 * @retval array Associative array of aggregation results
+	 *
+	 * The given pipeline is run against the collection. Results from the
+	 * aggregation are returned in a array of associative arrays.
+	 */
+	static public function aggregate ($pipeline) {
+		$cmd = new \MongoDB\Driver\Command([
+			'aggregate'=>static::_collection(),
+			'pipeline'=>$pipeline]);
+		$cur = Mongo::_mgr()->executeCommand(
+			static::_database(), $cmd);
+		$res = $cur->toArray()[0];
+		return $res->ok ? $res->result : false;
+	}
+
+	/**
+	 * @brief Get count of documents
+	 * @param array $qry Query to qualify document in collection (optional)
+	 * @retval int Number of document
+	 *
+	 * Determines the number of documents in the collection, optionally
+	 * qualified by a query. If a query is not given, returns the number
+	 * of documents in the collection.
+	 */
+	static public function count ($qry=null) {
+
+		// Aggregation approach...
+//		$pipeline = array();
+//		if ($query)
+//			$pipeline[] = [ '$match'=>$query ];
+//		$pipeline[] = [ '$group'=>[ '_id'=>null, 'count'=>[ '$sum'=>1 ]]];
+//		$results = static::aggregate($pipeline);
+//		return count($results) ? $results[0]->count : 0;
+
+		$cmd = new \MongoDB\Driver\Command($qry ?
+			[ 'count'=>static::_collection(), 'query'=>$qry ] :
+			[ 'count'=>static::_collection()]);
+		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
+		return $cur->toArray()[0]->n;
+	}
+
+	/**
+	 * @brief Get distinct values for the given property
+	 * @param string $fld Property name
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @retval array Array of distinct values
+	 *
+	 * Determines the distinct values for the given property that are saved
+	 * in the collection. A qualifying query may be specified, in which case
+	 * only qualifying documents are considered.
+	 */
+	static public function distinct ($fld, $qry=false) {
+
+		if (!$qry) $qry = array();
+		if (!is_array($qry))
+			throw new UsageException('Query must be an array');
+
+		// Convert any references in query.
+		foreach ($qry as $k=>$v) {
+			if (array_key_exists($k, static::$references)) {
+				if (!is_object($v) || get_class($v) != static::$references[$k])
+					throw new UsageException(
+						'Inconsistent document type in query');
+				$qry["_id_$k"] = $v->_id;
+				unset($qry[$k]);
+			}
+		}
+
+		// Get distinct values
+		$cmd = new \MongoDB\Driver\Command(
+			[ 'distinct'=>static::_collection(), 'key'=>$fld, 'query'=>$qry ]);
+		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
+		return $cur->toArray()[0]->values;
+	}
+
+	/**
+	 * @brief Retrieve a document by its id value
+	 * @param string $id Id value
+	 * @retval object Document object
+	 *
+	 * This function retrieves a single document from the table with the
+	 * given id value. If the document is not found, a NotFoundException
+	 * is thrown.
+	 */
+	static public function find ($id) {
+
+		// Query the document and get cursor.
+		$qry = new \MongoDB\Driver\Query(
+			array('_id'=>new \MongoDB\BSON\ObjectId($id)));
+		$cur = Mongo::_mgr()->executeQuery(
+			static::_database() . '.' . static::_collection(), $qry);
+
+		// If no document found, throw exception.
+		if (!$cur)
+			throw new NotFoundException(
+				static::_collection() . ':' . $id);
+		$arr = $cur->toArray();
+		if (!count($arr))
+			throw new NotFoundException(
+				static::_collection() . ':' . $id);
+
+		// Build and return object from query results.
+		$cls = get_called_class();
+		$obj = new $cls();
+		//$obj->_init($obj->read(get_object_vars($cur->toArray()[0])));
+		$obj->_init($obj->read(get_object_vars($arr[0])));
+		return $obj;
+	}
+
+	/**
+	 * @brief Retrieves a single document using a query
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @param string $srt Property for sorting results (optional)
+	 * @param int $skp Number of leading documents to skip (optional)
+	 * @retval mixed Document object or false
+
+	 * Retrieves a single document from the collection optionally with
+	 * a condition. Parameters $srt and $skp may be specified for to control
+	 * which document is retrieved among qualifying documents.
+	 */
+	static public function find_one ($qry=null, $srt=null, $skp=null) {
+		$objs = static::find_all($qry, $srt, 1, $skp);
+		return count($objs) ? $objs[0] : false;
+	}
+
+	/**
+	 * @brief Retrieve document or documents
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @param string $srt Property for sorting results (optional)
+	 * @param int $lim Limits number of documents retrieved (optional)
+	 * @param int $skp Number of leading document to skip (optional)
+	 * @retval mixed Document object or array of document objects
+	 *
+	 * This function retrieves all documents in the
+	 * collection as an array of objects, optionally qualified by the
+	 * $query parameter. Further,
+	 * $sort may be specified to specify the sorting order of returned
+	 * results, and $limit and $skip may be used to support paging in the
+	 * application.
+	 */
+	static public function find_all (
+			$qry=null, $srt=null, $lim=null, $skp=null) {
+
+		if (!$qry) $qry = array();
+		if (!is_array($qry))
+			throw new UsageException('Query must be an array');
+
+		// Get the called class for returning objects.
+		$cls = get_called_class();
+
+		// Convert any references in query.
+		foreach ($qry as $k=>$v) {
+			if (array_key_exists($k, static::$references)) {
+				if (!is_object($v) || get_class($v) != static::$references[$k])
+					throw new UsageException(
+						'Inconsistent document type in query');
+				$qry["_id_$k"] = $v->_id;
+				unset($qry[$k]);
+			}
+		}
+
+		// Build options for query.
+		$options = array();
+
+		// Sort option.
+		if ($srt) {
+			if (is_string($srt))
+				$srt = array($srt=>1);
+			if (!is_array($srt))
+				throw new UsageException(
+					'Sort option must be a string or array');
+			$options['sort'] = $srt;
+		}
+
+		// Limit option.
+		if ($lim) {
+			$lim = (int)$lim;
+			if ($lim <= 0)
+				throw new UsageException('Limit option must be int > 0');
+			$options['limit'] = $lim;
+		}
+
+		// Skip option.
+		if ($skp) {
+			$skp = (int)$skp;
+			if (!$skp)
+				throw new UsageException('Skip option must be int > 0');
+			$options['skip'] = $skp;
+		}
+
+		// Execute query.
+		$qry = new \MongoDB\Driver\Query($qry, $options);
+		$cur = Mongo::_mgr()->executeQuery(
+			static::_database() . '.' . static::_collection(), $qry);
+
+		// Build and return objects from query results
+		$objs = array();
+		foreach ($cur as $doc) {
+			$obj = new $cls();
+			$obj->_init($obj->read(get_object_vars($doc)));
+			$objs[] = $obj;
+		}
+		return $objs;
+	}
+
+	/// @cond
+
+	// Helper method to initialize properties from an associative array.
+	private function _init ($doc=array()) {
+
+		// Set object id.
+		$this->_id = isset($doc['_id']) ? $doc['_id'] : null;
+
+		// Set properties.
+		foreach ($doc as $key=>$val) {
+			// Referenced document, as described in static::$references?
+			if (substr($key, 0, 4) == '_id_' && array_key_exists(
+					substr($key, 4), static::$references))
+				$this->_id_refs[substr($key, 4)] = $val;
+			// All other properties, except '_id'.
+			else if ($key != '_id')
+				$this->$key = $val;
+		}
+	}
+
+	// Helper function to determine the collection name
+	static private function _collection () {
+		// If collection is not defined in the derived class, determine
+		//	collection name based on the class name. Inserts underscore before
+		//	all uppercase characters, except if first character, then
+		//	convert to lowercase and add "s". For example, class "User"
+		//	corresponds to collection "users", and class "AdminUser"
+		//	corresponds to collection "admin_users".
+		return static::$collection ? static::$collection :
+			strtolower(preg_replace(
+				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
+	}
+
+	// Helper function to return the database object
+	static private function _database ()
+		{ return Mongo::_db(static::$database); }
+
+	/// @endcond
+}
