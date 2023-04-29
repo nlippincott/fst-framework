@@ -12,6 +12,8 @@
 //	- Correction to HTML5 boolean attribute "readonly"
 // Revision history, version 5.2.2
 //	- Added placeholder function
+// Revision history, version 5.5
+//	- __toString, fixed deprecated parameter to htmlspecialchars
 
 /// @cond
 namespace FST;
@@ -46,7 +48,8 @@ class FormTextareaControl extends FormControl {
 	 */
 	public function __toString () {
 		return '<textarea' . Framework::attr($this->attr) . '>' .
-			htmlspecialchars($this->value) . '</textarea>';
+			($this->value ? htmlspecialchars($this->value) : '') .
+			'</textarea>';
 	}
 
 	/**

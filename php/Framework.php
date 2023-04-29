@@ -70,7 +70,7 @@ class Framework {
 	// FST version constants
 	const VERSION = '5.5-rc1';				///< FST version number
 	const VERSION_COPYRIGHT = '2004-23';	///< FST coypright dates
-	const VERSION_RELEASE = '2022-04-04';	///< FST version release date
+	const VERSION_RELEASE = '2022-04-29';	///< FST version release date
 
 	// For control of FST copyright comment in HTML output
 	const COPYRIGHT_STD = 1;		///< Default FST copyright output location
