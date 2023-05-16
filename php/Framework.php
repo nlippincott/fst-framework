@@ -38,6 +38,8 @@
 // Revisions, ver 5.4.3
 //	- Correction of converstion of application URI's, those leading with '#'
 //		are no longer converted using absolute URI logic
+// Revisions, ver 5.5
+//	- Fixed deprecated null parameter on uri method
 
 /// @cond
 namespace FST;
@@ -70,7 +72,7 @@ class Framework {
 	// FST version constants
 	const VERSION = '5.5-rc1';				///< FST version number
 	const VERSION_COPYRIGHT = '2004-23';	///< FST coypright dates
-	const VERSION_RELEASE = '2022-04-29';	///< FST version release date
+	const VERSION_RELEASE = '2022-05-01';	///< FST version release date
 
 	// For control of FST copyright comment in HTML output
 	const COPYRIGHT_STD = 1;		///< Default FST copyright output location
@@ -257,7 +259,9 @@ class Framework {
 	 * or leads with a slash, the given URL is considered to be an absolute
 	 * URL and is simply returned.
 	 */
-	public static function uri ($uri='') {
+	public static function uri ($uri=null) {
+		if (!$uri)
+			return self::config('root');
 		return preg_match('"^(\w+:|/|\?|#)"', $uri) ?
 			$uri : self::config('root') . $uri;
 	}
