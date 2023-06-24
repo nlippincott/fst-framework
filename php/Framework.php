@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.5
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -41,6 +41,12 @@
 // Revisions, ver 5.5
 //	- Fixed deprecated null parameter on uri method
 
+// Revisions, ver 6.0
+//	- No longer supports config.ini file
+//	- Add config option for .env files
+//	- Define helper functions from Framework initialization
+//	- Add option to define helper functions
+
 /// @cond
 namespace FST;
 /// @endcond
@@ -66,6 +72,8 @@ class Framework {
 	protected static $_cfg;		// Controller configuration
 
 	protected static $_action;	// Controller action
+
+	protected static $_env;		// App environment variables
 
 	/// @endcond
 
@@ -193,6 +201,22 @@ class Framework {
 	 */
 	public static function ctrlname () { return self::$_ctrlname; }
 
+	/**
+	 * @brief Get environment variable value.
+	 * @param string $var Environment variable name, or null for all
+	 * @retval mixed Environment variable value
+	 * 
+	 * Gets the value associated with the given environment variable.
+	 * Environment variables may be those defined by the shell, or those
+	 * defined for the application via an environment file.
+	 * 
+	 * If $var is not supplied, an array of environment variables is
+	 * returned.
+	 */
+	public static function env ($var=null) {
+		return $var ? (isset(self::$_env[$var]) ? self::$_env[$var] : null) : self::$_env;
+	}
+
 	/// @cond
 	// FST modules will call this function for usage errors. It is not
 	//	intended to be user-callable.
@@ -319,8 +343,7 @@ class Framework {
 						//	includes, or false
 					'template'=>'template', // Directory for templates
 
-					// Application options (may also be overridden in
-					//	config.ini)
+					// Application options
 					'ajax'=>true, // Handle Ajax requests
 					'controllers'=>array(), // Controller map
 					'copyright'=>self::COPYRIGHT_STD, // FST Copyright comments
@@ -328,6 +351,8 @@ class Framework {
 					'debug'=>false, // Use false for production
 					'debug_error_reporting'=>E_ALL,
 						// Error reporting level, when debug is set
+					'env'=>'.env', // Location of .env files, or array or false
+					'helpers'=>true, // Define helper functions
 					'home'=>'home', // Controller name for home page
 					'meta-content-type'=>true,
 						// Generate default meta content-type tag
@@ -336,29 +361,6 @@ class Framework {
 					'session'=>false, // session name, false for no session
 				),
 				$cfg);
-
-			// If app/config.ini exists, load options
-			$cfg2_fname = self::config('app') . '/config.ini';
-			if (file_exists($cfg2_fname)) {
-				$cfg2 = parse_ini_file($cfg2_fname, true);
-				$cfg2_map = array(
-						// legacy-option=>current-option
-						'Ajax'=>'ajax',
-						'Controller'=>'controllers',
-						'Copyright'=>'copyright',
-						'Debug'=>'debug',
-						'Session'=>'session',
-					);
-				foreach ($cfg2_map as $legacy=>$option) {
-					if (array_key_exists($legacy, $cfg2))
-						self::$_cfg[$option] = $cfg2[$legacy];
-					if (array_key_exists($option, $cfg2))
-						self::$_cfg[$option] = $cfg2[$option];
-				}
-				// Application root may also be deifned in config file
-				if (array_key_exists('root', $cfg2))
-					self::$_cfg['root'] = $cfg2['root'];
-			}
 
 			self::$_fst = new self();
 		}
@@ -411,6 +413,16 @@ class Framework {
 			ini_set('display_errors', 1);
 		}
 
+		// Load environment variables
+		self::$_env = $_ENV;
+		if (self::config('env'))
+			foreach (is_array(self::config('env')) ? self::config('env') : [ self::config('env') ] as $env)
+				self::$_env = array_merge(self::$_env, parse_ini_file($env, true));
+
+		// Define helper functions if configured
+		if (self::config('helpers'))
+			require 'fst-functions.php';
+
 		// Start session, if required
 		if (self::config('session')) {
 			session_name(self::config('session'));
@@ -418,26 +430,6 @@ class Framework {
 		}
 
 		// Set up application autoload function
-		//	TODO: Include autoload forms? *_form in app directory?
-		/*
-		if (self::config('class'))
-			spl_autoload_register(function ($cls) {
-				//$f = preg_match('/_(controller|form)$/', $cls) ?
-				$f = preg_match('/_controller$/', $cls) ?
-					Framework::config('app') . "/$cls.php" :
-					Framework::config('class') . "/$cls.php";
-				if (file_exists($f))
-					require $f;
-			});
-		else
-			spl_autoload_register(function ($cls) {
-				if (preg_match('/_controller$/', $cls)) {
-					$f = Framework::config('app') . "/$cls.php";
-					if (file_exists($f))
-						require $f;
-				}
-			});
-		*/
 		spl_autoload_register(function ($cls) {
 			if (substr($cls, -11) == '_controller') {
 				$ctrl_fname = self::config('app') . '/' . $cls . '.php';

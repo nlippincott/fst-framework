@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-23, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -10,6 +10,8 @@
 
 // Revisions, ver 5.1
 //	- Added functions _table and __table
+// Revisions, ver 6.0
+//	- Added function _env
 
 /**
  * @file
@@ -24,6 +26,9 @@
  * files for generating output. The single-underscore versions are provided
  * for other cases where a class (for example one derived from TableEngine)
  * or library function might need to return HTML code.
+ * 
+ * Also included are shortcut functions for calling some static function of
+ * class Framework.
  */
 
 /**
@@ -171,6 +176,15 @@ function _ctrl () { return FST\Framework::ctrl(); }
  * @retval string Controller name
  */
 function _ctrlname () { return FST\Framework::ctrl()->ctrl(); }
+
+/**
+ * @brief Get environment variable value.
+ * @param string $var Environment variable name, or null for all
+ * @retval mixed Environment variable value
+ * 
+ * Convenience function, calls Framework::env.
+ */
+function _env ($var=null) { return FST\Framework::env($var); }
 
 /**
  * @brief Get HTML IMG tag.
