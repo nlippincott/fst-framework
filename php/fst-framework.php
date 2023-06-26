@@ -24,16 +24,16 @@
 /// @cond
 
 // Requires PHP version 5.3 or higher
-if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300)
-	die('FST Application Framework requires PHP 5.3 or higher');
+// if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300)
+// 	die('FST Application Framework requires PHP 5.3 or higher');
 
-require 'Framework.php';
-require 'Controller.php';
+// require 'Framework.php';
+// require 'Controller.php';
 
-require 'TableEngine.php';
-require 'ListEngine.php';
-require 'CalendarEngine.php';
-require 'NameValueTable.php';
+// require 'TableEngine.php';
+// require 'ListEngine.php';
+// require 'CalendarEngine.php';
+// require 'NameValueTable.php';
 
 require 'Form.php';
 require 'FormLabel.php';

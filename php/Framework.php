@@ -419,6 +419,9 @@ class Framework {
 			foreach (is_array(self::config('env')) ? self::config('env') : [ self::config('env') ] as $env)
 				self::$_env = array_merge(self::$_env, parse_ini_file($env, true));
 
+		// Register form control methods
+		require 'fst-framework.php';
+
 		// Define helper functions if configured
 		if (self::config('helpers'))
 			require 'fst-functions.php';
