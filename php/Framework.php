@@ -430,7 +430,7 @@ class Framework {
 
 		// Set timezone, if configured
 		if (self::config('timezone'))
-			putenv('TZ=' . self::config('timezone'));
+			date_default_timezone_set(self::config('timezone'));
 
 		// Start session, if required
 		if (self::config('session')) {
