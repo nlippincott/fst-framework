@@ -46,6 +46,7 @@
 //	- Add config option for .env files
 //	- Define helper functions from Framework initialization
 //	- Add option to define helper functions
+//	- Add option to set timezone
 
 /// @cond
 namespace FST;
@@ -358,6 +359,7 @@ class Framework {
 						// Generate default meta content-type tag
 					'meta-viewport'=>true,
 						// Generate default meta viewport tag
+					'timezone'=>false, // Timezone, or false for system default
 					'session'=>false, // session name, false for no session
 				),
 				$cfg);
@@ -425,6 +427,10 @@ class Framework {
 		// Define helper functions if configured
 		if (self::config('helpers'))
 			require 'fst-functions.php';
+
+		// Set timezone, if configured
+		if (self::config('timezone'))
+			putenv('TZ=' . self::config('timezone'));
 
 		// Start session, if required
 		if (self::config('session')) {
