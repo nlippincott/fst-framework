@@ -217,7 +217,7 @@ function __img ($uri, $alt, $attr=array()) { print _img($uri, $alt, $attr); }
  * This is a convenience function that applies PHP functions htmlspecialchars
  * and nl2br (in that order) to a string. It is provided simply as a shortcut.
  */
-function _s ($s) { return nl2br(htmlspecialchars($s)); }
+function _s ($s) { return $s ? nl2br(htmlspecialchars($s)) : ''; }
 
 /**
  * @brief Generate an HTML element.
