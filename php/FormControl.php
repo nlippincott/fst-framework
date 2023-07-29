@@ -36,7 +36,7 @@ abstract class FormControl {
 
 	protected $glued = false;
 	protected $grouped = false;
-	protected $label;
+	protected $label = null;
 	protected $informational = false;
 	protected $nodata = null;
 	protected $required = false;
@@ -54,7 +54,7 @@ abstract class FormControl {
 	 * additional control initialization, but must maintain the parameter
 	 * list.
 	 *
-	 * The second parameter, $label, is typically the label associated with
+	 * The third parameter, $label, is typically the label associated with
 	 * the control. However, particular controls may use this field for a
 	 * different purpose (such as in FormSubmitControl).
 	 * If that is the case, FormControl::label may be
@@ -64,7 +64,7 @@ abstract class FormControl {
 		$this->attr['data-fst'] = 'form-control';
 		$this->attr['id'] = $form->id() . "_$name";
 		$this->attr['name'] = $name;
-		$this->label = $label;
+		$this->label($label);
 	}
 
 	/**
@@ -227,13 +227,12 @@ abstract class FormControl {
 	 *
 	 * If parameter $label is provided, this method sets the text to be
 	 * associated with the control's label. When called for this purpose,
-	 * this methods returns the FormControl object used to invoke this
+	 * this method returns the FormControl object used to invoke this
 	 * method, so as to facilitate method chaining.
 	 *
-	 * If parameter $label is not provided, this method returns a FormLabel
-	 * object representing the control's label, or an empty string if no
-	 * label is defined. (Note that the FormLabel object, when printed,
-	 * produces an HTML label element.)
+	 * If parameter $label is not provided, this method returns the FormLabel
+	 * object associated with this control, or null if no
+	 * label is defined.
 	 *
 	 * Most controls use the third parameter of the constructor (and the
 	 * second parameter of the Form class registered function) as the
@@ -244,10 +243,10 @@ abstract class FormControl {
 	 */
 	public function label ($label=null) {
 		if ($label !== null) {
-			$this->label = $label ? $label : '';
+			$this->label = new FormLabel($label, $this);
 			return $this;
 		}
-		return $this->label ? new FormLabel($this->label, $this) : '';
+		return $this->label;
 	}
 
 	/**

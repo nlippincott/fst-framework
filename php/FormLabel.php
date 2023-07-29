@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.4
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -26,6 +26,7 @@ class FormLabel {
 
 	/// @cond
 	protected $control;
+	protected $html = false;
 	protected $label;
 	/// @endcond
 
@@ -51,10 +52,24 @@ class FormLabel {
 	 * @retval string HTML code
 	 */
 	public function __toString () {
+		$label = $this->html ? $this->label : htmlspecialchars($this->label);
 		return $this->control ?
-			('<label for="' . $this->control->id() . '">' .
-				htmlspecialchars($this->label) . '</label>') :
-			('<label>' . htmlspecialchars($this->label) . '</label>');
+			('<label for="' . $this->control->id() . '">' . $label . '</label>') :
+			('<label>' . $label . '</label>');
+	}
+
+	/**
+	 * @brief Indicate label is given as HTML code
+	 * @retval The FormControl object associated with this label (for chaining)
+	 * 
+	 * Call this method to indicate that the label text was given as HTML
+	 * code as opposed to plain text. Since FormLabel objects are typically
+	 * not instantiated directly, call FormControl::label to retrieve
+	 * FormLabel object, then call this method.
+	 */
+	public function html () {
+		$this->html = true;
+		return $this->control;
 	}
 
 	/**
