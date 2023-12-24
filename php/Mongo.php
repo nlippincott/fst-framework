@@ -747,6 +747,21 @@ abstract class MongoModel {
 		return $objs;
 	}
 
+	/**
+	 * @brief Remove (delete) documents by query
+	 * @param array $qry Query for qualifying documents
+	 * 
+	 * Removes multiple documents in the collection. All documents qualified by
+	 * the given query are deleted from the collection.
+	 */
+	static public function remove ($qry) {
+		if (!is_array($qry))
+			throw new UsageException('Query required for delete');
+		$write = new \MongoDB\Driver\BulkWrite();
+		$write->delete($qry);
+		Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
+	}
+
 	/// @cond
 
 	// Helper method to initialize properties from an associative array.
