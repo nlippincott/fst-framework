@@ -584,6 +584,21 @@ abstract class MongoModel {
 	}
 
 	/**
+	 * @brief Delete all documents matching query
+	 * @param array $qry Query for qualifying documents
+	 * 
+	 * Deletes multiple documents in the collection. All documents qualified by
+	 * the given query are deleted from the collection. A query is required.
+	 */
+	static public function delete_all ($qry) {
+		if (!is_array($qry))
+			throw new UsageException('Query required for delete');
+		$write = new \MongoDB\Driver\BulkWrite();
+		$write->delete($qry);
+		Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
+	}
+
+	/**
 	 * @brief Get distinct values for the given property
 	 * @param string $fld Property name
 	 * @param array $qry Query for qualifying documents (optional)
@@ -745,21 +760,6 @@ abstract class MongoModel {
 			$objs[] = $obj;
 		}
 		return $objs;
-	}
-
-	/**
-	 * @brief Remove (delete) documents by query
-	 * @param array $qry Query for qualifying documents
-	 * 
-	 * Removes multiple documents in the collection. All documents qualified by
-	 * the given query are deleted from the collection.
-	 */
-	static public function remove ($qry) {
-		if (!is_array($qry))
-			throw new UsageException('Query required for delete');
-		$write = new \MongoDB\Driver\BulkWrite();
-		$write->delete($qry);
-		Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
 	}
 
 	/// @cond
