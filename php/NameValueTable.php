@@ -1,19 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Name/Value Table Generation Engine
+ * Name/Value Table Generation Engine
  *
  * Generates a table of name (or label) / value pairs.
  * This class is derived from TableEngine and is provide for producing
@@ -30,20 +28,23 @@ namespace FST;
  */
 class NameValueTable extends TableEngine {
 
-	/// @cond
+	/** @ignore */
 	protected $class;
+	/** @ignore */
 	protected $header = array('name'=>'', 'value'=>'');
+	/** @ignore */
 	protected $table_rows = array();
-	/// @endcond
 
 	/**
-	 * @brief Initialize the NameValueTable object
+	 * Initialize the NameValueTable object
+	 * 
 	 * @param string $class Class name to be applied to HTML table
 	 */
 	public function __construct ($class='') { $this->class = $class; }
 
 	/**
-	 * @brief Set table header cell values
+	 * Set table header cell values
+	 * 
 	 * @param string $name Header data for the name (first) column
 	 * @param string $value Header data for the value (second) column
 	 */
@@ -51,7 +52,8 @@ class NameValueTable extends TableEngine {
 		{ $this->header['name'] = $name; $this->header['value'] = $value; }
 
 	/**
-	 * @brief Adds a row to the table
+	 * Adds a row to the table
+	 * 
 	 * @param string $name Data for first (name or label) column
 	 * @param string $value data for second (value) column
 	 * @param string $class Class name to be applied to the row
@@ -61,14 +63,19 @@ class NameValueTable extends TableEngine {
 			array('name'=>$name, 'value'=>$value, 'class'=>$class);
 	}
 
-	/// @cond
+	/** @ignore */
 	protected function rows () { return $this->table_rows; }
+	/** @ignore */
 	protected function columns () { return array('name', 'value'); }
 
+	/** @ignore */
 	protected function cell ($row, $col) { return $row[$col]; }
+	/** @ignore */
 	protected function cell_class ($row, $col) { return $col; }
+	/** @ignore */
 	protected function head ($col) { return $this->header[$col]; }
+	/** @ignore */
 	protected function row_class ($row) { return $row['class']; }
+	/** @ignore */
 	protected function table_class () { return $this->class; }
-	/// @endcond
 }

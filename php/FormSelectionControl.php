@@ -1,28 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history, version 5.2.1:
-//	Correction to HTML5 boolean attribute "disabled"
-// Revision history, version 5.3
-//	For radio HTML, generate LABEL after INPUT (for styling)
-// Revision history, version 5.4
-//	Expanded acceptable values for second parameter to options method
-// Revision history, version 5.5
-//	Added optional third parameter to options method to define options groups
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Form control for selection from a number of options
+ * Form control for selection from a number of options.
  *
  * This control is used to select from a number of pre-defined options. Then
  * control may be rendered as a drop-down selection (default) or a set of
@@ -30,24 +19,30 @@ namespace FST;
  */
 class FormSelectionControl extends FormControl {
 
-	/// @cond
+	/** @ignore */
 	private $options = array();
+	/** @ignore */
 	private $options_group = array();
+	/** @ignore */
 	private $prompt = null;
+	/** @ignore */
 	private $radio = false;
+	/** @ignore */
 	private $radio_glued = false;
+	/** @ignore */
 	private $radio_group = false;
+	/** @ignore */
 	private $value = '';
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -55,8 +50,9 @@ class FormSelectionControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get HTML code
-	 * @retval string HTML code
+	 * Get HTML code
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () {
 
@@ -121,8 +117,9 @@ class FormSelectionControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get value of selected option.
-	 * @retval string Selected option value
+	 * Get value of selected option.
+	 *
+	 * @return string Selected option value
 	 */
 	public function data () {
 		if ($this->radio && $this->radio_group)
@@ -132,18 +129,15 @@ class FormSelectionControl extends FormControl {
 	}
 
 	/**
-	 * @brief Set initial value for the control.
+	 * Set initial value for the control.
+	 * 
 	 * @param mixed $val Initial value
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function init ($val) { $this->value = $val; return $this; }
 
 	/**
-	 * @brief Set available options for the control.
-	 * @param array $opt Array of control options
-	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
-	 * @param string $group Title for options group (optional)
-	 * @retval object This FormControl object
+	 * Set available options for the control.
 	 *
 	 * Defines the options that are available for the control. Parameter $opt
 	 * contains the data to be used as the values and descriptions for the
@@ -176,6 +170,11 @@ class FormSelectionControl extends FormControl {
 	 * 
 	 * If this control is defined as a radio control (by calling the radio
 	 * method), all option groups are ignored.
+	 *
+	 * @param array $opt Array of control options
+	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
+	 * @param string $group Title for options group (optional)
+	 * @return object This FormControl object
 	 */
 	public function options ($opt, $assoc=null, $group=null) {
 
@@ -233,46 +232,50 @@ class FormSelectionControl extends FormControl {
 	}
 
 	/**
-	 * @brief Sets the prompt text for the control.
-	 * @param string $text Prompt text
-	 * @retval object This FormControl object
+	 * Sets the prompt text for the control.
 	 *
 	 * Sets the prompt text when the control is presented as a drop-down
 	 * selection box. This is ignored if the control is rendered as radio
 	 * buttons.
+	 *
+	 * @param string $text Prompt text
+	 * @return object This FormControl object
 	 */
 	public function prompt ($text) { $this->prompt = $text; return $this; }
 
 	/**
 	 * Set control to radio presentation.
-	 * @param bool $glued Display-options-horizontally flag
-	 * @return This FormControl object
 	 *
 	 * Causes the control to be displayed as radio buttons rather than a
 	 * drop-down selection box. By default, radio buttons are displayed
 	 * vertically (i.e. within their own DIV elements). Set $glued to true
 	 * to "glue" them horizontally in the same form row.
+	 *
+	 * @param bool $glued Display-options-horizontally flag
+	 * @return object This FormControl object
 	 */
 	public function radio ($glued=false)
 		{ $this->radio = true; $this->radio_glued = $glued; return $this; }
 
 	/**
 	 * Set the radio group for the control.
-	 * @param string $name Radio group name
-	 * @retval object This FormControl object
 	 *
 	 * Sets the name of the radio group. This can be used to generate multiple
 	 * radio controls for the same selection group. Typically this is used
 	 * when more then one FormSelectionControl objects are defined and are
 	 * needed to work together.
 	 * Calling this function for a drop-down selection box has no effect.
+	 *
+	 * @param string $name Radio group name
+	 * @return object This FormControl object
 	 */
 	public function radiogroup ($name)
 		{ $this->radio_group = $name; return $this; }
 
 	/**
-	 * @brief Set control as read-only.
-	 * @return This FormControl object
+	 * Set control as read-only.
+	 *
+	 * @return object This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('disabled', 'disabled'); return $this; }

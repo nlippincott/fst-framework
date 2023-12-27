@@ -1,21 +1,15 @@
 <?php
 
 // FST Application Framework, Version 6.0
-// Copyright (c) 2004-23, Norman Lippincott Jr, Saylorsburg PA USA
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revisions, ver 5.1
-//	- Added functions _table and __table
-// Revisions, ver 6.0
-//	- Added function _env
-
 /**
- * @file
- * @brief Helper Functions for generating HTML code.
+ * Helper Functions for generating HTML code.
  *
  * These functions are primarily helpers for generating HTML code. Most
  * functions have two varieties; one starting with a single underscore and one
@@ -32,35 +26,38 @@
  */
 
 /**
- * @brief Print string in HTML format
- * @param string $s String to be printed
+ * Print string in HTML format
  *
  * This is a convenience function that applies PHP functions htmlspecialchars
  * and nl2br (in that order) to a string, then prints the result. It is
  * provided simply as a shortcut.
  *
  * Instead of using:
- *
- * <code>echo nl2br(htmlspecialchars($s))</code>
- *
+ * ```
+ * echo nl2br(htmlspecialchars($s))
+ * ```
  * use:
- *
- * <code>__($s)</code>
+ * ```
+ * __($s)
+ * ```
+ * @param string $s String to be printed
  */
 function __ ($s) { print _s($s); }
 
 /**
- * @brief Generate HTML A tag.
+ * Generate HTML A tag.
+ * 
  * @param string $uri Relative or absolute URI for HREF attribute
  * @param string $text Text to serve as hyperlink
  * @param array $attr Associative array of attributes
- * @retval string HTML A tag
+ * @return string HTML A tag
  */
 function _a ($uri, $text, $attr=array())
 	{ return _a_html($uri, htmlspecialchars($text), $attr); }
 
 /**
- * @brief Print HTML A tag.
+ * Print HTML A tag.
+ * 
  * @param string $uri Relative or absolute URI for HREF attribute
  * @param string $text Text to serve as hyperlink
  * @param array $attr Associative array of attributes
@@ -68,11 +65,12 @@ function _a ($uri, $text, $attr=array())
 function __a ($uri, $text, $attr=array()) { print _a($uri, $text, $attr); }
 
 /**
- * @brief Generate HTML A tag with HTML content.
+ * Generate HTML A tag with HTML content.
+ * 
  * @param string $uri Relative or absolute URI for HREF attribute
  * @param string $html HTML code to serve as hyperlink
  * @param array $attr Associative array of attributes
- * @retval string HTML A tag
+ * @return string HTML A tag
  */
 function _a_html ($uri, $html, $attr=array()) {
 	$attr['href'] = _uri($uri);
@@ -80,7 +78,8 @@ function _a_html ($uri, $html, $attr=array()) {
 }
 
 /**
- * @brief Print HTML A tag with HTML content.
+ * Print HTML A tag with HTML content.
+ * 
  * @param string $uri Relative or absolute URI for HREF attribute
  * @param string $html HTML code to serve as hyperlink
  * @param array $attr Associative array of attributes
@@ -89,17 +88,19 @@ function __a_html ($uri, $html, $attr=array())
 	{ print _a_html($uri, $html, $attr); }
 
 /**
- * @brief Generate HTML INPUT button.
+ * Generate HTML INPUT button.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $text Text to appear on button
  * @param array $attr Associative array of attributes
- * @retval string HTML INPUT tag
+ * @return string HTML INPUT tag
  */
 function _button ($uri, $text, $attr=array())
 	{ return _button_html($uri, htmlspecialchars($text), $attr); }
 
 /**
- * @brief Print HTML INPUT button.
+ * Print HTML INPUT button.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $text Text to appear on button
  * @param array $attr Associative array of attributes
@@ -108,11 +109,12 @@ function __button ($uri, $text, $attr=array())
 	{ print _button($uri, $text, $attr); }
 
 /**
- * @brief Generate HTML BUTTON with HTML.
+ * Generate HTML BUTTON with HTML.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $html Text to appear on button
  * @param array $attr Associative array of attributes
- * @retval string HTML BUTTON tag
+ * @return string HTML BUTTON tag
  */
 function _button_html ($uri, $html, $attr=array()) {
 	return _tag('button', $html,
@@ -123,7 +125,8 @@ function _button_html ($uri, $html, $attr=array()) {
 }
 
 /**
- * @brief Print HTML BUTTON with HTML.
+ * Print HTML BUTTON with HTML.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $html Text to appear on button
  * @param array $attr Associative array of attributes
@@ -132,18 +135,20 @@ function __button_html ($uri, $html, $attr=array())
 	{ print _button_html($uri, $html, $attr); }
 
 /**
- * @brief Generate HTML BUTTON with image.
+ * Generate HTML BUTTON with image.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $src Relative or absolute URI for SRC attribute for image
  * @param string $alt Alternate text
  * @param array $attr Associative array of attributes
- * @retval string HTML BUTTON tag
+ * @return string HTML BUTTON tag
  */
 function _button_img ($uri, $src, $alt, $attr=array())
 	{ return _button_html($uri, _img($src, $alt), $attr); }
 
 /**
- * @brief Print HTML BUTTON with image.
+ * Print HTML BUTTON with image.
+ * 
  * @param string $uri Relative or absolute URI for A:HREF behavior
  * @param string $src Relative or absolute URI for SRC attribute for image
  * @param string $alt Alternate text
@@ -153,45 +158,50 @@ function __button_img ($uri, $src, $alt, $attr=array())
 	{ print _button_img($uri, $src, $alt, $attr); }
 
 /**
- * @brief Get (or set) FST configuration option.
- * @param string $opt Option name
- * @param mixed $value Set value for option (optional)
- * @retval mixed Option value
+ * Get (or set) FST configuration option.
  *
  * This is a convenience function for calling Framework::config.
+ * 
+ * @param string $opt Option name
+ * @param mixed $value Set value for option (optional)
+ * @return mixed Option value
  */
 function _config ($opt, $value=null)
 	{ return FST\Framework::config($opt, $value); }
 
 /**
- * @brief Get the FST Controller object.
- * @retval object The Controller object for the current request
+ * Get the FST Controller object.
  *
  * This is a convenience function for returning current FST controller.
+ * 
+ * @return object The Controller object for the current request
  */
 function _ctrl () { return FST\Framework::ctrl(); }
 
 /**
- * @brief Get name of the current FST Controller.
- * @retval string Controller name
+ * Get name of the current FST Controller.
+ * 
+ * @return string Controller name
  */
 function _ctrlname () { return FST\Framework::ctrl()->ctrl(); }
 
 /**
- * @brief Get environment variable value.
- * @param string $var Environment variable name, or null for all
- * @retval mixed Environment variable value
+ * Get environment variable value.
  * 
  * Convenience function, calls Framework::env.
+ *
+ * @param string $var Environment variable name, or null for all
+ * @return mixed Environment variable value
  */
 function _env ($var=null) { return FST\Framework::env($var); }
 
 /**
- * @brief Get HTML IMG tag.
+ * Get HTML IMG tag.
+ * 
  * @param string $uri Relative or absolute URI for SRC attribute
  * @param string $alt Alternate text
  * @param array $attr Associative array of attributes
- * @retval string HTML IMG tag
+ * @return string HTML IMG tag
  */
 function _img ($uri, $alt, $attr=array()) {
 	$attr['src'] = _uri($uri);
@@ -202,7 +212,8 @@ function _img ($uri, $alt, $attr=array()) {
 }
 
 /**
- * @brief Print HTML IMG tag.
+ * Print HTML IMG tag.
+ * 
  * @param string $uri Relative or absolute URI for SRC attribute
  * @param string $alt Alternate text
  * @param array $attr Associative array of attributes
@@ -210,21 +221,23 @@ function _img ($uri, $alt, $attr=array()) {
 function __img ($uri, $alt, $attr=array()) { print _img($uri, $alt, $attr); }
 
 /**
- * @brief Convert string to HTML for printing
- * @param string $s String to be converted
- * @retval string HTML-formatted string
+ * Convert string to HTML for printing.
  *
  * This is a convenience function that applies PHP functions htmlspecialchars
  * and nl2br (in that order) to a string. It is provided simply as a shortcut.
+ * 
+ * @param string $s String to be converted
+ * @return string HTML-formatted string
  */
 function _s ($s) { return $s ? nl2br(htmlspecialchars($s)) : ''; }
 
 /**
- * @brief Generate an HTML element.
+ * Generate an HTML element.
+ * 
  * @param string $tag HTML tag
  * @param mixed $html HTML code for element content, or false for short tag
  * @param array $attr Associative array of attributes
- * @retval string HTML element
+ * @return string HTML element
  */
 function _tag ($tag, $html, $attr=array()) {
 	return "<$tag" . FST\Framework::attr($attr) .
@@ -232,7 +245,8 @@ function _tag ($tag, $html, $attr=array()) {
 }
 
 /**
- * @brief Print an HTML element.
+ * Print an HTML element.
+ * 
  * @param string $tag HTML tag
  * @param mixed $html HTML code for element content, or false for short tag
  * @param array $attr Associative array of attributes
@@ -240,10 +254,7 @@ function _tag ($tag, $html, $attr=array()) {
 function __tag ($tag, $html, $attr=array()) { print _tag($tag, $html, $attr); }
 
 /**
- * @brief Generate HTML from class derived from TableEngine
- * @param string $classname Class name
- * @param mixed $args Constructor argument or array of constructor arguments
- * @retval string Return value from __toString method of given class
+ * Generate HTML from class derived from TableEngine.
  *
  * Creates a new object of the given class, calls its __toString method, and
  * returns that function's return value. The given class name must refer to
@@ -263,8 +274,10 @@ function __tag ($tag, $html, $attr=array()) { print _tag($tag, $html, $attr); }
  * PHP will simply exit with a message saying that __toString must not throw
  * an exception. This function calls __toString explicitly then returns its
  * return string, thus allowing exceptions to be thrown.
- *
- * Added in FST version 5.1.
+ * 
+ * @param string $classname Class name
+ * @param mixed $args Constructor argument or array of constructor arguments
+ * @return string Return value from __toString method of given class
  */
 function _table ($classname, $args=array()) {
 	if (!is_string($classname) || !class_exists($classname))
@@ -278,32 +291,33 @@ function _table ($classname, $args=array()) {
 }
 
 /**
- * @brief Print HTML from class derived from TableEngine
- * @param string $classname Class name
- * @param mixed $args Constructor argument or array of constructor arguments
+ * Print HTML from class derived from TableEngine.
  *
  * Prints the output from _table.
  *
- * Added in FST version 5.1.
+ * @param string $classname Class name
+ * @param mixed $args Constructor argument or array of constructor arguments
  */
 function __table ($classname, $args=array())
 	{ print _table($classname, $args); }
 
 /**
- * @brief Get application URI given URI relative to root.
- * @param string $uri Relative (or absolute) URI
- * @retval string Absolute URI
+ * Get application URI given URI relative to root.
  *
  * This is a convenience function that calls Framework::uri. Note that if an
  * absolute URI is given, or a URI beginning with a non-alphanumeric character,
  * the given URI is simply returned (as is the behavior of Framework::uri).
+ *
+ * @param string $uri Relative (or absolute) URI
+ * @return string Absolute URI
  */
 function _uri ($uri) { return FST\Framework::uri($uri); }
 
 /**
- * @brief Print application URI given URI relative to root.
- * @param string $uri Relative URI
+ * Print application URI given URI relative to root.
  *
  * This is a convenience function for printing the return value of _uri.
+ *
+ * @param string $uri Relative URI
  */
 function __uri ($uri) { print _uri($uri); }

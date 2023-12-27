@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.4
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -8,33 +8,31 @@
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.3 - Added list member function for autocomplete values
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Text control.
+ * Text control.
  */
 class FormTextControl extends FormInputControl {
 
-	/// @cond
+	/** @ignore */
 	protected $case = false;
+	/** @ignore */
 	protected $datalist = false;
+	/** @ignore */
 	protected $regex = false;
+	/** @ignore */
 	protected $regex_msg = '';
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -43,8 +41,9 @@ class FormTextControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get HTML code.
-	 * @retval string HTML code
+	 * Get HTML code.
+	 * 
+	 * @return string HTML code
 	 */
 	public function __toString () {
 		if (!$this->datalist)
@@ -60,11 +59,12 @@ class FormTextControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get data input from text control
-	 * @retval string Text input that was entered into control
+	 * Get data input from text control
 	 *
 	 * Gets the data that was input for the control. If the lowercase or
 	 * uppercase option was used, that effect is applied by this method.
+	 *
+	 * @return string Text input that was entered into control
 	 */
 	public function data () {
 		if (parent::data())
@@ -76,16 +76,18 @@ class FormTextControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set autocomplete options.
+	 * Set autocomplete options.
+	 * 
 	 * @param array $datalist Autocomplete strings
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function datalist ($datalist)
 		{ $this->datalist = $datalist; return $this; }
 
 	/**
-	 * @brief Get error message associated with this control.
-	 * @retval string Error message, or empty string if no error
+	 * Get error message associated with this control.
+	 * 
+	 * @return string Error message, or empty string if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -96,38 +98,42 @@ class FormTextControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set maximim input length.
+	 * Set maximim input length.
+	 * 
 	 * @param int $length Maximim input length
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function maxlength ($length)
 		{ $this->attr['maxlength'] = $length; return $this; }
 
 	/**
-	 * @brief Set the control's placeholder text.
+	 * Set the control's placeholder text.
+	 * 
 	 * @param string $placeholder Placeholder text
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function placeholder ($placeholder)
 		{ $this->attr['placeholder'] = $placeholder; return $this; }
 
 	/**
-	 * @brief Set input size.
+	 * Set input size.
+	 * 
 	 * @param int $size Size of input control
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function size ($size) { $this->attr['size'] = $size; return $this; }
 
 	/**
-	 * @brief Set regular expression for validation.
-	 * @param string $regex Regular expression (PERL-compatible)
-	 * @param string $regex_msg Error message text
-	 * @retval object This FormControl object
+	 * Set regular expression for validation.
 	 *
 	 * Sets a regular expression to be used when validating this input. If
 	 * set, the regular expression is checked during form validation. If the
 	 * regular expression is not matched, the error message will be issued
 	 * as the error message for this control.
+	 *
+	 * @param string $regex Regular expression (PERL-compatible)
+	 * @param string $regex_msg Error message text
+	 * @return object This FormControl object
 	 */
 	public function regex ($regex, $regex_msg) {
 		$this->regex = $regex;
@@ -136,20 +142,22 @@ class FormTextControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Convert text input to lowercase.
-	 * @retval object This FormControl object
+	 * Convert text input to lowercase.
 	 *
 	 * Indicates that the text input should be converted to lowercase.
 	 * Conversion is done when retrieving form data.
+	 *
+	 * @return object This FormControl object
 	 */
 	public function tolower () { $this->case = 'lower'; return $this; }
 
 	/**
-	 * @brief Convert text input to uppercase
-	 * @retval object This FormControl object
+	 * Convert text input to uppercase
 	 *
 	 * Indicates that the text input should be converted to uppercase.
 	 * Conversion is done when retrieving form data.
+	 *
+	 * @return object This FormControl object
 	 */
 	public function toupper () { $this->case = 'upper'; return $this; }
 }

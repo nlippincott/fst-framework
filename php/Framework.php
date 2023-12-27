@@ -1,127 +1,101 @@
 <?php
 
 // FST Application Framework, Version 6.0
-// Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revisions, ver 5.1
-//	- For default controller selection, do not consider abstract classes
-//	- Added meta-viewport option configuration option
-//	- Added post data initialization methods
-//	- Output comment for controller name when in debug mode
-//	- For object return from content preprocessor, call __toString explicitly
-//		rather than implicit conversion to string
-//	- For object return from content preprocessor, throw an exception
-//		when object does not implement __toString
-//	- Throw an exception if content preprocessor return type is other than
-//		boolean, null, object, or a string
-//	- When content preprocessor returns true, output default content file
-//		(same behavior as null)
-//	- When content preprocessor returns a string with first character '<',
-//		output the string directly as HTML content
-// Revisions, ver 5.2
-//	- Function attr, apply htmlspecialchars to attribute values
-// Revisions, ver 5.2.1
-//	- For form controls, correction to values for HTML5 boolean attributes
-// Revisions, ver 5.2.2
-//	- For textarea control, added placeholder function
-// Revisions, ver 5.3
-//	- Configuration option 'class' may be specified as an array of directories
-//	- Call _init methods of traits used by controller
-// Revisions, ver 5.4
-//	- Configuration option 'lib' may be specified as an array of directories
-//	- Added DatabaseException and NotFoundException classes
-// Revisions, ver 5.4.3
-//	- Correction of converstion of application URI's, those leading with '#'
-//		are no longer converted using absolute URI logic
-// Revisions, ver 5.5
-//	- Fixed deprecated null parameter on uri method
-
-// Revisions, ver 6.0
-//	- No longer supports config.ini file
-//	- Add config option for .env files
-//	- Define helper functions from Framework initialization
-//	- Add option to define helper functions
-//	- Add option to set timezone
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Framework initialization and page generation.
+ * Framework initialization and request processing.
  *
- * Initializes and drives the FST Application Framework.
- *
- * <code>Framework::init($config_options);</code>
+ * Initializes and drives the FST Application Framework. An application does
+ * not explicitly create an object of this type but rather calls its static
+ * method *init* to launch initialization and request processing.
  */
 class Framework {
 
-	/// @cond
-
+	/** @ignore */
 	protected static $_fst = null;	// Framework instance
 
+	/** @ignore */
 	protected static $_ctrl;		// Controller object
+	/** @ignore */
 	protected static $_ctrlname;	// Controller name
 
+	/** @ignore */
 	protected static $_args;	// Controller argument string
+	/** @ignore */
 	protected static $_argv;	// Controller argument array
+	/** @ignore */
 	protected static $_cfg;		// Controller configuration
 
+	/** @ignore */
 	protected static $_action;	// Controller action
 
+	/** @ignore */
 	protected static $_env;		// App environment variables
 
-	/// @endcond
-
 	// FST version constants
-	const VERSION = '6.0-alpha';			///< FST version number
-	const VERSION_COPYRIGHT = '2004-23';	///< FST coypright dates
-	const VERSION_RELEASE = '2023-07-29';	///< FST version release date
+	/** FST version number. */
+	const VERSION = '6.0-alpha';
+	/** FST copyright dates */
+	const VERSION_COPYRIGHT = '2004-23';
+	/** FST version release date */
+	const VERSION_RELEASE = '2023-07-29';
 
 	// For control of FST copyright comment in HTML output
-	const COPYRIGHT_STD = 1;		///< Default FST copyright output location
-	const COPYRIGHT_HEAD = 0;		///< Place FST copyright in HEAD section
-	const COPYRIGHT_END = 1;		///< Place FST copyright at end of HTML
-	const COPYRIGHT_NONE = 2;		///< No FST copyright notice
-	const COPYRIGHT_STEALTH = 3;	///< No FST copyright notice or META tag
+	/** Default FST copyright output location. */
+	const COPYRIGHT_STD = 1;
+	/** Place FST copyright in HEAD section. */
+	const COPYRIGHT_HEAD = 0;
+	/** Place FST copyright at end of HTML. */
+	const COPYRIGHT_END = 1;
+	/** No FST copyright notice. */
+	const COPYRIGHT_NONE = 2;
+	/** No FST copyright notice or META tag. */
+	const COPYRIGHT_STEALTH = 3;
 
 	/**
-	 * @brief Get controller action.
-	 * @retval string Controller action
+	 * Get controller action.
 	 *
 	 * Gets the action for the current request. The "action" is the first
 	 * GET parameter passed on the URL (i.e. the name of the first name/value
 	 * pair following the "?"). This is typically used during form submissions
 	 * and Ajax requests.
+	 *
+	 * @return string Controller action
 	 */
 	public static function action () { return self::$_action; }
 
 	/**
-	 * @brief Get controller argument by index.
-	 * @param int $idx Zero-based index
-	 * @retval string Controller argument value
+	 * Get controller argument by index.
 	 *
 	 * FST controller arguments are given in the URL and are separated by
 	 * slashes. For example, if the requested resource is "/account/14/edit",
 	 * argument 0 is "account", argument 1 is "14", and argument 2 is "edit".
+	 * The given index determines which argument value is returned. If no
+	 * argument exists for the given index, an empty string is returned.
+	 *
+	 * @param int $idx Zero-based index
+	 * @return string Controller argument value
 	 */
 	public static function arg ($idx)
 		{ return isset(self::$_argv[$idx]) ? self::$_argv[$idx] : ''; }
 
 	/**
-	 * @brief Get controller argument count.
-	 * @retval int Number of controller arguments
+	 * Get controller argument count.
+	 *
+	 * @return int Number of controller arguments
 	 */
 	public static function argc () { return count(self::$_argv); }
 
 	/**
-	 * @brief Get controller argument string.
-	 * @retval string Argument URI (relative to application root)
+	 * Get controller argument string.
 	 *
 	 * Returns a string containing all controller arguments separated by
 	 * slashes. The string does not contain a leading slash. The string
@@ -131,30 +105,34 @@ class Framework {
 	 * "/myapp/account/15/edit?_form=account_form", this function returns
 	 * "account/15/edit". The return value of this function is suitable
 	 * for usage in redirects initiated by Controller::redirect.
+	 *
+	 * @return string Argument URI (relative to application root)
 	 */
 	public static function args () { return implode('/', self::$_argv); }
 
 	/**
-	 * @brief Get controller argument array.
-	 * @retval array Controller arguments
+	 * Get controller argument array.
 	 *
 	 * Returns an array of the controller arguments, relative to the
 	 * application root.
+	 *
+	 * @return array Controller arguments
 	 */
 	public static function argv () { return self::$_argv; }
 
 	/**
-	 * @brief Get (or set) framework configuration option.
-	 * @param string $opt Option name
-	 * @param mixed $value Set value for option (optional)
-	 * @retval string Option value
+	 * Get (or set) framework configuration option.
 	 *
 	 * If $value is not given, returns a configuration option. If $value is
 	 * given, sets the given configuration option. Typically, this function
 	 * is used to query options given at the time the framework was
 	 * initialized via Framework::init. However, this function may be called
-	 * by a Controller class to override an option set during framework
-	 * initialization.
+	 * by a Controller class to override an option that was set during
+	 * framework initialization.
+	 * 
+	 * @param string $opt Option name
+	 * @param mixed $value Set value for option (optional)
+	 * @return string Option value
 	 */
 	public static function config ($opt, $value=null) {
 		if (isset($value))
@@ -163,8 +141,7 @@ class Framework {
 	}
 
 	/**
-	 * @brief Output content from content file.
-	 * @param string $fname File name
+	 * Output content from content file.
 	 *
 	 * Produces content from a named content file. Public member variables of
 	 * the Controller class handling the request are set prior to executing
@@ -172,40 +149,39 @@ class Framework {
 	 * available as variables in the content file.
 	 *
 	 * The file name must include relative path from the root.
+	 * 
+	 * @param string $fname File name
 	 */
 	public static function content ($fname) {
-//		foreach (get_object_vars(self::ctrl()) as $_k=>$_v)
-//			$$_k = $_v;
-//		unset($_k, $_v);
 		extract(get_object_vars(self::ctrl()));
 		require $fname;
 	}
 
 	/**
-	 * @brief Get controller object.
-	 * @retval object Current Controller object
+	 * Get controller object.
 	 *
 	 * Gets the current controller object. This is an object that is derived
-	 * from class Controller, and represents the controller object that is
+	 * from class Controller and represents the controller object that is
 	 * handling the current request.
+	 * 
+	 * @return Controller Current Controller object
 	 */
 	public static function ctrl () { return self::$_ctrl; }
 
 	/**
-	 * @brief Get controller name.
-	 * @retval string Current controller name
+	 * Get controller name.
 	 *
 	 * Gets the name of the current controller. For example, if the
 	 * Controller derived class is named "account_controller", this function
 	 * returns "account". (Note that all controller classes used by the
 	 * framework have names ending in "_controller".)
+	 *
+	 * @return string Current controller name
 	 */
 	public static function ctrlname () { return self::$_ctrlname; }
 
 	/**
-	 * @brief Get environment variable value.
-	 * @param string $var Environment variable name, or null for all
-	 * @retval mixed Environment variable value
+	 * Get environment variable value.
 	 * 
 	 * Gets the value associated with the given environment variable.
 	 * Environment variables may be those defined by the shell, or those
@@ -213,18 +189,21 @@ class Framework {
 	 * 
 	 * If $var is not supplied, an array of environment variables is
 	 * returned.
+	 *
+	 * @param string $var Environment variable name (optional)
+	 * @return mixed|array Environment variable value
 	 */
 	public static function env ($var=null) {
 		return $var ? (isset(self::$_env[$var]) ? self::$_env[$var] : null) : self::$_env;
 	}
 
-	/// @cond
 	// FST modules will call this function for usage errors. It is not
 	//	intended to be user-callable.
 	// This function attempts to report the file and line number where an FST
 	//	user error occurred. It does this by going through the backtrace to
 	//	find the first occurrence of a source file that is not part of the
 	//	FST system directory (or the same directory as this source file).
+	/** @ignore */
 	public static function error ($msg) {
 		if (self::config('debug')) {
 			$fstdir = dirname(__FILE__);
@@ -245,10 +224,9 @@ class Framework {
 			print $msg;
 		exit;
 	}
-	/// @endcond
 
 	/**
-	 * @brief Send 404 Not Found header.
+	 * Send 404 Not Found header.
 	 *
 	 * Sends a 404 Not Found header to the client and exits.
 	 */
@@ -271,9 +249,7 @@ class Framework {
 	}
 
 	/** 
-	 * @brief Convert relative URI to absolute URI.
-	 * @param string $uri Relative URI
-	 * @retval string Absolute URI
+	 * Convert relative URI to absolute URI.
 	 *
 	 * Converts a relative URL to an absoute URI, considering the base URI
 	 * of the application. For example, if the application root is specified
@@ -283,6 +259,9 @@ class Framework {
 	 * Note that if this function is given a URL that includes the protocol
 	 * or leads with a slash, the given URL is considered to be an absolute
 	 * URL and is simply returned.
+	 *
+	 * @param string $uri Relative URI
+	 * @return string Absolute URI
 	 */
 	public static function uri ($uri=null) {
 		if (!$uri)
@@ -292,8 +271,7 @@ class Framework {
 	}
 
 	/**
-	 * @brief Initialize the framework and carry out the controller action.
-	 * @param array $cfg Configuration settings
+	 * Initialize the framework and carry out the controller action.
 	 *
 	 * Initializes the framework and carries out the action appropriate to
 	 * the request. Such action may involve page generation, form processing,
@@ -310,12 +288,15 @@ class Framework {
 	 *	- copyright: "COPYRIGHT_STD" Control of FST copyright comments
 	 *	- debug: "false" FST Debug Mode
 	 *	- default: "true" Enable default controller selection
+	 *	- env: ".env" Environment file, or array of files, or false
 	 *	- home: "home" Controller name for home page
 	 *	- inc: "inc" Relative path to the include directory
 	 *	- lib: "lib" Relative path or array of paths to the library directory
 	 *	- root: "/" The application root (include leading and trailing slash)
 	 *	- session: "false" Session name, or false if no session
 	 *	- template: "template" Relative path to the template directory
+	 *
+	 * @param array $cfg Configuration settings
 	 */
 	public static function init ($cfg = array()) {
 
@@ -352,7 +333,7 @@ class Framework {
 					'debug'=>false, // Use false for production
 					'debug_error_reporting'=>E_ALL,
 						// Error reporting level, when debug is set
-					'env'=>'.env', // Location of .env files, or array or false
+					'env'=>'.env', // Location of .env file, or array or false
 					'helpers'=>true, // Define helper functions
 					'home'=>'home', // Controller name for home page
 					'meta-content-type'=>true,
@@ -388,14 +369,15 @@ class Framework {
 	}
 
 	/**
-	 * @brief Convert name/value pairs to HTML attribute string.
-	 * @param array $attr Attribute name/value pairs
-	 * @retval string HTML-formatted attribute string
+	 * Convert name/value pairs to HTML attribute string.
 	 *
 	 * Converts an associative array into a string that may be output in
 	 * HTML attribute form. This string may be output immediately after
 	 * the HTML tag (the string returned includes a leading space, except
 	 * if the string is empty).
+	 * 
+	 * @param array $attr Attribute name/value pairs
+	 * @return string HTML-formatted attribute string
 	 */
 	public static function attr ($attr) {
 		$str = '';
@@ -404,9 +386,8 @@ class Framework {
 		return $str;
 	}
 
-	/**
-	 * @brief Constructor, framework driver.
-	 */
+	// Constructor, framework driver.
+	/** @ignore */
 	protected function __construct () {
 
 		// Set error reporting, if debug mode is set
@@ -571,14 +552,17 @@ class Framework {
 		exit;
 	}
 
-	/// @cond
-
+	/** @ignore */
 	protected $parser;
 
+	/** @ignore */
 	protected $stack = array();		// Parser element stack
+	/** @ignore */
 	protected $head = false;		// HEAD element encountered
+	/** @ignore */
 	protected $body = false;		// BODY element encountered
 
+	/** @ignore */
 	protected function generate_page () {
 
 		// Get the template.
@@ -648,6 +632,7 @@ class Framework {
 		xml_parser_free($this->parser);
 	}
 
+	/** @ignore */
 	protected function data ($p, $data) {
 		$tag = end($this->stack);
 		switch ($tag) {
@@ -671,6 +656,7 @@ class Framework {
 		}
 	}
 
+	/** @ignore */
 	protected function element ($p, $tag, $attr) {
 
 		if (!count($this->stack) && $tag != 'html')
@@ -1002,6 +988,7 @@ class Framework {
 		}
 	}
 
+	/** @ignore */
 	protected function element_end ($p, $tag) {
 		switch ($tag) {
 
@@ -1037,6 +1024,7 @@ class Framework {
 		array_pop($this->stack);
 	}
 
+	/** @ignore */
 	protected function copyright () {
 		print "<!--\n";
 		print "  Generated by FST Application Framework\n\n";
@@ -1048,28 +1036,29 @@ class Framework {
 		print "-->\n";
 	}
 
+	/** @ignore */
 	protected function __clone () { }
-
-	/// @endcond
 }
 
-/// @cond
-
+/** @ignore */
 class TemplateException extends \Exception {
 	public function __construct ($msg)
 		{ parent::__construct(htmlspecialchars($msg)); }
 }
 
+/** @ignore */
 class UsageException extends \Exception {
 	public function __construct ($msg)
 		{ parent::__construct(htmlspecialchars($msg)); }
 }
 
+/** @ignore */
 class ContentException extends TemplateException {
 	public function __construct ($fname)
 		{ parent::__construct("Content file $fname not found"); }
 }
 
+/** @ignore */
 class IncludeException extends TemplateException {
 	public function __construct ($fname, $fname2=false) {
 		parent::__construct($fname2 ?
@@ -1078,6 +1067,7 @@ class IncludeException extends TemplateException {
 	}
 }
 
+/** @ignore */
 class TagException extends TemplateException {
 	public function __construct ($tag, $attr=false, $value=false) {
 		parent::__construct($attr ?
@@ -1088,15 +1078,18 @@ class TagException extends TemplateException {
 	}
 }
 
+/** @ignore */
 class TagAttReqException extends TemplateException {
 	public function __construct ($tag, $attr)
 		{ parent::__construct("<$tag> requires $attr attribute"); }
 }
 
+/** @ignore */
 class DatabaseException extends UsageException {
 	public function __construct ($msg) { parent::__construct($msg); }
 }
 
+/** @ignore */
 class NotFoundException extends DatabaseException {
 	public function __construct ($msg) { parent::__construct($msg); }
 }

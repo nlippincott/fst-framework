@@ -1,23 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.3 - Method init allows object parameter in addition to array.
-//	v5.5 - Method init considers object properties provided by magic methods.
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief FST Form class
+ * FST Form class.
  *
  * Form class for facilitating management of HTML forms within FST
  * Controllers. Once a Form object is created, various FormControl objects
@@ -32,18 +26,18 @@ namespace FST;
  */
 class Form {
 
-	/// @cond
+	/** @ignore */
 	static protected $controls = array(); // Registered controls
-	/// @endcond
 
 	/**
-	 * @brief Register a Form control class.
-	 * @param string $function_name Name of control creation function
-	 * @param string $class_name Name of class used to create the control
+	 * Register a Form control class.
 	 *
 	 * A Form object includes form controls, each of which is defined by
 	 * a class that is derived from FormControl. This function registers
 	 * a control creation function with a control class.
+	 *
+	 * @param string $function_name Name of control creation function
+	 * @param string $class_name Name of class used to create the control
 	 */
 	static function register ($function_name, $class_name) {
 		// Note: May be called a second time for a given function name, so
@@ -54,21 +48,24 @@ class Form {
 		self::$controls[$function_name] = $class_name;
 	}
 
-	/// @cond
+	/** @ignore */
 	protected $attr = array(); // Additional attributes for form tag
+	/** @ignore */
 	protected $ajax = true; // Submit via Ajax, if fst-jquery installed
+	/** @ignore */
 	protected $error = array(); // Error messages for controls
+	/** @ignore */
 	protected $fld = array(); // Form fields
-	/// @endcond
 
 	/**
-	 * @brief Form object constructor.
-	 * @param string $id Form id, for HTML DOM
-	 * @param string $action Form action
+	 * Form object constructor.
 	 *
 	 * Creates a form. A form id is required. It is the programmer's
 	 * responsibility that the id given does not conflict with any other
 	 * elements in the HTML DOM.
+	 *
+	 * @param string $id Form id, for HTML DOM
+	 * @param string $action Form action
 	 */
 	public function __construct ($id, $action='') {
 		$this->attr('id', $id);
@@ -78,10 +75,7 @@ class Form {
 	}
 
 	/**
-	 * @brief Constructs a FormControl object.
-	 * @param string $fcn Method name
-	 * @param array $args Method arguments
-	 * @retval object A FormControl object
+	 * Constructs a FormControl object.
 	 *
 	 * When an undefined method is called, this magic method checks to
 	 * see if the method name is associated with a registered form class.
@@ -93,6 +87,10 @@ class Form {
 	 * is the name of the control and must be unique with respect to the
 	 * form. The second is optional and is typically the label, but may
 	 * be used for another purpose, depending on the control.
+	 *
+	 * @param string $fcn Method name
+	 * @param array $args Method arguments
+	 * @return object A FormControl object
 	 */
 	public function __call ($fcn, $args) {
 		if (array_key_exists($fcn, self::$controls) === false)
@@ -113,9 +111,10 @@ class Form {
 	}
 
 	/**
-	 * @brief Get submitted form value.
+	 * Get submitted form value.
+	 *
 	 * @param string $name Field name
-	 * @retval string Submitted field value (from $_POST), trimmed
+	 * @return string Submitted field value (from $_POST), trimmed
 	 */
 	public function __get ($name) {
 		if (!isset($this->fld[$name]))
@@ -124,43 +123,47 @@ class Form {
 	}
 
 	/**
-	 * @brief Produce HTML code with class attribute.
-	 * @param string $class Class name
-	 * @retval string HTML code
+	 * Produce HTML code with class attribute.
 	 *
 	 * Produces the HTML code for the form with the class attribute specified
 	 * on the FORM tag. Provided for convience, this simply calls Form::html
 	 * to produce the code.
+	 *
+	 * @param string $class Class name
+	 * @return string HTML code
 	 */
 	public function __invoke ($class='') { return $this->html($class); }
 
 	/**
-	 * @brief Produce HTML code for the form.
-	 * @retval string HTML code
+	 * Produce HTML code for the form.
 	 *
 	 * Called when the object is printed, produces the HTML code for the
 	 * form. This function simply calls Form::html.
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () { return $this->html(); }
 
 	/**
-	 * @brief Get named form control object.
-	 * @param string $name Field name
-	 * @retval mixed FormControl object or false
+	 * Get named form control object.
 	 *
 	 * Retrieves the form control object with the given name. If no control
 	 * with the given name exists, returns false.
+	 *
+	 * @param string $name Field name
+	 * @return mixed FormControl object or false
 	 */
 	public function ctrl ($name)
 		{ return isset($this->fld[$name]) ? $this->fld[$name] : false; }
 
 	/**
-	 * @brief Produce HTML code for the form.
-	 * @param string $class Class name, optional
-	 * @retval string HTML code
+	 * Produce HTML code for the form.
 	 *
 	 * Produces the HTML code for the form, with an optional class to be
 	 * added to the FORM tag.
+	 *
+	 * @param string $class Class name, optional
+	 * @return string HTML code
 	 */
 	public function html ($class='') {
 
@@ -228,9 +231,7 @@ class Form {
 	}
 
 	/**
-	 * @brief Produce HTML code for form tag.
-	 * @param string $class Class name, optional
-	 * @retval string HTML code
+	 * Produce HTML code for form tag.
 	 *
 	 * Produces the HTML code for the opening form tag, with an optional
 	 * class to be added.
@@ -240,6 +241,9 @@ class Form {
 	 * default form HTML code. Content generators that need full control over
 	 * how the form is produced should use this function to generate the
 	 * form tag.
+	 *
+	 * @param string $class Class name, optional
+	 * @return string HTML code
 	 */
 	public function html_form ($class='') {
 		$attr = $this->attr;
@@ -252,41 +256,38 @@ class Form {
 	}
 
 	/**
-	 * @brief Produce HTML code for form end tag.
-	 * @retval string HTML code
+	 * Produce HTML code for form end tag.
 	 *
 	 * Produce the HTML FORM end tag, for use in conjunction with function
 	 * Form::html_form.
+	 *
+	 * @return string HTML code
 	 */
 	public function html_form_end () { return '</form>'; }
 
-	/// @cond
-	/*
-	 * Set or clear form to submit via Ajax (deprecated)
-	 *
-	 * Indicates whether or not form is submitted via Ajax. Default is to
-	 * submit via Ajax, if FST jQuery module is used. Default value for $ajax
-	 * is true for compatibility with FST version 4.
-	 * @param bool $ajax Submit form via Ajax flag (default true)
-	 */
+	// Set or clear form to submit via Ajax (deprecated)
+	//
+	// Indicates whether or not form is submitted via Ajax. Default is to
+	// submit via Ajax, if FST jQuery module is used. Default value for $ajax
+	// is true for compatibility with FST version 4.
+	// @param bool $ajax Submit form via Ajax flag (default true)
+	/** @ignore */
 	public function ajax ($ajax=true) { $this->ajax = $ajax; }
-	/// @endcond
 
 	/**
-	 * @brief Set form attribute.
-	 * @param string $name Attribute name
-	 * @param string $value Attribute value
+	 * Set form attribute.
 	 *
 	 * Sets an attribute to be included in the HTML form tag. Care must be
 	 * taken so as to not inadvertently override attributes that
 	 * are managed by the Form class itself.
+	 *
+	 * @param string $name Attribute name
+	 * @param string $value Attribute value
 	 */
 	public function attr ($name, $value) { $this->attr[$name] = $value; }
 
 	/**
-	 * @brief Get submitted form data.
-	 * @param array $fields Array of field names (optional, or false)
-	 * @retval array Name/value pairs of submitted form values
+	 * Get submitted form data.
 	 *
 	 * Returns an associative array of name/value pairs of the submitted form
 	 * data. If $fields is supplied, it is expected to be an array of field
@@ -294,6 +295,9 @@ class Form {
 	 * in that array. If $fields is not supplied, the returned array will
 	 * contain all fields for which controls are defined except any that
 	 * are indicated as informational.
+	 *
+	 * @param array $fields Array of field names (optional, or false)
+	 * @return array Name/value pairs of submitted form values
 	 */
 	public function data ($fields=false) {
 		$data = array();
@@ -306,12 +310,13 @@ class Form {
 	}
 
 	/**
-	 * @brief Set error message for the given field.
-	 * @param string $name Field name
-	 * @param string $message Error message text
+	 * Set error message for the given field.
 	 *
 	 * Sets an error message for a given field. This is to be called
 	 * by the application when performing form validation.
+	 *
+	 * @param string $name Field name
+	 * @param string $message Error message text
 	 */
 	public function error ($name, $message) {
 		if (!isset($this->fld[$name]))
@@ -320,33 +325,35 @@ class Form {
 	}
 
 	/**
-	 * @brief Get number of errors in form.
-	 * @retval int Error count
+	 * Get number of errors in form.
 	 *
 	 * Returns the number of fields that have error messages associated with
 	 * them. Fields do not have errors associated with them until after
 	 * form validation occurs.
+	 *
+	 * @return int Error count
 	 */
 	public function error_count () { return count($this->error); }
 
 	/**
-	 * @brief Get form errors.
-	 * @retval array Name/value pairs of field names and error messages
+	 * Get form errors.
 	 *
 	 * Returns an associative array of error messages for the form. The
 	 * array is indexed by field name.
+	 *
+	 * @return array Name/value pairs of field names and error messages
 	 */
 	public function errors () { return $this->error; }
 
 	/**
-	 * @brief Get form id.
-	 * @retval string Form id
+	 * Get form id.
+	 *
+	 * @return string Form id
 	 */
 	public function id () { return $this->attr['id']; }
 
 	/**
-	 * @brief Set initial form values
-	 * @param mixed $data Array or object for initializing form values
+	 * Set initial form values.
 	 *
 	 * Sets initial value of all form elements that have been defined. If
 	 * $data is an associative array, key/value pairs are used to initialize
@@ -358,6 +365,8 @@ class Form {
 	 *
 	 * This does not have any effect on form elements created after
 	 * this method is called.
+	 *
+	 * @param mixed $data Array or object for initializing form values
 	 */
 	public function init ($data) {
 		if (!is_array($data) && !is_object($data))
@@ -378,37 +387,20 @@ class Form {
 		}
 	}
 
-	/// @cond
-	/*
-	 * Get HTML code for FORM begin tag (deprecated)
-	 *
-	 * This function is deprecated in favor of function html_form.
-	 * @return HTML code
-	 */
-	public function begin () { return $this->html_form(); }
-
-	/*
-	 * Get HTML code for FORM end tag (deprecated)
-	 *
-	 * This function is deprecated in favor of function html_form_end.
-	 * @return HTML code
-	 */
-	public function end () { return $this->html_form_end(); }
-	/// @endcond
-
 	/**
-	 * @brief Sets all form elements to read-only.
+	 * Sets all form elements to read-only.
 	 */
 	public function readonly () { foreach ($this->fld as $f) $f->readonly(); }
 
 	/**
-	 * @brief Perform validation on submitted form data.
-	 * @retval bool Validation success flag
+	 * Perform validation on submitted form data.
 	 *
 	 * This calls the error function for each form control. Each form control
 	 * should return a string if there is a validation error for the given
 	 * control. If the form submission was canceled, this function performs
 	 * error validation only on the submit control.
+	 *
+	 * @return bool Validation success flag
 	 */
 	public function validate () {
 		$this->error = array();

@@ -1,41 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.5
-// Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revisions, ver 5.3
-//	- Initial version of Mongo class
-// Revisions, ver 5.4
-//	- Modified MongoDoc::save method to remove all members with a leading
-//		underscore before saving to database (previously removed only _id,
-//		_id_refs, and _docs).
-//	- Bug fix in __set method to ensure value given is either a valid id
-//		or a valid object
-//	- Bug fix in Mongo::database when explicit database name not given
-//	- Re-defined functions find, find_all, and find_one, for consistency
-//		with other FST libraries (breaks compatibility with FST 5.3)
-//	- Use general FST exception classes, removed exception classes specific
-//		to this library
-//	- Allow find_by_* and find_all_by_* function calls to receive an optional
-//		parameter to specify sort order
-// Revisions, ver 5.5
-//	- Added read post-processing method.
-//	- Added write pre-processing method.
-//	- Convert DateTime objects to string prior to database write.
-//	- Method __isset now considers getters.
-//	- Method __call fixed bug in detecting query and sort criteria
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Database and connection management for MongoDB
+ * Database and connection management for MongoDB.
  *
  * A class for managing Mongo databases and providing connections via the
  * MongoDB Manager class. Allows definition of database aliases to multiple
@@ -46,32 +22,32 @@ namespace FST;
  */
 final class Mongo {
 
-	/// @cond
+	/** @ignore */
 	static private $_databases = array(); // Mongo database connections
+	/** @ignore */
 	static private $_database_default = false; // Default database connection
+	/** @ignore */
 	static private $_manager = null; // Mongo database manager
+	/** @ignore */
 	static private $_uri = 'mongodb://localhost'; // Authentication URI
-	/// @endcond
 
 	/**
-	 * @brief Provides authorization string to database manager
-	 * @param string $user Database username
-	 * @param string $pass Database password
-	 * @param string $auth Authenticaion database
-	 * @param string $host Authentication database host name (optional)
+	 * Provides authorization string to database manager.
 	 *
 	 * Provides the username, password, and authentication database to be
 	 * used for database connections. Optionally, the hostname of the
 	 * authentication database may be provided (default is localhost).
+	 *
+	 * @param string $user Database username
+	 * @param string $pass Database password
+	 * @param string $auth Authenticaion database
+	 * @param string $host Authentication database host name (optional)
 	 */
 	static public function auth ($user, $pass, $auth, $host='localhost')
 		{ static::$_uri = "mongodb://$user:$pass@$host/$auth"; }
 
 	/**
-	 * @brief Specifies a database with a database alias name
-	 *
-	 * @param $alias string Database alias name
-	 * @param $database string Database name (optional)
+	 * Specifies a database with a database alias name.
 	 *
 	 * Specifies the database alias to be used to access the given database.
 	 * If the database name is not provided, the given alias is used also
@@ -79,6 +55,9 @@ final class Mongo {
 	 * becomes the default database. MongoDoc classes will indicate a
 	 * database alias to specify the database in which the documents
 	 * reside.
+	 *
+	 * @param $alias string Database alias name
+	 * @param $database string Database name (optional)
 	 */
 	static public function database ($alias, $database=false) {
 		if (!$database)
@@ -91,13 +70,13 @@ final class Mongo {
 	}
 
 	/**
-	 * @brief Get database name
-	 *
-	 * @param $alias string Database alias
-	 * @retval string Database name
+	 * Get database name.
 	 *
 	 * Used to retrieve actual database name for a given alias name. This
 	 * function is provided for usage by the MongoDoc base class.
+	 *
+	 * @param $alias string Database alias
+	 * @return string Database name
 	 */
 	static public function _db ($alias=false) {
 		if (!$alias && static::$_database_default)
@@ -108,12 +87,12 @@ final class Mongo {
 	}
 
 	/**
-	 * @brief Get database manager object
-	 *
-	 * @retval object A \\MongoDB\\Manager object
+	 * Get database manager object.
 	 *
 	 * Used to retrieve the database manager object. This function is provided
 	 * for usage by the MongoDoc base class.
+	 *
+	 * @return object A \\MongoDB\\Manager object
 	 */
 	static public function _mgr () {
 		if (!isset(static::$_manager))
@@ -123,7 +102,7 @@ final class Mongo {
 }
 
 /**
- * @brief Base class to represent documents in a Mongo collection
+ * Base class to represent documents in a Mongo collection.
  *
  * Each collection is represented by a class that is derived from this
  * abstract base class. Derived classes specify the database in which the
@@ -142,7 +121,7 @@ final class Mongo {
 abstract class MongoModel {
 
 	/**
-	 * @brief Defines the collection name
+	 * Defines the collection name.
 	 *
 	 * Derived classes may override this property to define the collection
 	 * name. If the derived class does not override this property, the
@@ -153,7 +132,7 @@ abstract class MongoModel {
 	static protected $collection = false;
 
 	/**
-	 * @brief Defines the database name
+	 * Defines the database name.
 	 *
 	 * Derived classes may override this property to specify the database
 	 * in which the collection resides. If the derived class does not
@@ -164,7 +143,7 @@ abstract class MongoModel {
 	static protected $database = false;
 
 	/**
-	 * @brief Defines documents which reference this document
+	 * Defines documents which reference this document.
 	 *
 	 * Derived classes may specify an associative array to define other
 	 * derived classes that link to the current document. Key values are
@@ -180,7 +159,7 @@ abstract class MongoModel {
 	static protected $referenced_by = array();
 
 	/**
-	 * @brief Defines referenced documents
+	 * Defines referenced documents.
 	 *
 	 * Derived classes may specify an associative array to link to documents
 	 * from other collections. Key values are used as virtual properties of
@@ -190,28 +169,29 @@ abstract class MongoModel {
 	 */
 	static protected $references = array();
 
-	/// @cond
+	/** @ignore */
 	private $_id = null;
+	/** @ignore */
 	private $_id_refs = array();
+	/** @ignore */
 	private $_docs = array();
-	/// @endcond
 
 	/**
-	 * @brief Constructs a new document
-	 * @param mixed $properties Associative array or object of initial properties (optional)
+	 * Constructs a new document.
 	 *
 	 * Creates a new (unsaved) document. Initial properties may optionally
 	 * be specified as an associative array. Each key in the array is assigned
 	 * as a property of the object.
+	 *
+	 * @param mixed $properties Associative array or object of initial properties (optional)
 	 */
 	public function __construct ($properties=null)
 		{ if ($properties) $this->set($properties); }
 
-	/// @cond
-
 	// Magic method to define function for retrieval of objects of another
 	// derived class that reference a document from this class. Optional
 	// arguments to the function are the query and sort criteria.
+	/** @ignore */
 	public function __call ($fcn, $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
 			throw new UsageException("Call to undefined method: $fcn");
@@ -240,6 +220,7 @@ abstract class MongoModel {
 
 	// Provides for cloning of objects. A cloned object is a copy but is
 	// unsaved in the collection.
+	/** @ignore */
 	public function __clone () { $this->_id = null; }
 
 	// Magic method to get properties of the object that are not directly
@@ -249,6 +230,7 @@ abstract class MongoModel {
 	// function is called to retrieve the property. If the property is a
 	// referenced property, an object of the referenced class is created
 	// and returned if a document is referenced, or null if none referenced.
+	/** @ignore */
 	public function __get ($fld) {
 
 		// If getting '_id', return Mongo Object ID
@@ -293,6 +275,7 @@ abstract class MongoModel {
 
 	// Magic method to indicate whether the id property is set or getter
 	// exists and has non-null return value
+	/** @ignore */
 	public function __isset ($fld) {
 		switch ($fld) {
 		case 'id':
@@ -308,6 +291,7 @@ abstract class MongoModel {
 	// or properties beginning with "_id_" that refer to referenced objects.
 	// When setting referenced objects, the object being assigned must be
 	// of the designated referenced class, else an exception is thrown.
+	/** @ignore */
 	public function __set ($fld, $val) {
 
 		// May not assign 'id', '_id', or '_id_refs'
@@ -368,6 +352,7 @@ abstract class MongoModel {
 	}
 
 	// Magic method to unset referenced properties
+	/** @ignore */
 	public function __unset ($fld) {
 
 		// If a referenced object, remove its id from referenced id's.
@@ -375,6 +360,7 @@ abstract class MongoModel {
 			unset($this->_id_refs[$fld]);
 	}
 
+	/** @ignore */
 	static public function __callStatic ($fcn, $args) {
 		// Implements 'find_by_*' and 'find_all_by_*' and 'count_by_*' static
 		//	methods.
@@ -415,10 +401,8 @@ abstract class MongoModel {
 		return static::$method($query, $sort);
 	}
 
-	/// @endcond
-
 	/**
-	 * @brief Delete current document from the collection
+	 * Delete current document from the collection.
 	 *
 	 * The document is removed from the collection. Upon deletion, the object
 	 * properties remain intact and represent an unsaved document.
@@ -436,9 +420,7 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Post-process database fields after read
-	 * @param array $rec Associative array of field values from database
-	 * @retval array Associative array of field values for the object model
+	 * Post-process database fields after read.
 	 *
 	 * Derived classes may override this method to perform any post-processing
 	 * to be done to the document's data immediately after it was read from
@@ -452,11 +434,14 @@ abstract class MongoModel {
 	 * Note that the set method does not set properties that lead with an
 	 * underscore. If such properties are needed for object context they
 	 * may be set directly in this method.
+	 *
+	 * @param array $rec Associative array of field values from database
+	 * @return array Associative array of field values for the object model
 	 */
 	protected function read ($rec) { return $rec; }
 
 	/**
-	 * @brief Save current document to database
+	 * Save current document to database.
 	 *
 	 * If the document was retrieved from the collection, replaces the
 	 * document. If an unsaved document, a new document is added to the
@@ -502,14 +487,15 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Sets document properties from associative array or object
-	 * @param mixed $properties Associative array or object of key/value pairs
+	 * Sets document properties from associative array or object.
 	 *
 	 * Uses the given array or object to set properties for the current
 	 * document. If an array, each key which is a valid property name,
 	 * except those beginning with an underscore, is assigned to the
 	 * corresponding value. If an object, the object is converted to an
 	 * associative array and the array logic is used.
+	 *
+	 * @param mixed $properties Associative array or object of key/value pairs
 	 */
 	public function set ($properties) {
 
@@ -524,9 +510,7 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Pre-process database fields before write
-	 * @param array $rec Associative array of field values from the model
-	 * @retval array Associative array of field values for the database
+	 * Pre-process database fields before write.
 	 *
 	 * This method may be overridden in derived classes to perform any
 	 * pre-processing that should occur just before writing the document to
@@ -536,16 +520,20 @@ abstract class MongoModel {
 	 *
 	 * The method should return an associative array
 	 * of actual values to be written (by either INSERT or UPDATE).
+	 *
+	 * @param array $rec Associative array of field values from the model
+	 * @return array Associative array of field values for the database
 	 */
 	protected function write ($rec) { return $rec; }
 
 	/**
-	 * @brief Runs an aggregation against the collection
-	 * @param array $pipeline A Mongo aggregation pipeline
-	 * @retval array Associative array of aggregation results
+	 * Runs an aggregation against the collection.
 	 *
 	 * The given pipeline is run against the collection. Results from the
 	 * aggregation are returned in a array of associative arrays.
+	 *
+	 * @param array $pipeline A Mongo aggregation pipeline
+	 * @return array Associative array of aggregation results
 	 */
 	static public function aggregate ($pipeline) {
 		$cmd = new \MongoDB\Driver\Command([
@@ -558,13 +546,14 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Get count of documents
-	 * @param array $qry Query to qualify document in collection (optional)
-	 * @retval int Number of document
+	 * Get count of documents.
 	 *
 	 * Determines the number of documents in the collection, optionally
 	 * qualified by a query. If a query is not given, returns the number
 	 * of documents in the collection.
+	 *
+	 * @param array $qry Query to qualify document in collection (optional)
+	 * @return int Number of document
 	 */
 	static public function count ($qry=null) {
 
@@ -584,11 +573,12 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Delete all documents matching query
-	 * @param array $qry Query for qualifying documents
+	 * Delete all documents matching query.
 	 * 
 	 * Deletes multiple documents in the collection. All documents qualified by
 	 * the given query are deleted from the collection. A query is required.
+	 *
+	 * @param array $qry Query for qualifying documents
 	 */
 	static public function delete_all ($qry) {
 		if (!is_array($qry))
@@ -599,14 +589,15 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Get distinct values for the given property
-	 * @param string $fld Property name
-	 * @param array $qry Query for qualifying documents (optional)
-	 * @retval array Array of distinct values
+	 * Get distinct values for the given property.
 	 *
 	 * Determines the distinct values for the given property that are saved
 	 * in the collection. A qualifying query may be specified, in which case
 	 * only qualifying documents are considered.
+	 *
+	 * @param string $fld Property name
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @return array Array of distinct values
 	 */
 	static public function distinct ($fld, $qry=false) {
 
@@ -633,13 +624,14 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Retrieve a document by its id value
-	 * @param string $id Id value
-	 * @retval object Document object
+	 * Retrieve a document by its id value.
 	 *
 	 * This function retrieves a single document from the table with the
 	 * given id value. If the document is not found, a NotFoundException
 	 * is thrown.
+	 *
+	 * @param string $id Id value
+	 * @return object Document object
 	 */
 	static public function find ($id) {
 
@@ -667,15 +659,16 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Retrieves a single document using a query
-	 * @param array $qry Query for qualifying documents (optional)
-	 * @param string $srt Property for sorting results (optional)
-	 * @param int $skp Number of leading documents to skip (optional)
-	 * @retval mixed Document object or false
+	 * Retrieves a single document using a query.
 
 	 * Retrieves a single document from the collection optionally with
 	 * a condition. Parameters $srt and $skp may be specified for to control
 	 * which document is retrieved among qualifying documents.
+	 *
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @param string $srt Property for sorting results (optional)
+	 * @param int $skp Number of leading documents to skip (optional)
+	 * @return mixed Document object or false
 	 */
 	static public function find_one ($qry=null, $srt=null, $skp=null) {
 		$objs = static::find_all($qry, $srt, 1, $skp);
@@ -683,12 +676,7 @@ abstract class MongoModel {
 	}
 
 	/**
-	 * @brief Retrieve document or documents
-	 * @param array $qry Query for qualifying documents (optional)
-	 * @param string $srt Property for sorting results (optional)
-	 * @param int $lim Limits number of documents retrieved (optional)
-	 * @param int $skp Number of leading document to skip (optional)
-	 * @retval mixed Document object or array of document objects
+	 * Retrieve document or documents.
 	 *
 	 * This function retrieves all documents in the
 	 * collection as an array of objects, optionally qualified by the
@@ -696,6 +684,12 @@ abstract class MongoModel {
 	 * $sort may be specified to specify the sorting order of returned
 	 * results, and $limit and $skip may be used to support paging in the
 	 * application.
+	 *
+	 * @param array $qry Query for qualifying documents (optional)
+	 * @param string $srt Property for sorting results (optional)
+	 * @param int $lim Limits number of documents retrieved (optional)
+	 * @param int $skp Number of leading document to skip (optional)
+	 * @return mixed Document object or array of document objects
 	 */
 	static public function find_all (
 			$qry=null, $srt=null, $lim=null, $skp=null) {
@@ -762,9 +756,8 @@ abstract class MongoModel {
 		return $objs;
 	}
 
-	/// @cond
-
 	// Helper method to initialize properties from an associative array.
+	/** @ignore */
 	private function _init ($doc=array()) {
 
 		// Set object id.
@@ -783,6 +776,7 @@ abstract class MongoModel {
 	}
 
 	// Helper function to determine the collection name
+	/** @ignore */
 	static private function _collection () {
 		// If collection is not defined in the derived class, determine
 		//	collection name based on the class name. Inserts underscore before
@@ -796,8 +790,7 @@ abstract class MongoModel {
 	}
 
 	// Helper function to return the database object
+	/** @ignore */
 	static private function _database ()
 		{ return Mongo::_db(static::$database); }
-
-	/// @endcond
 }

@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.4
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -8,33 +8,30 @@
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.2 - Improved free-form date entry and error detection
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Date input control
+ * Date input control.
  */
 class FormDateControl extends FormInputControl {
 
-	/// @cond
+	/** @ignore */
 	protected $data = false;
 
+	/** @ignore */
 	protected $max = null;
+	/** @ignore */
 	protected $min = null;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -43,11 +40,12 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get submitted form data.
-	 * @retval string Date in YYYY-MM-DD format (or empty string if no input)
+	 * Get submitted form data.
 	 *
 	 * Returns the date in YYYY-MM-DD format. If no input is provided,
 	 * returns null or an empty string, depending on setting of Form::notnull.
+	 *
+	 * @return string Date in YYYY-MM-DD format (or empty string if no input)
 	 */
 	public function data () {
 		if ($this->data === false) {
@@ -64,8 +62,9 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get error message.
-	 * @retval mixed Error message as a string, or false if no error
+	 * Get error message.
+	 *
+	 * @return mixed Error message as a string, or false if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -80,9 +79,10 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set initial date value.
+	 * Set initial date value.
+	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function init ($val) {
 		if ($val) {
@@ -101,9 +101,10 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set maximum date input value.
+	 * Set maximum date input value.
+	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function max ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -114,9 +115,10 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set minimum date input value.
+	 * Set minimum date input value.
+	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function min ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -127,12 +129,13 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Cause input type as text instead of search.
-	 * @retval object This FormControl object
+	 * Cause input type as text instead of search.
 	 *
 	 * By default, the HTML input control generated is of type "date".
 	 * Call this function to cause the control to be generated with
 	 * type "text".
+	 *
+	 * @return object This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

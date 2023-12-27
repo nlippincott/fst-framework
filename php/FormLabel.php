@@ -1,19 +1,17 @@
 <?php
 
 // FST Application Framework, Version 6.0
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief A form label.
+ * A form label.
  *
  * The Form class, when generating its HTML code, will generate a label for
  * each control row. Objects of this class are returned from the
@@ -31,9 +29,7 @@ class FormLabel {
 	/// @endcond
 
 	/**
-	 * @brief Constructor.
-	 * @param string $label Label text
-	 * @param object $control FormControl object with which label is associated
+	 * Constructor.
 	 *
 	 * Objects of this class are returned by FormControl::label, and are
 	 * used to print the HTML code for the label.
@@ -41,6 +37,9 @@ class FormLabel {
 	 * The HTML code will include the "for" attribute to indicate the ID of
 	 * the control with which the label is associated. If $control is passed
 	 * as false, no "for" attribute is generated.
+	 *
+	 * @param string $label Label text
+	 * @param object $control FormControl object with which label is associated
 	 */
 	public function __construct ($label, $control) {
 		$this->control = $control;
@@ -48,8 +47,9 @@ class FormLabel {
 	}
 
 	/**
-	 * @brief Get HTML code for the label.
-	 * @retval string HTML code
+	 * Get HTML code for the label.
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () {
 		$label = $this->html ? $this->label : htmlspecialchars($this->label);
@@ -59,13 +59,14 @@ class FormLabel {
 	}
 
 	/**
-	 * @brief Indicate label is given as HTML code
-	 * @retval The FormControl object associated with this label (for chaining)
+	 * Indicate label is given as HTML code.
 	 * 
 	 * Call this method to indicate that the label text was given as HTML
 	 * code as opposed to plain text. Since FormLabel objects are typically
 	 * not instantiated directly, call FormControl::label to retrieve
 	 * FormLabel object, then call this method.
+	 *
+	 * @return object The FormControl object associated with this label (for chaining)
 	 */
 	public function html () {
 		$this->html = true;
@@ -73,8 +74,9 @@ class FormLabel {
 	}
 
 	/**
-	 * @brief Get the label text.
-	 * @retval string Label text string
+	 * Get the label text.
+	 *
+	 * @return string Label text string
 	 */
 	public function label () { return $this->label; }
 }

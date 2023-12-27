@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.5
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -8,23 +8,10 @@
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revisions, ver 5.4.2
-//	- Convert boolean values to 0/1 prior insert or update in method save.
-//	- Correction to parameter construction in method count.
-//	- Correction to SQL syntax on update
-// Revisions, ver 5.5
-//	- Added read post-processing method.
-//	- Added write pre-processing method.
-//	- Convert DateTime objects to string prior to database write.
-//	- Fixed MySQLDoc::find_one to set limit of 1 record when calling find_all.
-//	- Added static method distinct
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Database and connection management for MySQL Databases
+ * Database and connection management for MySQL Databases.
  *
  * A class for managing MySQL databases accessible via the PHP PDO library.
  * Allows definition of database aliases to multiple databases.
@@ -40,41 +27,43 @@ namespace FST;
  */
 final class MySQL {
 
-	/// @cond
+	/** @ignore */
 	static private $_databases = array(); // PDO Database connections
+	/** @ignore */
 	static private $_database_default = false; // Default database connection
+	/** @ignore */
 	static private $_user = null; // Username for database access
+	/** @ignore */
 	static private $_user_pass = null; // Password for database access
-	/// @endcond
 
 	/**
-	 * @brief Provides user authorization information to the database manager
-	 *
-	 * @param string $user Database username
-	 * @param string $pass Database password
+	 * Provides user authorization information to the database manager.
 	 *
 	 * Provides the username and password to be used for database connections.
 	 * All databases connections made after calling this function will use
 	 * the same user credentials. If multiple databases are used with different
 	 * credentials, this function may be called subsequent times to change
 	 * the authentication information.
+	 *
+	 * @param string $user Database username
+	 * @param string $pass Database password
 	 */
 	static public function auth ($user, $pass)
 		{ static::$_user = $user; static::$_user_pass = $pass; }
 
 	/**
-	 * @brief Specifies a database with a database alias name
-	 *
-	 * @param string $alias Database alias name
-	 * @param string $database Database name (optional)
-	 * @param string $host Database host name/address (default localhost)
-	 * @param string $engine Database engine (default mysql)
+	 * Specifies a database with a database alias name.
 	 *
 	 * Specifies the database alias to be used to access the given database.
 	 * If the database name is not provided, the given alias is used also
 	 * as the database name. If a host name is not given, 'localhost' is
 	 * used. The first database defined with this function becomes the default
 	 * database.
+	 *
+	 * @param string $alias Database alias name
+	 * @param string $database Database name (optional)
+	 * @param string $host Database host name/address (default localhost)
+	 * @param string $engine Database engine (default mysql)
 	 */
 	static public function database ($alias,
 			$database=null, $host='localhost', $engine='mysql') {
@@ -96,22 +85,20 @@ final class MySQL {
 	}
 
 	/**
-	 * @brief Get auto-increment id of last insert
-	 * @param string $alias Database alias (optional)
-	 * @retval string Id of the most recent insert
+	 * Get auto-increment id of last insert.
 	 *
 	 * Typically called on the same database immediately following a call to
 	 * MySQL::query with the same database, returns the value of the id of
 	 * the last insert query.
+	 *
+	 * @param string $alias Database alias (optional)
+	 * @return string Id of the most recent insert
 	 */
 	static public function insert_id ($alias=null)
 		{ return static::_db($alias)->lastInsertId(); }
 
 	/**
-	 * @brief Executes a query against a database
-	 * @param mixed $sql An SQL query
-	 * @param string $alias Database alias (optional)
-	 * @retval mixed Query results
+	 * Executes a query against a database.
 	 *
 	 * This function executes a query against the database associated with
 	 * the given alias. If the query is a SELECT query, an array of annonymous
@@ -126,6 +113,10 @@ final class MySQL {
 	 * remaining elements are arguments.
 	 *
 	 * If the $alias parameter is not given, the default database is used.
+	 *
+	 * @param mixed $sql An SQL query
+	 * @param string $alias Database alias (optional)
+	 * @return mixed Query results
 	 */
 	static public function query ($sql, $alias=null) {
 		try {
@@ -152,14 +143,14 @@ final class MySQL {
 	}
 
 	/**
-	 * @brief Get PDO object for database
-	 *
-	 * @param string $alias Database alias (optional)
-	 * @retval object PDO database object
+	 * Get PDO object for database.
 	 *
 	 * Used to retrieve PDO database connection object for a given alias name.
 	 * If an alias is not given, the default (first) database connection
 	 * object is returned.
+	 *
+	 * @param string $alias Database alias (optional)
+	 * @return object PDO database object
 	 */
 	static public function _db ($alias=null) {
 		if (!$alias && static::$_database_default)
@@ -172,7 +163,7 @@ final class MySQL {
 }
 
 /**
- * @brief Base class to represent records in a MySQL database table
+ * Base class to represent records in a MySQL database table.
  *
  * Each table is represented by a class that is derived from this abstract
  * base class. Derived classes may specify the database alias and table in
@@ -189,7 +180,7 @@ final class MySQL {
 abstract class MySQLModel {
 
 	/**
-	 * @brief Defines the database name
+	 * Defines the database name.
 	 *
 	 * Derived classes may override this property to specify the database
 	 * in which the table resides. If the derived class does not
@@ -200,7 +191,7 @@ abstract class MySQLModel {
 	static protected $database = null; /// Database alias name
 
 	/**
-	 * @brief Defines the database table name
+	 * Defines the database table name.
 	 *
 	 * Derived classes may override this property to define the table
 	 * name. If the derived class does not override this property, the
@@ -211,7 +202,7 @@ abstract class MySQLModel {
 	static protected $table = null; /// Table name
 
 	/**
-	 * @brief Defines the name of the primary key field
+	 * Defines the name of the primary key field.
 	 *
 	 * Derived classes may override this property to define the name of the
 	 * primary key field. If the derived class does not override this
@@ -220,7 +211,7 @@ abstract class MySQLModel {
 	static protected $key = 'id'; /// Primary key field
 
 	/** 
-	 * @brief Defines documents which reference this document
+	 * Defines documents which reference this document.
 	 *
 	 * Derived classes may specify an associative array to define other
 	 * derived classes that link to the current document (current document
@@ -239,7 +230,7 @@ abstract class MySQLModel {
 	static protected $referenced_by = array();
 
 	/**
-	 * @brief Defines referenced documents
+	 * Defines referenced documents.
 	 *
 	 * Derived classes may specify an associative array to link to documents
 	 * from other classes. Key values are used as virtual properties of
@@ -253,23 +244,23 @@ abstract class MySQLModel {
 	 */
 	static protected $references = array();
 
-	/// @cond
+	/** @ignore */
 	private $_id = null;
+	/** @ignore */
 	private $_refs = array();
-	/// @endcond
 
 	/**
-	 * @brief Constructs a new document
+	 * Constructs a new document.
+	 * 
 	 * @param mixed $properties Associative array or object of initial properties (optional)
 	 */
 	public function __construct ($properties=null)
 		{ if ($properties) $this->set($properties); }
 
-	/// @cond
-
 	// Magic method to define functions for retrieval of objects of another
 	// derived class that refernce this class. Optional arguments to the
 	// function are the WHERE clause and the ORDER BY clause.
+	/** @ignore */
 	public function __call ($fcn, $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
 			throw new UsageException("Call to undefined method: $fcn");
@@ -307,6 +298,7 @@ abstract class MySQLModel {
 
 	// Provides for cloning of objects. A cloned object is a copy but is
 	// not saved.
+	/** @ignore */
 	public function __clone () { $this->_id = null; }
 
 	// Magic method to get properties of the object that are not already
@@ -317,6 +309,7 @@ abstract class MySQLModel {
 	// created and returned, or null is returned if none is referenced.
 	// If the property has a getter (method "get_" followed by a property
 	// name, that function is called to retrieve the property.
+	/** @ignore */
 	public function __get ($fld) {
 
 		// May get primary key value via _id. Note that this is the primary
@@ -376,6 +369,7 @@ abstract class MySQLModel {
 
 	// Magic method to indicate whether the _id property is set or getter
 	// exists and has non-null return value
+	/** @ignore */
 	public function __isset ($fld) {
 		if ($fld == '_id')
 			return isset($this->_id);
@@ -388,6 +382,7 @@ abstract class MySQLModel {
 	// or any properties of referenced documents.
 	// When setting referenced objects, the object being assigned must be
 	// of the designated referenced class, else an exception is thrown.
+	/** @ignore */
 	public function __set ($fld, $val) {
 
 		// May not assign reserved properties (_id, _refs)
@@ -438,6 +433,7 @@ abstract class MySQLModel {
 		return $this->$fld = $val;
 	}
 
+	/** @ignore */
 	static public function __callStatic ($fcn, $args) {
 		// Implements 'find_by_*', 'find_all_by_*', and 'count_by_*' static
 		// methods.
@@ -481,10 +477,8 @@ abstract class MySQLModel {
 		return static::$method($where, $sort);
 	}
 
-	/// @endcond
-
 	/**
-	 * @brief Deletes this record from the database
+	 * Deletes this record from the database.
 	 *
 	 * The record which this object represents in the database is deleted.
 	 * All properties for this object are left intact. Any attempt to save
@@ -501,9 +495,7 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Post-process database fields after read
-	 * @param array $rec Associative array of field values from database
-	 * @retval array Associative array of field values for the object model
+	 * Post-process database fields after read.
 	 *
 	 * Derived classes may override this method to perform any post-processing
 	 * to be done to the document's data immediately after it is read from the
@@ -517,11 +509,14 @@ abstract class MySQLModel {
 	 * Note that the set method does not set properties that lead with an
 	 * underscore. If such properties are needed for object context they
 	 * may be set directly in this method.
+	 *
+	 * @param array $rec Associative array of field values from database
+	 * @return array Associative array of field values for the object model
 	 */
 	protected function read ($rec) { return $rec; }
 
 	/**
-	 * @brief Saves current document to the database
+	 * Saves current document to the database.
 	 *
 	 * Saves the values of all object properties to the corresponding columns
 	 * in the corresponding database table. Any object properties with a
@@ -584,14 +579,15 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Sets document properties from associative array or object
-	 * @param mixed $properties Associative array or object of key/value pairs
+	 * Sets document properties from associative array or object.
 	 *
 	 * Uses the given array or object to set properties for the current
 	 * document. If an array, each key which is a valid property name,
 	 * except those beginning with an underscore, is assigned to the
 	 * corresponding value. If an object, the object is converted to an
 	 * associative array and the array logic is used.
+	 *
+	 * @param mixed $properties Associative array or object of key/value pairs
 	 */
 	public function set ($properties) {
 
@@ -606,9 +602,7 @@ abstract class MySQLModel {
 }
 
 	/**
-	 * @brief Pre-process database fields before write
-	 * @param array $rec Associative array of field values from the model
-	 * @retval array Associative array of field values for the database
+	 * Pre-process database fields before write.
 	 *
 	 * This method may be overridden in derived classes to perform any
 	 * pre-processing that should occur just before writing the document to
@@ -617,13 +611,17 @@ abstract class MySQLModel {
 	 * an underscore removed, thus representing the data just about to be
 	 * written to the database. The method should return an associative array
 	 * of actual values to be written (by either INSERT or UPDATE).
+	 *
+	 * @param array $rec Associative array of field values from the model
+	 * @return array Associative array of field values for the database
 	 */
 	protected function write ($rec) { return $rec; }
 
 	/**
-	 * @brief Get count of records
+	 * Get count of records.
+	 * 
 	 * @param mixed $whr WHERE query clause as string or array (optional)
-	 * @retval int Number of records
+	 * @return int Number of records
 	 */
 	static public function count ($whr=null) {
 		$sql = 'select count(*) as cnt from `' . static::_table() . '`';
@@ -644,14 +642,15 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Retrieve distinct values of field
-	 * @param string $fld Field name
-	 * @param mixed $whr WHERE query clause as string or array (optional)
-	 * @retval array Array of distinct values for the given field
+	 * Retrieve distinct values of field
 	 *
 	 * Retrieves an array containing the distinct values for the given 
 	 * field. An optional WHERE clause may be supplied to qualify the records
 	 * from which the values are taken.
+	 * 
+	 * @param string $fld Field name
+	 * @param mixed $whr WHERE query clause as string or array (optional)
+	 * @return array Array of distinct values for the given field
 	 */
 	static public function distinct ($fld, $whr=null) {
 
@@ -682,13 +681,14 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Retrieve a record by its primary key value
-	 * @param mixed $id Primary key value
-	 * @retval object Object of the called class
+	 * Retrieve a record by its primary key value.
 	 *
 	 * This function retrieves a single record from the table with the given
 	 * primary key value. If the record is not found, a NotFoundException is
 	 * thrown.
+	 * 
+	 * @param mixed $id Primary key value
+	 * @return object Object of the called class
 	 */
 	static public function find ($id) {
 		$doc = static::find_one(array('`' . static::$key . '`=?', $id));
@@ -699,11 +699,7 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Retrieves a single record using some condition
-	 * @param mixed $whr Condition to be used as the WHERE clause
-	 * @param string $srt Order or record retrieval (optional)
-	 * @param int $skp Number of records to skip (optional)
-	 * @retval mixed Object of called class, or false
+	 * Retrieves a single record using some condition.
 	 *
 	 * Retrieves a single record from the database according to the given
 	 * condition. The condition may be given as a string or an array. If an
@@ -713,6 +709,11 @@ abstract class MySQLModel {
 	 * ORDER BY clause, thus determining which record is retrieved if more
 	 * than one record match the given condition. Optionally, a number of
 	 * records matching the condition may be skipped.
+	 * 
+	 * @param mixed $whr Condition to be used as the WHERE clause
+	 * @param string $srt Order or record retrieval (optional)
+	 * @param int $skp Number of records to skip (optional)
+	 * @return mixed Object of called class, or false
 	 */
 	static public function find_one ($whr, $srt=null, $skp=null) {
 		$objs = static::find_all($whr, $srt, 1, $skp);
@@ -720,16 +721,17 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * @brief Retrieve records
-	 * @param mixed $whr WHERE query clause as string or array (optional)
-	 * @param string $srt ORDER BY query clause (optional)
-	 * @param int $lim Maximum number of records to return (optional)
-	 * @param int $skp Number of records to skip (optional)
-	 * @retval array Array of objects represeting requested records
+	 * Retrieve records.
 	 *
 	 * Retrieves all records matching the given WHERE clause, or all records
 	 * from the table if no WHERE clause is given. Optionally, a limit may
 	 * be specified as well as number of leading records to skip.
+	 * 
+	 * @param mixed $whr WHERE query clause as string or array (optional)
+	 * @param string $srt ORDER BY query clause (optional)
+	 * @param int $lim Maximum number of records to return (optional)
+	 * @param int $skp Number of records to skip (optional)
+	 * @return array Array of objects represeting requested records
 	 */
 	static public function find_all (
 			$whr=null, $srt=null, $lim=null, $skp=null) {
@@ -777,9 +779,8 @@ abstract class MySQLModel {
 		return $objs;
 	}
 
-	/// @cond
-
 	// Helper function to return the table name
+	/** @ignore */
 	static private function _table () {
 		// If table is not defined in the derived class, determine table
 		// name based on the class name. Inserts underscore before all
@@ -791,6 +792,4 @@ abstract class MySQLModel {
 			strtolower(preg_replace(
 				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
 	}
-
-	/// @endcond
 }

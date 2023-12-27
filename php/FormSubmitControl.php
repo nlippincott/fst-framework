@@ -1,34 +1,32 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Submit control
+ * Submit control.
  */
 class FormSubmitControl extends FormInputControl {
 
-	/// @cond
+	/** @ignore */
 	protected $cancel=false;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $init Text to appear on submit button (default "Submit")
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $init Text to appear on submit button (default "Submit")
 	 */
 	public function __construct ($form, $name, $init='Submit') {
 		parent::__construct($form, $name, '');
@@ -39,8 +37,9 @@ class FormSubmitControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get HTML code.
-	 * @retval string HTML code
+	 * Get HTML code.
+	 * 
+	 * @return string HTML code
 	 */
 	public function __toString () {
 
@@ -56,33 +55,36 @@ class FormSubmitControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Include cancel button with control.
-	 * @param string $text Text to appear on cancel button
-	 * @retval object This FormControl object
+	 * Include cancel button with control.
 	 *
 	 * Adds a button element for cancel functionality. It is the responsibility
 	 * of the presentation layer to implement the cancel function.
+	 *
+	 * @param string $text Text to appear on cancel button
+	 * @return object This FormControl object
 	 */
 	public function cancel ($text='Cancel')
 		{ $this->cancel = $text; return $this; }
 
 	/**
-	 * @brief Get error message for this control.
-	 * @retval bool False, to indicate no error
+	 * Get error message for this control.
 	 *
 	 * There are no errors associated with this control.
+	 *
+	 * @return bool False, to indicate no error
 	 */
 	public function error () { return false; }
 
 	/**
-	 * @brief Set control to ok/cancel format
-	 * @param string $ok Text for OK button
-	 * @param string $cancel Text for Cancel button
-	 * @retval object This FormControl object
+	 * Set control to ok/cancel format
 	 *
 	 * Sets up the control to include a cancel button. Also labels the submit
 	 * button as "OK" (or value supplied) and the cancel button as "Cancel"
 	 * (or value supplied).
+	 *
+	 * @param string $ok Text for OK button
+	 * @param string $cancel Text for Cancel button
+	 * @return object This FormControl object
 	 */
 	public function okcancel ($ok='OK', $cancel='Cancel')
 		{ $this->init($ok); $this->cancel($cancel); return $this; }

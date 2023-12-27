@@ -1,23 +1,30 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
-/// @cond
 /*
- * Number range control (experimental)
+ * Number range control (experimental).
  */
 class FormRangeControl extends FormInputControl {
 
+	/**
+	 * Control constructor.
+	 *
+	 * Calls the base class constructor and
+	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
+	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
 		$this->attr('data-fst', 'form-control-range');
@@ -28,15 +35,17 @@ class FormRangeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get submitted form data for this control.
-	 * @retval int Form data value
+	 * Get submitted form data for this control.
+	 *
+	 * @return int Form data value
 	 */
 	public function data ()
 		{ return parent::data() === null ? null : (int)parent::data(); }
 
 	/**
-	 * @brief Get error message associated with this control
-	 * @retval string Error message, or empty string if no error
+	 * Get error message associated with this control.
+	 * 
+	 * @return string Error message, or empty string if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -53,25 +62,27 @@ class FormRangeControl extends FormInputControl {
 	}
 
 	/**
-	 * Set maximum value for range
+	 * Set maximum value for range.
+	 * 
 	 * @param int $max Maximum value
-	 * @return This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function max ($max) { $this->attr('max', (int)$max); return $this; }
 
 	/**
-	 * Set minimum value for range
+	 * Set minimum value for range.
+	 * 
 	 * @param int $min Minimum value
-	 * @return This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function min ($min) { $this->attr('min', (int)$min); return $this; }
 
 	/**
-	 * Set step attribute
+	 * Set step attribute.
+	 * 
 	 * @param int $step Step value
-	 * @return This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function step ($step)
 		{ $this->attr('step', (int)$step); return $this; }
 }
-/// @endcond

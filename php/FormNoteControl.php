@@ -1,19 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.5
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Form note control.
+ * Form note control.
  *
  * This is not an actual input control, but rather includes a text- or
  * HTML-based note into a form. This control must have a unique name just
@@ -22,20 +20,22 @@ namespace FST;
 
 class FormNoteControl extends FormControl {
 
-	/// @cond
+	/** @ignore */
 	protected $html = false;
+	/** @ignore */
 	protected $name;
+	/** @ignore */
 	protected $note;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -46,8 +46,9 @@ class FormNoteControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get HTML code.
-	 * @retval string HTML code
+	 * Get HTML code.
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () {
 		return '<span' . Framework::attr($this->attr) . '>' .
@@ -56,34 +57,38 @@ class FormNoteControl extends FormControl {
 	}
 
 	/**
-	 * @brief Sets the control text or HTML.
+	 * Sets the control text or HTML.
+	 * 
 	 * @param string $val Text or HTML for the note
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function init ($val) { $this->note = $val; return $this; }
 
 	/**
-	 * @brief Set control value format as HTML.
-	 * @return This FormNoteControl object
+	 * Set control value format as HTML.
 	 *
 	 * Call this method to indicate that the form data provided to
 	 * FormNoteControl::init was HTML-formatted.
+	 *
+	 * @return object This FormNoteControl object
 	 */
 	public function html () { $this->html = true; return $this; }
 
 	/**
-	 * @brief Get control name.
+	 * Get control name.
+	 * 
 	 * @retval string Control name
 	 */
 	public function name () { return $this->name; }
 
 	/**
-	 * @brief Set control as read-only.
-	 * @retval control This FormControl object
+	 * Set control as read-only.
 	 *
 	 * This method overrides the base class method, and simply returns
 	 * itself. The base class behavior of this method, and its intended
 	 * function, is not appropriate to this control.
+	 *
+	 * @return control This FormControl object
 	 */
 	public function readonly () { return $this; }
 }

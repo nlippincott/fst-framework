@@ -1,43 +1,40 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history, ver 5.1:
-//	- Complete re-write of error detection.
-// Revision history, ver 5.2.1:
-//	- Correction to HTML5 boolean attribute "multiple"
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Form file upload control
+ * Form file upload control.
  */
 class FormFileControl extends FormInputControl {
 
-	/// @cond
+	/** @ignore */
 	protected $data = null;
+	/** @ignore */
 	protected $ext = null;
+	/** @ignore */
 	protected $extmsg;
+	/** @ignore */
 	protected $files = array();
+	/** @ignore */
 	protected $multiple = false;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -67,11 +64,12 @@ class FormFileControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get the HTML input tag for the control.
-	 * @retval string HTML code for input tag
+	 * Get the HTML input tag for the control.
 	 *
 	 * This varies from the parent class in that if this control is designated
 	 * as a multipe file input, the name attribute has "[]" appended to it.
+	 *
+	 * @return string HTML code for input tag
 	 */
 	public function __toString () {
 		if (!$this->multiple)
@@ -82,9 +80,7 @@ class FormFileControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get file(s) submitted through this control.
-	 * @param string $type Class name for returned object(s)
-	 * @retval mixed See description
+	 * Get file(s) submitted through this control.
 	 *
 	 * This function returns a FormFileUpload object for the uploaded file.
 	 * If the multiple option is used, an array of FormFileUpload objects is
@@ -95,6 +91,9 @@ class FormFileControl extends FormInputControl {
 	 * The $type parameter is used internally, allowing derived
 	 * classes to use this method's logic to return a different type
 	 * (specifically, FormImageControl).
+	 *
+	 * @param string $type Class name for returned object(s)
+	 * @retval mixed See description
 	 */
 	public function data ($type='\FST\FormFileUpload') {
 
@@ -116,8 +115,9 @@ class FormFileControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get error message for this control.
-	 * @retval mixed Error message string, or false if no error
+	 * Get error message for this control.
+	 *
+	 * @return mixed Error message string, or false if no error
 	 */
 	public function error () {
 
@@ -154,10 +154,11 @@ class FormFileControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Allow multipe file uploads.
-	 * @retval object This FormFile object
+	 * Allow multipe file uploads.
 	 *
 	 * Indicates that multiple files may be upload via this control.
+	 *
+	 * @return object This FormFile object
 	 */
 	public function multiple () {
 		$this->attr('multiple', 'multiple');
@@ -166,15 +167,16 @@ class FormFileControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Indicate allowable upload file types.
-	 * @param string $ext Comma-separated list of allowable file extensions
-	 * @param string $extmsg Error message if upload extension does not match
-	 * @retval object This FormControl object
+	 * Indicate allowable upload file types.
 	 *
 	 * Sets the allowable types that are permissable for this file upload.
 	 * File type is (blindly) determined by the file name extension. By
 	 * default, there are no restrictions on the type/extension. The
 	 * extensions provided must not include the dot.
+	 *
+	 * @param string $ext Comma-separated list of allowable file extensions
+	 * @param string $extmsg Error message if upload extension does not match
+	 * @return object This FormControl object
 	 */
 	public function type ($ext, $extmsg=false) {
 		$this->attr('data-fst-type', $ext);

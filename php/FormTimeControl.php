@@ -1,42 +1,39 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.2 - Corrected step value in HTML INPUT tag
-//	v5.2 - Improved free-form time entry and error detection
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Time input control.
+ * Time input control.
  */
 class FormTimeControl extends FormInputControl {
 
-	/// @cond
+	/** @ignore */
 	protected $data = false;
 
+	/** @ignore */
 	protected $max = null;
+	/** @ignore */
 	protected $min = null;
+	/** @ignore */
 	protected $step = null; // Step value in minutes
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -45,8 +42,9 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get submitted form data.
-	 * @retval string Time in HH:MM format, or empty string if no input
+	 * Get submitted form data.
+	 *
+	 * @return string Time in HH:MM format, or empty string if no input
 	 */
 	public function data () {
 		if ($this->data === false) {
@@ -63,8 +61,9 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Get error message.
-	 * @retval mixed Error message, or empty string if no error
+	 * Get error message.
+	 * 
+	 * @return mixed Error message, or empty string if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -79,9 +78,10 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set initial time value
+	 * Set initial time value.
+	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function init ($val) {
 		if ($val) {
@@ -100,9 +100,10 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set maximum time input value.
+	 * Set maximum time input value.
+	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function max ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -113,9 +114,10 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set minimum time input value.
+	 * Set minimum time input value.
+	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function min ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -126,9 +128,10 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Set the step value.
+	 * Set the step value.
+	 *
 	 * @param int $step Step value, in minutes
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function step ($step) {
 		if ((int)$step > 0) {
@@ -140,12 +143,13 @@ class FormTimeControl extends FormInputControl {
 	}
 
 	/**
-	 * @brief Cause input type as text instead of time.
-	 * @retval object This FormControl object
+	 * Cause input type as text instead of time.
 	 *
 	 * By default, the HTML input control generated is of type "time".
 	 * Call this function to cause the control to be generated with
 	 * type "text".
+	 *
+	 * @return object This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

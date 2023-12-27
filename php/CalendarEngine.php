@@ -1,22 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.3 - Constructor accpets DateTime object or string for initialization
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Calendar Generation Engine, abstract base class.
+ * Calendar Generation Engine, abstract base class.
  *
  * Abstract base class for the Calendar Generation Engine.
  * This class is used to generated calendar-based HTML tables.
@@ -28,21 +23,23 @@ namespace FST;
  */
 abstract class CalendarEngine extends TableEngine {
 
-	/// @cond
+	/** @ignore */
 	protected $ym; // Year and month, YYYY-MM
+	/** @ignore */
 	protected $dt; // Date of Sunday of first week in calendar
+	/** @ignore */
 	protected $weeks; // Number of weeks in calendar
-	/// @endcond
 
 	/**
-	 * @brief Constructor, set up the calendar month.
-	 * @param mixed $ym Month to be displayed in calendar
+	 * Constructor, set up the calendar month.
 	 *
 	 * Initializes the calendar for the month to be rendered in the table.
 	 * If $ym is given as a DateTime object, calendar is rendered for the
 	 * year/month of the date that was given. If $ym is a string, it must
 	 * be in either YYYY-MM or YYYY-MM-DD format to indicate the month to
 	 * be rendered.
+	 * 
+	 * @param mixed $ym Month to be displayed in calendar
 	 */
 	public function __construct ($ym=false) {
 
@@ -76,20 +73,19 @@ abstract class CalendarEngine extends TableEngine {
 	}
 
 	/**
-	 * @brief Get content for a given date.
-	 * @param string $dt Date
-	 * @retval string Table cell content for the given date
+	 * Get content for a given date.
 	 *
 	 * Derived classes must override this function to return the HTML content
 	 * for the given date. The value returned will be sent directly to the
 	 * output of the calendar table.
+	 * 
+	 * @param string $dt Date
+	 * @return string Table cell content for the given date
 	 */
 	abstract protected function date ($dt);
 
 	/**
-	 * @brief Get cell class string.
-	 * @param string $dt Date in YYYY-MM-DD format
-	 * @retval string Class name(s)
+	 * Get cell class string.
 	 *
 	 * Derived classes may override this function to return the
 	 * class attributes
@@ -99,15 +95,18 @@ abstract class CalendarEngine extends TableEngine {
 	 * dates in the first row that preceed the first of the month, or dates
 	 * in the last row that follow the last day of the month) will have
 	 * class name 'outside' automatically added to the class attribute.
+	 * 
+	 * @param string $dt Date in YYYY-MM-DD format
+	 * @return string Class name(s)
 	 */
 	protected function date_class ($dt) { return ''; }
 
-	/**
-	 * @brief Get contents of a table cell.
-	 * @retval string Class name(s) for the date cell
-	 *
-	 * This method overrides Table::cell and is final.
-	 */
+	// Get contents of a table cell.
+	//
+	// This method overrides Table::cell and is final.
+	// 
+	// @return string Class name(s) for the date cell
+	/** @ignore */
 	final protected function cell ($row, $col) {
 
 		// Determine date for current block
@@ -120,11 +119,10 @@ abstract class CalendarEngine extends TableEngine {
 			$this->date($dt) : '&nbsp;';
 	}
 
-	/**
-	 * @brief Get class name(s) for a table cell.
-	 *
-	 * This method overrides Table::cell_class and is final.
-	 */
+	// Get class name(s) for a table cell.
+	//
+	// This method overrides Table::cell_class and is final.
+	/** @ignore */
 	final protected function cell_class ($row, $col) {
 
 		// Determine date for current block
@@ -146,11 +144,10 @@ abstract class CalendarEngine extends TableEngine {
 		return $class;
 	}
 
-	/**
-	 * @brief Get column span for a table cell.
-	 *
-	 * This method overrides Table::cell_colspan and is final.
-	 */
+	// Get column span for a table cell.
+	//
+	// This method overrides Table::cell_colspan and is final.
+	/** @ignore */
 	final protected function cell_colspan ($row, $col) {
 
 		// If showing outside dates, no column spanning needed
@@ -179,25 +176,22 @@ abstract class CalendarEngine extends TableEngine {
 		return 7 - $col;
 	}
 
-	/**
-	 * @brief Get table columns.
-	 *
-	 * This method overrides Table::columns and is final.
-	 */
+	// Get table columns.
+	//
+	// This method overrides Table::columns and is final.
+	/** @ignore */
 	final protected function columns () { return range(0, 6); }
 
-	/**
-	 * @brief Get table rows.
-	 *
-	 * This method overrides Table::rows and is final.
-	 */
+	// Get table rows.
+	//
+	// This method overrides Table::rows and is final.
+	/** @ignore */
 	final protected function rows () { return range(0, $this->weeks - 1); }
 
-	/**
-	 * @brief Get column header contents.
-	 *
-	 * This method overrides Table::head and is final.
-	 */
+	// Get column header contents.
+	//
+	// This method overrides Table::head and is final.
+	/** @ignore */
 	final protected function head ($col) {
 
 		if ($this->show_month())
@@ -235,17 +229,15 @@ abstract class CalendarEngine extends TableEngine {
 		}
 	}
 
-	/**
-	 * @brief Get column span for a header column.
-	 *
-	 * This method overrides Table::head_colspan and is final.
-	 */
+	// Get column span for a header column.
+	//
+	// This method overrides Table::head_colspan and is final.
+	/** @ignore */
 	final protected function head_colspan ($day)
 		{ return $this->show_month() ? 7 : 1; }
 
 	/**
-	 * @brief Show month in calenar heading.
-	 * @retval bool Show month flag
+	 * Show month in calenar heading.
 	 *
 	 * Derived classes may override this function to override its default
 	 * behavior. If this function returns true (which is the default),
@@ -253,12 +245,13 @@ abstract class CalendarEngine extends TableEngine {
 	 * name and 4-digit year in the heading, in addition to the names of the
 	 * days of the week. If return false, only headings for the days of the
 	 * week are produced.
+	 *
+	 * @return bool Show month flag
 	 */
 	protected function show_month () { return true; }
 
 	/**
-	 * @brief Show dates outside the current month.
-	 * @retval bool Show outside dates flag
+	 * Show dates outside the current month.
 	 *
 	 * Derived classes may override this function to override its default
 	 * behavior. If this function returns true, the engine will generate
@@ -267,17 +260,20 @@ abstract class CalendarEngine extends TableEngine {
 	 * false (which is the default), only dates for the month being generated
 	 * will result in cell data. Cells for dates outside the current month
 	 * will have class attribute 'outside' automatically applied.
+	 *
+	 * @return bool Show outside dates flag
 	 */
 	protected function show_outside () { return false; }
 
 	/**
-	 * @brief Start weeks on Monday instead of Sunday.
-	 * @retval bool Start week on Monday flag
+	 * Start weeks on Monday instead of Sunday.
 	 *
 	 * Derived classes may override this function to override its default
 	 * behavior. If this function returns true, weeks will begin on Monday
 	 * instead of Sunday. If returns false (which is the default), weeks
 	 * will begin on Sunday.
+	 *
+	 * @return bool Start week on Monday flag
 	 */
 	protected function week_monday () { return false; }
 }

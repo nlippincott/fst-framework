@@ -1,32 +1,17 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history, ver 5.2.1
-//	- Correction to HTML5 boolean attribute "disabled"
-//	- Correction to HTML5 boolean attribute "multiple"
-// Revision history, ver 5.4
-//	- Removed reference to this->prompt (not applicable)
-//	- Added method checkbox to allow generating control as multiple
-//		checkboxes instead of the native multiple selection control.
-//	- For native multiple selection control, corrected selected attribute
-//	- Added implode option to return values as single string, imploded with
-//		newlines, instead of an array.
-//	- Changed init method to explode value given when value given is not
-//		an array.
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Form control for multiple selection from a number of options.
+ * Form control for multiple selection from a number of options.
  *
  * This control is used to select from a number of pre-defined options. The
  * control allows for multiple selections. Data value returned from this
@@ -36,22 +21,26 @@ namespace FST;
  */
 class FormMultipleControl extends FormControl {
 
-	/// @cond
+	/** @ignore */
 	private $assoc = null;
+	/** @ignore */
 	private $check = false;
+	/** @ignore */
 	private $implode = false;
+	/** @ignore */
 	private $options = array();
+	/** @ignore */
 	private $value = array();
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -61,8 +50,9 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get HTML code.
-	 * @retval string HTML code
+	 * Get HTML code.
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () {
 
@@ -117,23 +107,25 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Generate control as multiple checkboxes
-	 * @param bool $check Generate as checkboxes (default true)
-	 * @retval object This FormControl object
+	 * Generate control as multiple checkboxes.
 	 *
 	 * If $check is true, causes the control to be generated as multiple
 	 * checkbox controls rather than the native multiple selection control.
+	 *
+	 * @param bool $check Generate as checkboxes (default true)
+	 * @return object This FormControl object
 	 */
 	public function checkbox ($check=true)
 		{ $this->check = $check; return $this; }
 
 	/**
-	 * @brief Get value of selected option.
-	 * @retval mixed Array or string containing the selected values
+	 * Get value of selected option.
 	 *
 	 * By default, returns an array of the selected values. If the implode
 	 * option is set, returns a string of the selected values separated by
 	 * newlines.
+	 *
+	 * @return mixed Array or string containing the selected values
 	 */
 	public function data () {
 		$val = isset($_POST[$this->name()]) ? $_POST[$this->name()] : array();
@@ -141,7 +133,8 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get error message associated with this control.
+	 * Get error message associated with this control.
+	 *
 	 * @return Error message string, or false if no error
 	 */
 	public function error () {
@@ -150,9 +143,7 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Set initial value for the control.
-	 * @param mixed $val Initial value, or array of initial values
-	 * @retval object This FormControl object
+	 * Set initial value for the control.
 	 *
 	 * This function accepts a scalar value or an array. If a scalar value,
 	 * that value supplied becomes an initially selected value in the control.
@@ -160,6 +151,9 @@ class FormMultipleControl extends FormControl {
 	 * initially select multiple values. If, however, an array is passed,
 	 * the values in the array are used as the initially selected values, and
 	 * the values supplied by any previous calls are discarded.
+	 *
+	 * @param mixed $val Initial value, or array of initial values
+	 * @return object This FormControl object
 	 */
 	public function init ($val) {
 		if (is_array($val))
@@ -172,33 +166,32 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Cause control value to be returned as string.
-	 * @param bool $implode Set data method to return imploded values
-	 * @retval object This FormControl object
+	 * Cause control value to be returned as string.
 	 *
 	 * This function controls the behavior of the return value of the data
 	 * method. By default, the data method returns an array of values
 	 * selected. If this function is called passing true (default), then
 	 * the values selected will be imploded (PHP implode function) with
 	 * newline characters and returned as a string.
+	 *
+	 * @param bool $implode Set data method to return imploded values
+	 * @return object This FormControl object
 	 */
 	public function implode ($implode=true)
 		{ $this->implode = $implode; return $this; }
 
 	/**
-	 * @brief Get control name.
-	 * @retval string Control name
+	 * Get control name.
 	 *
 	 * This overrides the default function by trimming '[]' off the name
 	 * attribute.
+	 *
+	 * @return string Control name
 	 */
 	public function name () { return substr($this->attr['name'], 0, -2); }
 
 	/**
-	 * @brief Set available options for the control.
-	 * @param array $opt Array of control options
-	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
-	 * @retval object This FormControl object
+	 * Set available options for the control.
 	 *
 	 * Defines the options that are available for the control. Parameter $opt
 	 * contains the data to be used as the values and descriptions for the
@@ -218,6 +211,10 @@ class FormMultipleControl extends FormControl {
 	 *		to be used as the option description. KEY (if supplied) specifies
 	 *		the index or property to be used as the option value. If KEY is
 	 * 		not provided, DESC is also used as the option value.
+	 *
+	 * @param array $opt Array of control options
+	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
+	 * @return object This FormControl object
 	 */
 	public function options ($opt, $assoc=null) {
 
@@ -263,16 +260,18 @@ class FormMultipleControl extends FormControl {
 	}
 
 	/**
-	 * @brief Set control as read-only.
-	 * @retval object This FormControl object
+	 * Set control as read-only.
+	 *
+	 * @return object This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('disabled', 'disabled'); return $this; }
 
 	/**
-	 * @brief Set control size.
+	 * Set control size.
+	 * 
 	 * @param int $size Size of the control
-	 * @return This FormControl object.
+	 * @return object This FormControl object.
 	 */
 	public function size ($size) { $this->attr('size', $size); return $this; }
 }

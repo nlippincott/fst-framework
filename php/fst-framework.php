@@ -1,39 +1,20 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/**
- * @file
- * @brief Defines classes and functions for the FST Application Framework.
- *
- * This file is to be the first file included in the application's index.php
- * file, and defines the various classes and function to support the
- * framework.
- *
- * In addition, this file registers all the standard form controls included
- * with the framework so that they are available with the Form class
- * @see <a href="fst-form-controls.html">FST Form Controls</a>
- */
-
-/// @cond
-
-// Requires PHP version 5.3 or higher
-// if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300)
-// 	die('FST Application Framework requires PHP 5.3 or higher');
-
-// require 'Framework.php';
-// require 'Controller.php';
-
-// require 'TableEngine.php';
-// require 'ListEngine.php';
-// require 'CalendarEngine.php';
-// require 'NameValueTable.php';
+// This file is to be the first file included in the application's index.php
+// file, and defines the various classes and function to support the
+// framework.
+//
+// In addition, this file registers all the standard form controls included
+// with the framework so that they are available with the Form class
+// @see <a href="fst-form-controls.html">FST Form Controls</a>
 
 require 'Form.php';
 require 'FormLabel.php';
@@ -108,5 +89,3 @@ if (PHP_VERSION_ID >= 70000) {
 	require 'Mongo.php';
 	require 'MySQL.php';
 }
-
-/// @endcond

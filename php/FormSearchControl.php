@@ -1,30 +1,29 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Search control.
+ * Search control.
  */
 class FormSearchControl extends FormTextControl {
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='Search') {
 		parent::__construct($form, $name, $label);
@@ -33,12 +32,13 @@ class FormSearchControl extends FormTextControl {
 	}
 
 	/**
-	 * @brief Cause input type as text instead of search.
-	 * @retval object This FormControl object
+	 * Cause input type as text instead of search.
 	 *
 	 * By default, the HTML input control generated is of type "search".
 	 * Call this function to cause the control to be generated with
 	 * type "text".
+	 *
+	 * @return object This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

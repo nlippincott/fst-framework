@@ -1,41 +1,32 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history, version 5.2.1
-//	- Correction to HTML5 boolean attribute "readonly"
-// Revision history, version 5.2.2
-//	- Added placeholder function
-// Revision history, version 5.5
-//	- __toString, fixed deprecated parameter to htmlspecialchars
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Textarea control
+ * Textarea control.
  */
 class FormTextareaControl extends FormControl {
 
-	/// @cond
+	/** @ignore */
 	protected $value;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -43,8 +34,9 @@ class FormTextareaControl extends FormControl {
 	}
 
 	/**
-	 * @brief Get HTML code.
-	 * @retval string HTML code
+	 * Get HTML code.
+	 *
+	 * @return string HTML code
 	 */
 	public function __toString () {
 		return '<textarea' . Framework::attr($this->attr) . '>' .
@@ -53,38 +45,43 @@ class FormTextareaControl extends FormControl {
 	}
 
 	/**
-	 * @brief Set number of columns for control.
+	 * Set number of columns for control.
+	 * 
 	 * @param int $cols Number of columns
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function cols ($cols) { $this->attr['cols'] = $cols; return $this; }
 
 	/**
-	 * @brief Set initial value for control.
+	 * Set initial value for control.
+	 *
 	 * @param string $val Initial value
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function init ($val) { $this->value = $val; return $this; }
 
 	/**
-	 * @brief Set the control's placeholder text.
+	 * Set the control's placeholder text.
+	 * 
 	 * @param string $placeholder Placeholder text
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function placeholder ($placeholder)
 		{ $this->attr['placeholder'] = $placeholder; return $this; }
 
 	/**
 	 * Set control as read-only.
-	 * @retval object This FormControl object
+	 * 
+	 * @return object This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('readonly', 'readonly'); return $this; }
 
 	/**
-	 * @brief Set number of rows for control.
+	 * Set number of rows for control.
+	 * 
 	 * @param int $rows Number of rows
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function rows ($rows) { $this->attr['rows'] = $rows; return $this; }
 }

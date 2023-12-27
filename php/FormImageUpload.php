@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 5.4
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -19,12 +19,10 @@
 //	- Added src method
 //	- Added support for SVG upload
 
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Image file upload handler
+ * Image file upload handler.
  *
  * An object of this type is returned as data from the FormImageControl
  * object. The FormImageControl object will return objects of this type
@@ -33,7 +31,8 @@ namespace FST;
 class FormImageUpload extends FormFileUpload {
 
 	/**
-	 * @brief Constructor.
+	 * Constructor.
+	 *
 	 * @param string $name Name of the file upload control
 	 */
 	public function __construct ($name) {
@@ -60,21 +59,20 @@ class FormImageUpload extends FormFileUpload {
 	}
 
 	/**
-	 * @brief Get image string base64-encoded
-	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @retval string Image file contents, base64-encoded
+	 * Get image string base64-encoded
 	 *
 	 * Gets a base64-encoded string of the image file, optionally scaled
 	 * according to the scaling dimensions. See FileImageUpload::image for
 	 * dimension options.
+	 *
+	 * @param mixed $dim Max scaling dimension, or dimension options array
+	 * @return string Image file contents, base64-encoded
 	 */
 	public function base64 ($dim=false)
 		{ return base64_encode($this->read($dim)); }
 
 	/**
-	 * @brief Get image resource
-	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @retval resource Image resource
+	 * Get image resource.
 	 *
 	 * Creates an image resource from the uploaded file, optionally scaled
 	 * according to the given dimension option. This method is not applicable
@@ -91,6 +89,9 @@ class FormImageUpload extends FormFileUpload {
 	 * the scaling size options, no image resizing is done.
 	 *
 	 * Returns false if called for an SVG image upload.
+	 *
+	 * @param mixed $dim Max scaling dimension, or dimension options array
+	 * @return resource Image resource
 	 */
 	public function image ($dim=false) {
 		switch ($this->imagetype) {
@@ -188,13 +189,15 @@ class FormImageUpload extends FormFileUpload {
 	}
 
 	/**
-	 * @brief Get the image file contents
-	 * @retval string Image file contents
+	 * Get the image file contents.
 	 *
 	 * Gets the uploaded image file contents, optionally scaled
 	 * according to the scaling dimensions. See FileImageUpload::image for
 	 * dimension options. Scaling dimensions are ignored for SVG image
 	 * uploads.
+	 *
+	 * @param mixed $dim Max scaling dimension, or dimension options array
+	 * @return string Image file contents
 	 */
 	public function read ($dim=false) {
 		// If not scaled or if an svg, just get uploaded file contents
@@ -218,15 +221,16 @@ class FormImageUpload extends FormFileUpload {
 	}
 
 	/**
-	 * @brief Save uploaded image
-	 * @param string $path Path for saving file
-	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @retval int Image creation status
+	 * Save uploaded image.
 	 *
 	 * Saves the uploaded image to the given path, optionally scaled
 	 * according to the scaling dimensions. See FileImageUpload::image for
 	 * dimension options. Scaling dimensions are ignored for SVG image
 	 * uploads.
+	 *
+	 * @param string $path Path for saving file
+	 * @param mixed $dim Max scaling dimension, or dimension options array
+	 * @return int Image creation status
 	 */
 	public function save ($path, $dim=false) {
 		// If not scaled or if an svg, just copy the uploaded file
@@ -250,9 +254,7 @@ class FormImageUpload extends FormFileUpload {
 	}
 
 	/**
-	 * @brief Get HTML IMG tag source
-	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @retval string Image source string
+	 * Get HTML IMG tag source.
 	 *
 	 * Gets a string that may be used as the SRC attribute of an HTML IMG
 	 * tag with the image data embedded directly in the tag.
@@ -260,6 +262,9 @@ class FormImageUpload extends FormFileUpload {
 	 * according to the scaling dimensions (but is ignored if the image type
 	 * is SVG). See FileImageUpload::image for
 	 * dimension options.
+	 *
+	 * @param mixed $dim Max scaling dimension, or dimension options array
+	 * @return string Image source string
 	 */
 	public function src ($dim=false) {
 		return "data:image/{$this->type};base64," . $this->base64($dim);

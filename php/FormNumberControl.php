@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 5.4
+// FST Application Framework, Version 6.0
 // Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -8,33 +8,31 @@
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
 
-// Revision history:
-//	v5.3 - Modified text method to add inputmode attribute (set to numeric)
-
-/// @cond
 namespace FST;
-/// @endcond
 
 /**
- * @brief Number input control.
+ * Number input control.
  */
 class FormNumberControl extends FormTextControl {
 
-	/// @cond
+	/** @ignore */
 	protected $decimal = false;
+	/** @ignore */
 	protected $max = null;
+	/** @ignore */
 	protected $min = null;
+	/** @ignore */
 	protected $negative = false;
-	/// @endcond
 
 	/**
-	 * @brief Control constructor.
-	 * @param object $form Form object to which control is attached
-	 * @param string $name Control name ("name" attribute in HTML)
-	 * @param string $label Control label (or other value, see description)
+	 * Control constructor.
 	 *
 	 * Calls the base class constructor and
 	 * performs additional required initialization.
+	 *
+	 * @param object $form Form object to which control is attached
+	 * @param string $name Control name ("name" attribute in HTML)
+	 * @param string $label Control label (or other value, see description)
 	 */
 	public function __construct ($form, $name, $label='') {
 		parent::__construct($form, $name, $label);
@@ -44,15 +42,17 @@ class FormNumberControl extends FormTextControl {
 	}
 
 	/**
-	 * @brief Allow decmial number input.
-	 * @retval object This FormControl object
+	 * Allow decmial number input.
+	 *
+	 * @return object This FormControl object
 	 */
 	public function decimal ()
 		{ $this->decimal = true; $this->attr('step', 'any'); return $this; }
 
 	/**
-	 * @brief Get error message associated with this control
-	 * @retval string Error message, or empty string if no error
+	 * Get error message associated with this control.
+	 * 
+	 * @return string Error message, or empty string if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -75,33 +75,37 @@ class FormNumberControl extends FormTextControl {
 	}
 
 	/**
-	 * @brief Set maximum input value.
+	 * Set maximum input value.
+	 *
 	 * @param mixed $max Maximum value
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function max ($max)
 		{ $this->max = $max; $this->attr('max', $max); return $this; }
 
 	/**
-	 * @brief Set minimum input value.
+	 * Set minimum input value.
+	 * 
 	 * @param mixed $min Minimum value
-	 * @retval object This FormControl object
+	 * @return object This FormControl object
 	 */
 	public function min ($min)
 		{ $this->min = $min; $this->attr('min', $min); return $this; }
 
 	/**
 	 * Allow negative number input.
-	 * @retval object This FormControl object
+	 *
+	 * @return object This FormControl object
 	 */
 	public function negative () { $this->negative = true; return $this; }
 
 	/**
-	 * @brief Set input type as text instead of number.
-	 * @retval object This FormControl object
+	 * Set input type as text instead of number.
 	 *
 	 * This control generates an HTML input tag with type "number". Calling
 	 * this method causes the type to be generated as "text".
+	 *
+	 * @return object This FormControl object
 	 */
 	public function text () {
 		$this->attr('type', 'text');
