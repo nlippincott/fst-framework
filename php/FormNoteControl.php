@@ -51,8 +51,9 @@ class FormNoteControl extends FormControl {
 	 * @return string HTML code
 	 */
 	public function __toString () {
+		$note = $this->note === null ? '' : $this->note;
 		return '<span' . Framework::attr($this->attr) . '>' .
-			($this->html ? $this->note : htmlspecialchars($this->note)) .
+			($this->html ? $note : htmlspecialchars($note)) .
 			'</span>';
 	}
 
