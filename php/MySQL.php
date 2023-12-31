@@ -766,17 +766,36 @@ abstract class MySQLModel {
 			array_merge(array($sql), $args) : $sql, static::$database);
 
 		// Create array of objects, with each row from the database passed
-		// to the read method for post-processing.
+		//  as an array to the read method for post-processing.
 		$cls = get_called_class();
 		$objs = array();
 		foreach ($rows as $row) {
 			$obj = new $cls();
-			$obj->set($obj->read($row));
+			$obj->set($obj->read(get_object_vars($row)));
 			$obj->_id = $obj->{static::$key};
 			$objs[] = $obj;
 		}
 
 		return $objs;
+	}
+
+	/**
+	 * Retrieve records based on subquery.
+	 * 
+	 * Retrieves all records such that the primary key matches the values
+	 * in the result of the given SELECT query. Parameter $sql must be
+	 * a SELECT query that gives a single column in its result.
+	 *
+	 * The $sql parameter may be given as a string or an array. If an array,
+	 * the first element is the SQL statement with placeholders, and the
+	 * remaining elements are arguments.
+	 *
+	 * @param mixed $sql An SQL query
+	 */
+	static public function find_where_in ($sql) {
+		$where = is_array($sql) ? $sql : [ $sql ];
+		$where[0] = '`' . static::$key . '` in (' . $where[0] . ')';
+		return static::find_all($where);
 	}
 
 	// Helper function to return the table name
