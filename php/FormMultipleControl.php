@@ -138,7 +138,7 @@ class FormMultipleControl extends FormControl {
 	 * @return Error message string, or false if no error
 	 */
 	public function error () {
-		return $this->is_required() && !count($this->data()) ?
+		return $this->is_required && !($this->implode ? strlen($this->data()) : count($this->data()))
 			'Value required' : false;
 	}
 
