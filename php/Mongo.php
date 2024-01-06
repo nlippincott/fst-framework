@@ -530,19 +530,19 @@ abstract class MongoModel {
 	 * Runs an aggregation against the collection.
 	 *
 	 * The given pipeline is run against the collection. Results from the
-	 * aggregation are returned in a array of associative arrays.
+	 * aggregation are returned as an array of objects.
 	 *
 	 * @param array $pipeline A Mongo aggregation pipeline
-	 * @return array Associative array of aggregation results
+	 * @return array Aggregation results
 	 */
 	static public function aggregate ($pipeline) {
 		$cmd = new \MongoDB\Driver\Command([
 			'aggregate'=>static::_collection(),
-			'pipeline'=>$pipeline]);
-		$cur = Mongo::_mgr()->executeCommand(
-			static::_database(), $cmd);
-		$res = $cur->toArray()[0];
-		return $res->ok ? $res->result : false;
+			'pipeline'=>$pipeline,
+			'cursor'=>[ 'batchSize'=>0 ]
+		]);
+		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
+		return $cur->toArray();
 	}
 
 	/**
@@ -553,23 +553,36 @@ abstract class MongoModel {
 	 * of documents in the collection.
 	 *
 	 * @param array $qry Query to qualify document in collection (optional)
-	 * @return int Number of document
+	 * @return int Number of documents
 	 */
 	static public function count ($qry=null) {
 
-		// Aggregation approach...
-//		$pipeline = array();
-//		if ($query)
-//			$pipeline[] = [ '$match'=>$query ];
-//		$pipeline[] = [ '$group'=>[ '_id'=>null, 'count'=>[ '$sum'=>1 ]]];
-//		$results = static::aggregate($pipeline);
-//		return count($results) ? $results[0]->count : 0;
+		// Validate query parameter.
+		if (!$qry) $qry = [];
+		if (!is_array($qry))
+			throw new UsageException('Query must be an array');
 
-		$cmd = new \MongoDB\Driver\Command($qry ?
-			[ 'count'=>static::_collection(), 'query'=>$qry ] :
-			[ 'count'=>static::_collection()]);
-		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
-		return $cur->toArray()[0]->n;
+		// Convert any references in query.
+		foreach ($qry as $k=>$v) {
+			if (array_key_exists($k, static::$references)) {
+				if (!is_object($v) || get_class($v) != static::$references[$k])
+					throw new UsageException(
+						'Inconsistent document type in query');
+				$qry["_id_$k"] = $v->_id;
+				unset($qry[$k]);
+			}
+		}
+
+		// Create pipeline and aggregate.
+		// $pipeline = [];
+		// if (count($qry))
+		// 	$pipeline[] = [ '$match'=>$qry ];
+		$pipeline = count($qry) ? [ [ '$match'=>$qry ] ] : [];
+		$pipeline[] = [ '$group'=>[ '_id'=>null, 'count'=>[ '$sum'=>1 ]]];
+		$results = static::aggregate($pipeline);
+
+		// Return count from aggregation results.
+		return count($results) ? $results[0]->count : 0;
 	}
 
 	/**
