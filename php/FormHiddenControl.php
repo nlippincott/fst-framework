@@ -29,7 +29,7 @@ class FormHiddenControl extends FormInputControl {
 		parent::__construct($form, $name);
 		$this->attr('data-fst', 'form-control-hidden');
 		$this->attr('type', 'hidden');
-		if ($init)
+		if ($init !== null)
 			$this->init($init);
 	}
 }
