@@ -46,7 +46,7 @@ class Framework {
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-24';
 	/** FST version release date */
-	const VERSION_RELEASE = '2024-01-01';
+	const VERSION_RELEASE = '2024-01-18';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */

@@ -74,7 +74,7 @@ class FormMultipleControl extends FormControl {
 				print '<div>';
 				$attr['id'] = $this->attr['id'] . '-' . ++$cnt;
 				$attr['value'] = $this->assoc ? $k : $v;
-				if (array_search($v, $this->value) !== false)
+				if (array_search($attr['value'], $this->value) !== false)
 					$attr['checked'] = 'checked';
 				else if (isset($attr['checked']))
 					unset($attr['checked']);
