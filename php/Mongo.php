@@ -175,6 +175,8 @@ abstract class MongoModel {
 	private $_id_refs = array();
 	/** @ignore */
 	private $_docs = array();
+	/** @ignore */
+	private $_readonly = false;
 
 	/**
 	 * Constructs a new document.
@@ -449,6 +451,10 @@ abstract class MongoModel {
 	 */
 	public function save () {
 
+		// Cannot save a read-only document
+		if ($this->_readonly)
+			throw new DatabaseException('Cannot save read-only document');
+
 		// Create bulk write object
 		$write = new \MongoDB\Driver\BulkWrite();
 
@@ -676,14 +682,18 @@ abstract class MongoModel {
 
 	 * Retrieves a single document from the collection optionally with
 	 * a condition. Parameters $srt and $skp may be specified for to control
-	 * which document is retrieved among qualifying documents.
+	 * which document is retrieved among qualifying documents. Parameter
+	 * $prj may be used to specify a projection. For specifying sort and
+	 * projection options, see MongoModel::find_all.
 	 *
 	 * @param array $qry Query for qualifying documents (optional)
-	 * @param string $srt Property for sorting results (optional)
+	 * @param mixed $srt Property for sorting results (optional)
 	 * @param int $skp Number of leading documents to skip (optional)
+	 * @param mixed $prj Projection properties (optional)
 	 * @return mixed Document object or false
 	 */
-	static public function find_one ($qry=null, $srt=null, $skp=null) {
+	static public function find_one (
+			$qry=null, $srt=null, $skp=null, $prj=null) {
 		$objs = static::find_all($qry, $srt, 1, $skp);
 		return count($objs) ? $objs[0] : false;
 	}
@@ -693,19 +703,39 @@ abstract class MongoModel {
 	 *
 	 * This function retrieves all documents in the
 	 * collection as an array of objects, optionally qualified by the
-	 * $query parameter. Further,
-	 * $sort may be specified to specify the sorting order of returned
-	 * results, and $limit and $skip may be used to support paging in the
-	 * application.
+	 * $query parameter using MongoDB query specification rules.
+	 * 
+	 * The number of documents retrieved and leading number of documents to
+	 * exclude may be specified by the $lim and $skp parameters. These may
+	 * be used to support paging in an application.
+	 *
+	 * Sort order of documents may be specified via the $srt parameter,
+	 * given as a string or associative array.
+	 * If given as a string, must be specified as a comma-separated
+	 * list of attributes. Attribute names may be preceeded by a minus sign to
+	 * indicating a descending sort by that attribute.
+	 * If given as an associative array, use MongoDB sort conventions.
+	 * 
+	 * A projection may be specified via the $prj parameter, given as
+	 * a string or associative array, in order to
+	 * limit the attributes retrieved for each document.
+	 * If given as a string, must be specified as a comma-separated list
+	 * of attribute names to include with each document. Optionally, the
+	 * string may begin with a minus sign to specify attributes to
+	 * exclude from each document.
+	 * If given as an associative array, use MongoDB projection conventions.
+	 * 
+	 * If a projection is specified, documents retrieved will be read-only.
 	 *
 	 * @param array $qry Query for qualifying documents (optional)
-	 * @param string $srt Property for sorting results (optional)
+	 * @param mixed $srt Property for sorting results (optional)
 	 * @param int $lim Limits number of documents retrieved (optional)
 	 * @param int $skp Number of leading document to skip (optional)
+	 * @param mixed $prj Projection properties (optional)
 	 * @return mixed Document object or array of document objects
 	 */
 	static public function find_all (
-			$qry=null, $srt=null, $lim=null, $skp=null) {
+			$qry=null, $srt=null, $lim=null, $skp=null, $prj=null) {
 
 		if (!$qry) $qry = array();
 		if (!is_array($qry))
@@ -730,8 +760,15 @@ abstract class MongoModel {
 
 		// Sort option.
 		if ($srt) {
-			if (is_string($srt))
-				$srt = array($srt=>1);
+			if (is_string($srt)) {
+				$tmp = array_map('trim', explode(',', $srt));
+				$srt = array();
+				foreach ($tmp as $attr)
+					if (substr($attr, 0, 1) == '-')
+						$srt[substr($attr, 1)] = -1;
+					else
+						$srt[$attr] = 1;
+			}
 			if (!is_array($srt))
 				throw new UsageException(
 					'Sort option must be a string or array');
@@ -754,6 +791,23 @@ abstract class MongoModel {
 			$options['skip'] = $skp;
 		}
 
+		// Project option.
+		if ($prj) {
+			if (is_string($prj)) {
+				$incl = substr($prj, 0, 1) == '-' ? 0 : 1;
+				if (!$incl)
+					$prj = trim(substr($prj, 1));
+				$tmp = array_map('trim', explode(',', $prj));
+				$prj = array();
+				foreach ($tmp as $attr)
+					$prj[$attr] = $incl;
+			}
+			if (!is_array($prj))
+				throw new UsageException(
+					'Projection option must be a string or array');
+			$options['projection'] = $prj;
+		}
+
 		// Execute query.
 		$qry = new \MongoDB\Driver\Query($qry, $options);
 		$cur = Mongo::_mgr()->executeQuery(
@@ -764,6 +818,8 @@ abstract class MongoModel {
 		foreach ($cur as $doc) {
 			$obj = new $cls();
 			$obj->_init($obj->read(get_object_vars($doc)));
+			if ($prj !== null)
+				$obj->_readonly = true;
 			$objs[] = $obj;
 		}
 		return $objs;
