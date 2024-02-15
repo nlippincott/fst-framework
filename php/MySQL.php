@@ -247,6 +247,8 @@ abstract class MySQLModel {
 	/** @ignore */
 	private $_id = null;
 	/** @ignore */
+	private $_readonly = false;
+	/** @ignore */
 	private $_refs = array();
 
 	/**
@@ -524,6 +526,9 @@ abstract class MySQLModel {
 	 * valid columns names, a DatabaseException exception is thrown.
 	 */
 	public function save () {
+		// Check for read-only document.
+		if ($this->_readonly)
+			throw new DatabaseException('Cannot save read-only document');
 		// Changing the value of the primary key is not allowed.
 		if ($this->_id && $this->_id != $this->{static::$key})
 			throw new UsageException('Update of primary key ' .
@@ -709,14 +714,19 @@ abstract class MySQLModel {
 	 * ORDER BY clause, thus determining which record is retrieved if more
 	 * than one record match the given condition. Optionally, a number of
 	 * records matching the condition may be skipped.
+	 *
+	 * A comma-separated list of columns may be specified. If specified,
+	 * only those columns will be retrieved from the database records.
+	 * When this option is used, the document becomes read-only.
 	 * 
 	 * @param mixed $whr Condition to be used as the WHERE clause
 	 * @param string $srt Order or record retrieval (optional)
 	 * @param int $skp Number of records to skip (optional)
+	 * @param string $cols Columns to be included (optional)
 	 * @return mixed Object of called class, or false
 	 */
-	static public function find_one ($whr, $srt=null, $skp=null) {
-		$objs = static::find_all($whr, $srt, 1, $skp);
+	static public function find_one ($whr, $srt=null, $skp=null, $cols=null) {
+		$objs = static::find_all($whr, $srt, 1, $skp, $cols);
 		return count($objs) ? $objs[0] : false;
 	}
 
@@ -726,17 +736,26 @@ abstract class MySQLModel {
 	 * Retrieves all records matching the given WHERE clause, or all records
 	 * from the table if no WHERE clause is given. Optionally, a limit may
 	 * be specified as well as number of leading records to skip.
-	 * 
+	 *
+	 * A comma-separated list of columns may be specified. If specified,
+	 * only those columns will be retrieved from the database records.
+	 * When this option is used, the document becomes read-only.
+	 *
 	 * @param mixed $whr WHERE query clause as string or array (optional)
 	 * @param string $srt ORDER BY query clause (optional)
 	 * @param int $lim Maximum number of records to return (optional)
 	 * @param int $skp Number of records to skip (optional)
+	 * @param string $cols Columns to be included (optional)
 	 * @return array Array of objects represeting requested records
 	 */
 	static public function find_all (
-			$whr=null, $srt=null, $lim=null, $skp=null) {
+			$whr=null, $srt=null, $lim=null, $skp=null, $cols=null) {
 
-		$sql = 'select * from `' . static::_table() . '`';
+		// Columns to be retrieved
+		$cols = $cols === null ? '*' :
+			implode(',', array_map(function ($c) { return '`' . trim($c) . '`'; }, explode(',', $cols)));
+
+		$sql = "select $cols from `" . static::_table() . '`';
 		$args = false;
 
 		// Add WHERE clause, if supplied
@@ -773,6 +792,7 @@ abstract class MySQLModel {
 			$obj = new $cls();
 			$obj->set($obj->read(get_object_vars($row)));
 			$obj->_id = $obj->{static::$key};
+			$obj->_readonly = $cols != '*';
 			$objs[] = $obj;
 		}
 
