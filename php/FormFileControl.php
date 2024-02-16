@@ -182,6 +182,8 @@ class FormFileControl extends FormInputControl {
 		$this->attr('data-fst-type', $ext);
 		$this->ext = explode(',', strtolower($ext));
 		$this->extmsg = $extmsg;
+		$this->attr('accept', implode(',',
+			array_map(function ($t) { return '.' . $t; }, $this->ext)));
 		return $this;
 	}
 }
