@@ -563,26 +563,10 @@ abstract class MongoModel {
 	 */
 	static public function count ($qry=null) {
 
-		// Validate query parameter.
-		if (!$qry) $qry = [];
-		if (!is_array($qry))
-			throw new UsageException('Query must be an array');
-
-		// Convert any references in query.
-		foreach ($qry as $k=>$v) {
-			if (array_key_exists($k, static::$references)) {
-				if (!is_object($v) || get_class($v) != static::$references[$k])
-					throw new UsageException(
-						'Inconsistent document type in query');
-				$qry["_id_$k"] = $v->_id;
-				unset($qry[$k]);
-			}
-		}
+		// Convert references in query.
+		$qry = static::_query($qry);
 
 		// Create pipeline and aggregate.
-		// $pipeline = [];
-		// if (count($qry))
-		// 	$pipeline[] = [ '$match'=>$qry ];
 		$pipeline = count($qry) ? [ [ '$match'=>$qry ] ] : [];
 		$pipeline[] = [ '$group'=>[ '_id'=>null, 'count'=>[ '$sum'=>1 ]]];
 		$results = static::aggregate($pipeline);
@@ -595,13 +579,26 @@ abstract class MongoModel {
 	 * Delete all documents matching query.
 	 * 
 	 * Deletes multiple documents in the collection. All documents qualified by
-	 * the given query are deleted from the collection. A query is required.
+	 * the given query are deleted from the collection. A query is required,
+	 * and an empty query is not permitted. To delete all documents in the
+	 * collection, pass the query parameter as true.
 	 *
 	 * @param array $qry Query for qualifying documents
 	 */
 	static public function delete_all ($qry) {
-		if (!is_array($qry))
-			throw new UsageException('Query required for delete');
+
+		if ($qry === true)
+			// Delete all documents in the collection
+			$qry = array();
+		else {
+			// Ensure a query is given (invalid if no criteria).
+			if (!is_array($qry) || !count($qry))
+				throw new UsageException('Query required for delete_all');
+			// Convert references in query.
+			$qry = static::_query($qry);
+		}
+
+		// Delete documents matching query.
 		$write = new \MongoDB\Driver\BulkWrite();
 		$write->delete($qry);
 		Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
@@ -620,20 +617,8 @@ abstract class MongoModel {
 	 */
 	static public function distinct ($fld, $qry=false) {
 
-		if (!$qry) $qry = array();
-		if (!is_array($qry))
-			throw new UsageException('Query must be an array');
-
-		// Convert any references in query.
-		foreach ($qry as $k=>$v) {
-			if (array_key_exists($k, static::$references)) {
-				if (!is_object($v) || get_class($v) != static::$references[$k])
-					throw new UsageException(
-						'Inconsistent document type in query');
-				$qry["_id_$k"] = $v->_id;
-				unset($qry[$k]);
-			}
-		}
+		// Convert references in query.
+		$qry = static::_query($qry);
 
 		// Get distinct values
 		$cmd = new \MongoDB\Driver\Command(
@@ -692,8 +677,7 @@ abstract class MongoModel {
 	 * @param mixed $prj Projection properties (optional)
 	 * @return mixed Document object or false
 	 */
-	static public function find_one (
-			$qry=null, $srt=null, $skp=null, $prj=null) {
+	static public function find_one ($qry=null, $srt=null, $skp=null, $prj=null) {
 		$objs = static::find_all($qry, $srt, 1, $skp);
 		return count($objs) ? $objs[0] : false;
 	}
@@ -734,26 +718,13 @@ abstract class MongoModel {
 	 * @param mixed $prj Projection properties (optional)
 	 * @return mixed Document object or array of document objects
 	 */
-	static public function find_all (
-			$qry=null, $srt=null, $lim=null, $skp=null, $prj=null) {
+	static public function find_all ($qry=null, $srt=null, $lim=null, $skp=null, $prj=null) {
 
-		if (!$qry) $qry = array();
-		if (!is_array($qry))
-			throw new UsageException('Query must be an array');
+		// Convert references in query.
+		$qry = static::_query($qry);
 
 		// Get the called class for returning objects.
 		$cls = get_called_class();
-
-		// Convert any references in query.
-		foreach ($qry as $k=>$v) {
-			if (array_key_exists($k, static::$references)) {
-				if (!is_object($v) || get_class($v) != static::$references[$k])
-					throw new UsageException(
-						'Inconsistent document type in query');
-				$qry["_id_$k"] = $v->_id;
-				unset($qry[$k]);
-			}
-		}
 
 		// Build options for query.
 		$options = array();
@@ -862,4 +833,27 @@ abstract class MongoModel {
 	/** @ignore */
 	static private function _database ()
 		{ return Mongo::_db(static::$database); }
+
+	// Helper function to preprocess queries
+	/** @ignore */
+	static private function _query ($qry) {
+
+		// Ensure query is given as an array or as null.
+		if (!$qry) $qry = array();
+		if (!is_array($qry))
+			throw new UsageException('Query must be an array');
+
+		// Convert any references in query.
+		foreach ($qry as $k=>$v) {
+			if (array_key_exists($k, static::$references)) {
+				if (!is_object($v) || get_class($v) != static::$references[$k])
+					throw new UsageException(
+						'Inconsistent document type in query');
+				$qry["_id_$k"] = $v->_id;
+				unset($qry[$k]);
+			}
+		}
+
+		return $qry;
+	}
 }
