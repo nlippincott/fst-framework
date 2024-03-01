@@ -261,7 +261,7 @@ abstract class MySQLModel {
 
 	// Magic method to define functions for retrieval of objects of another
 	// derived class that refernce this class. Optional arguments to the
-	// function are the WHERE clause and the ORDER BY clause.
+	// function are the WHERE clause, the ORDER BY clause, and columns.
 	/** @ignore */
 	public function __call ($fcn, $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
@@ -294,8 +294,11 @@ abstract class MySQLModel {
 		// Build the ORDER BY clause
 		$srt = count($args) > 1 ? $args[1] : false;
 
+		// Get columns if specified
+		$cols = count($args) > 2 ? $args[2] : null;
+
 		// Find documents related to this table
-		return $cls::find_all($whr, $srt);
+		return $cls::find_all($whr, $srt, null, null, $cols);
 	}
 
 	// Provides for cloning of objects. A cloned object is a copy but is
