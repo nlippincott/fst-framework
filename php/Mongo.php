@@ -192,7 +192,7 @@ abstract class MongoModel {
 
 	// Magic method to define function for retrieval of objects of another
 	// derived class that reference a document from this class. Optional
-	// arguments to the function are the query and sort criteria.
+	// arguments to the function are the query, sort criteria, and projection.
 	/** @ignore */
 	public function __call ($fcn, $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
@@ -210,14 +210,20 @@ abstract class MongoModel {
 			':' . strtolower(preg_replace(
 				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . ':', 3);
 
-		// Optional arguments to this function are a query and sort criteria.
-		$qry = (count($args) > 0 && is_array($args[0])) ? $args[0] : [];
-		$srt = count($args) > 1 ? $args[1] : [];
+		// Optional arguments to this function are query, sort and projection.
+		$qry = count($args) > 0 && $args[0] !== null ? $args[0] : [];
+		$srt = count($args) > 1 ? $args[1] : null;
+		$prj = count($args) > 2 ? $args[2] : null;
+
+		// Query must be an array. Other arguments may be array or string and
+		// are validated by self::find_all.
+		if (!is_array($qry))
+				throw new UsageException("Invalid query parameter");
 
 		// Include this object in criteria for the query
 		$qry[$fld] = $this;
 
-		return $cls::find_all($qry, $srt);
+		return $cls::find_all($qry, $srt, null, null, $prj);
 	}
 
 	// Provides for cloning of objects. A cloned object is a copy but is
