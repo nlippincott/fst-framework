@@ -220,12 +220,15 @@ abstract class MySQLModel {
 	 * document contains the foreign key). Key values are used as virtual
 	 * properties and functions of objects (via the __get and __call magic
 	 * methods) to retrieve all documents of the other class that reference
-	 * this document. Values of the associative array are either a class
-	 * name or a class name followed by a colon (":") followed by
-	 * the name of the property in the class that references a document from
-	 * this class. If the name of the property is not provided, it is
-	 * assumed to be the name of this class, converted to lowercase, followed
-	 * by "_id".
+	 * this document.
+	 * 
+	 * Values of the associative array include at least one or as many as
+	 * three components separated by colons. The first (required) component
+	 * is the class name of the document to which the current document is
+	 * related. The second (optional) component is the name of the foreign
+	 * key in the related document. If a foreign key is not provided, default
+	 * rules for foreign key names applies. The third (optional) component
+	 * is the default sort order of the related documents.
 	 */
 	static protected $referenced_by = array();
 
@@ -272,13 +275,16 @@ abstract class MySQLModel {
 		if (!isset($this->_id))
 			return array();
 
-		// Get class name and foreign key
-		list($cls, $key) = explode(":", static::$referenced_by[$fcn] . ":");
+		// Get class name, foreign key, and default sort order
+		list($cls, $key, $srt) = explode(":", static::$referenced_by[$fcn] . "::");
 
 		// If foreign key not explicitly given, derive from class name
 		if (!$key)
-			$key = strtolower(preg_replace(
-				'/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
+			$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
+
+		// If default sort order is not explicitly given, set to null
+		if (!$srt)
+			$srt = null;
 
 		// Build the WHERE clause
 		$whr = array("`$key`=?", $this->_id);
@@ -291,8 +297,9 @@ abstract class MySQLModel {
 				$whr[0] .= ' and (' . $args[0] . ')';
 		}
 
-		// Build the ORDER BY clause
-		$srt = count($args) > 1 ? $args[1] : false;
+		// Set sort order if given by parameter
+		if (count($args) > 1)
+			$srt = $args[1];
 
 		// Get columns if specified
 		$cols = count($args) > 2 ? $args[2] : null;
@@ -338,11 +345,9 @@ abstract class MySQLModel {
 			list($cls, $key) = explode(":", static::$references[$fld] . ":");
 			// If foreign key not explicitly given, derive from class name
 			if (!$key)
-				$key = strtolower(preg_replace(
-					'/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
+				$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
 			// Get document using find, and return it
-			$doc = $cls::find_one(
-				array('`' . $cls::$key . '`=?', $this->$key));
+			$doc = $cls::find_one(array('`' . $cls::$key . '`=?', $this->$key));
 			// If document found, save in $_refs
 			if ($doc)
 				$this->_refs[$fld] = $doc;
@@ -356,15 +361,16 @@ abstract class MySQLModel {
 			// If current document has no primary key value, return empty array
 			if (!isset($this->_id))
 				return array();
-			// Get class name and foreign key
-			list($cls, $key) =
-				explode(":", static::$referenced_by[$fld] . ":");
+			// Get class name, foreign key, and default sort order
+			list($cls, $key, $srt) = explode(":", static::$referenced_by[$fld] . "::");
 			// If foreign key not explicitly given, derive from class name
 			if (!$key)
-				$key = strtolower(preg_replace(
-					'/(?<!^)[A-Z]/', '_$0', get_called_class())) . '_id';
+				$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', get_called_class())) . '_id';
+			// If default sort order not given, set to null
+			if (!$srt)
+				$srt = null;
 			// Find documents related to this table
-			return $cls::find_all(array("`$key`=?", $this->_id));
+			return $cls::find_all(array("`$key`=?", $this->_id), $srt);
 		}
 
 		// Attempt to retrieve invalid property
