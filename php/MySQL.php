@@ -280,7 +280,7 @@ abstract class MySQLModel {
 
 		// If foreign key not explicitly given, derive from class name
 		if (!$key)
-			$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
+			$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', get_called_class())) . '_id';
 
 		// If default sort order is not explicitly given, set to null
 		if (!$srt)
