@@ -210,14 +210,20 @@ abstract class MongoModel {
 		if (!isset($this->_id))
 			return array();
 
-		// Get class name, field name, and default sort order.
-		list($cls, $fld, $srt) = explode(':', static::$referenced_by[$fcn] .
-			':' . strtolower(preg_replace(
-				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . '::', 3);
+		// Get class name, foreign property, and default sort order
+		list($cls, $fld, $srt) = explode(":", static::$referenced_by[$fcn] . "::");
+
+		// If foreign property not explicitly given, derive from class name
+		if (!$fld)
+			$fld = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', get_called_class()));
+
+		// If default sort order is not explicitly given, set to null
+		if (!$srt)
+			$srt = null;
 
 		// Optional arguments to this function are query, sort and projection.
 		$qry = count($args) > 0 && $args[0] !== null ? $args[0] : [];
-		$srt = count($args) > 1 ? $args[1] : ($srt ? $srt : null);
+		$srt = count($args) > 1 ? $args[1] : $srt;
 		$prj = count($args) > 2 ? $args[2] : null;
 
 		// Query must be an array. Other arguments may be array or string and
