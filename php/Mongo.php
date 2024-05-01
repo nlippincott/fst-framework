@@ -149,12 +149,19 @@ abstract class MongoModel {
 	 * derived classes that link to the current document. Key values are
 	 * used as virtual properties and functions of objects (via the __get
 	 * and __call magic methods) to retrieve all documents of another
-	 * collection that have references to this document. Values of the
-	 * associative array are either a class name or a class name followed
-	 * by a colon (":") followed by the name of the property in
-	 * that class that references a document from this class. If the name of
-	 * the property is not provided, it is assumed to be the name of this
-	 * class, converted to lowercase.
+	 * collection that reference this document.
+	 
+	 * Values of the associative array include at least one or as many as
+	 * three components separated by colons. The first (required) component
+	 * is the class name of the document which references this document. The
+	 * second (optional) component is the name of the virtual property in
+	 * the related document. If the property name is not provided, default
+	 * rules for class-to-property name rules apply. The third (optional)
+	 * component is the default sort order of the related documents.
+	 *
+	 * Sort order, if specified, must be given as a comma-separated list
+	 * of attributes. Attribute names may be preceeded by a minus sign to
+	 * indicating a descending sort by that attribute.
 	 */
 	static protected $referenced_by = array();
 
@@ -203,16 +210,14 @@ abstract class MongoModel {
 		if (!isset($this->_id))
 			return array();
 
-		// Get class name and field name that references this class.
-//		list($cls, $fld, $tmp) = explode(':', static::$referenced_by[$fcn] .
-//			':' . strtolower(get_called_class()) . ':', 3);
-		list($cls, $fld, $tmp) = explode(':', static::$referenced_by[$fcn] .
+		// Get class name, field name, and default sort order.
+		list($cls, $fld, $srt) = explode(':', static::$referenced_by[$fcn] .
 			':' . strtolower(preg_replace(
-				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . ':', 3);
+				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . '::', 3);
 
 		// Optional arguments to this function are query, sort and projection.
 		$qry = count($args) > 0 && $args[0] !== null ? $args[0] : [];
-		$srt = count($args) > 1 ? $args[1] : null;
+		$srt = count($args) > 1 ? $args[1] : ($srt ? $srt : null);
 		$prj = count($args) > 2 ? $args[2] : null;
 
 		// Query must be an array. Other arguments may be array or string and
