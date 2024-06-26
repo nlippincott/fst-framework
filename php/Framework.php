@@ -132,7 +132,7 @@ class Framework {
 	 * 
 	 * @param string $opt Option name
 	 * @param mixed $value Set value for option (optional)
-	 * @return string Option value
+	 * @return mixed Option value
 	 */
 	public static function config ($opt, $value=null) {
 		if (isset($value))
