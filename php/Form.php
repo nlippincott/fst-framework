@@ -87,6 +87,31 @@ class Form {
 	 * is the name of the control and must be unique with respect to the
 	 * form. The second is optional and is typically the label, but may
 	 * be used for another purpose, depending on the control.
+	 * 
+	 * The following function names and their corresponding FormControl classes
+	 * are automatically registered by the Framework:
+	 *
+	 * |-----------|----------------------|
+	 * | date      | FormDateControl      |
+	 * | email     | FormEmailControl     |
+	 * | file      | FormFileControl      |
+	 * | hidden    | FormHiddenControl    |
+	 * | image     | FormImageControl     |
+	 * | money     | FormMoneyControl     |
+	 * | multiple  | FormMultipleControl  |
+	 * | note      | FormNoteControl      |
+	 * | number    | FormNumberControl    |
+	 * | option    | FormOptionControl    |
+	 * | password  | FormPasswordControl  |
+	 * | search    | FormSearchControl    |
+	 * | selection | FormSelectionControl |
+	 * | submit    | FormSubmitControl    |
+	 * | text      | FormTextControl      |
+	 * | textarea  | FormTextareaControl  |
+	 * | time      | FormTimeControl      |
+	 * | url       | FormURLControl       |
+	 * | username  | FormUsernameControl  |
+	 * |-----------|----------------------|
 	 *
 	 * @param string $fcn Method name
 	 * @param array $args Method arguments
@@ -236,7 +261,6 @@ class Form {
 	 * Produces the HTML code for the opening form tag, with an optional
 	 * class to be added.
 	 *
-	 * Produce the HTML FORM tag.
 	 * Typically called by an application when it is undesirable to use the
 	 * default form HTML code. Content generators that need full control over
 	 * how the form is produced should use this function to generate the
