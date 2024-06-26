@@ -91,7 +91,7 @@ class FormImageUpload extends FormFileUpload {
 	 * Returns false if called for an SVG image upload.
 	 *
 	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @return resource Image resource
+	 * @return \GdImage Image resource
 	 */
 	public function image ($dim=false) {
 		switch ($this->imagetype) {
