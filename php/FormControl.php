@@ -112,10 +112,10 @@ abstract class FormControl {
 	/**
 	 * Get submitted form data for this control.
 	 *
-	 * Returns for data that was submitted within the form for this control.
+	 * Returns the data value that was submitted via the form for this control.
 	 * If data was provided for the control, a string is returned and that
-	 * string is trimmed (leading and trailing spaces removed). If not data
-	 * was submitted, return null unless FormControl::notnull was called in
+	 * string is trimmed (leading and trailing spaces removed). If no data
+	 * was submitted, returns null unless FormControl::notnull was called in
 	 * which case an empty string is returned.
 	 *
 	 * @return mixed Form data value (trimmed)
@@ -180,7 +180,7 @@ abstract class FormControl {
 	 * informational purposes, but its value is not included in the form's
 	 * input data.
 	 *
-	 * A control may be designated as informational by calling this function.
+	 * A control may be designated as informational by calling this method.
 	 * However, controls derived from this class may be informational by
 	 * their nature, in which case the control's constructor will designate
 	 * the control as informational (e.g. FormNoteControl).
@@ -197,7 +197,7 @@ abstract class FormControl {
 	 * Sets the initial value for the control.
 	 *
 	 * Derived classes must override this function to set up the control's
-	 * value as the given value. The derived function must return the current
+	 * value as the given value. The derived method must return the current
 	 * FormControl object.
 	 *
 	 * @param mixed $val Initial control value
