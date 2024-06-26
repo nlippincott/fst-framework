@@ -72,7 +72,7 @@ abstract class Controller {
 	 *
 	 * @todo Fix the description, not correct for position argument
 	 * @param int $idx Index of the controller argument
-	 * @return string Argument value, or null if no argument
+	 * @return string Argument value (empty string if no argument)
 	 */
 	final protected function arg ($idx) { return Framework::arg($idx); }
 
@@ -110,7 +110,7 @@ abstract class Controller {
 	 * Creates a form to be used with the controller's form handler. The
 	 * handler name is used to determine controller methods that will be
 	 * automatically called by the form handler. The ID is used as both the
-	 * ID in the HTML DOM (when output as content) and as the member variable
+	 * ID in the HTML DOM (when generated in page content) and as the member variable
 	 * name within the controller. If an ID is not supplied, the handler name
 	 * is used.
 	 * 
@@ -182,7 +182,7 @@ abstract class Controller {
 	 * Exit with a 404 Not Found header.
 	 *
 	 * Sends a 404 Not Found header to the client and exits. This may be
-	 * called from the controller's init function to indicate that the
+	 * called from the controller's init method to indicate that the
 	 * resource requested was not found. The end user will experience
 	 * a 404 error, and no output from the application.
 	 */
@@ -193,7 +193,7 @@ abstract class Controller {
 	 *
 	 * Sends header to change the location to the given URI. If the URI is
 	 * absolute or includes a protocol, it is used as-is. Otherwise, it is
-	 * converted to an absolute URI via the uri function.
+	 * converted to an absolute URI via the uri method.
 	 *
 	 * The controller exits immediately after sending the header.
 	 *
