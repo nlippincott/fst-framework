@@ -75,11 +75,11 @@ abstract class CalendarEngine extends TableEngine {
 	/**
 	 * Get content for a given date.
 	 *
-	 * Derived classes must override this function to return the HTML content
+	 * Derived classes must override this method to return the HTML content
 	 * for the given date. The value returned will be sent directly to the
 	 * output of the calendar table.
 	 * 
-	 * @param string $dt Date
+	 * @param string $dt Date in YYYY-MM-DD format
 	 * @return string Table cell content for the given date
 	 */
 	abstract protected function date ($dt);
@@ -87,7 +87,7 @@ abstract class CalendarEngine extends TableEngine {
 	/**
 	 * Get cell class string.
 	 *
-	 * Derived classes may override this function to return the
+	 * Derived classes may override this method to return the
 	 * class attributes
 	 * to be applied to the cell for the given date. If a string is returned,
 	 * that string is included in the class attribute of the td element.
@@ -239,8 +239,8 @@ abstract class CalendarEngine extends TableEngine {
 	/**
 	 * Show month in calenar heading.
 	 *
-	 * Derived classes may override this function to override its default
-	 * behavior. If this function returns true (which is the default),
+	 * Derived classes may override this method to override its default
+	 * behavior. If this method returns true (which is the default),
 	 * the engine will generate the month
 	 * name and 4-digit year in the heading, in addition to the names of the
 	 * days of the week. If return false, only headings for the days of the
@@ -253,8 +253,8 @@ abstract class CalendarEngine extends TableEngine {
 	/**
 	 * Show dates outside the current month.
 	 *
-	 * Derived classes may override this function to override its default
-	 * behavior. If this function returns true, the engine will generate
+	 * Derived classes may override this method to override its default
+	 * behavior. If this method returns true, the engine will generate
 	 * cells for dates in the previous month in the first week and dates for
 	 * the next month in the last week, as opposed to empty cells. If returns
 	 * false (which is the default), only dates for the month being generated
@@ -268,8 +268,8 @@ abstract class CalendarEngine extends TableEngine {
 	/**
 	 * Start weeks on Monday instead of Sunday.
 	 *
-	 * Derived classes may override this function to override its default
-	 * behavior. If this function returns true, weeks will begin on Monday
+	 * Derived classes may override this method to override its default
+	 * behavior. If this method returns true, weeks will begin on Monday
 	 * instead of Sunday. If returns false (which is the default), weeks
 	 * will begin on Sunday.
 	 *
