@@ -129,7 +129,7 @@ class FormDateControl extends FormInputControl {
 	}
 
 	/**
-	 * Cause input type as text instead of search.
+	 * Cause input type as text instead of date.
 	 *
 	 * By default, the HTML input control generated is of type "date".
 	 * Call this function to cause the control to be generated with
