@@ -41,9 +41,9 @@ class FormImageControl extends FormFileControl {
 	/**
 	 * Get file(s) submitted through this control.
 	 *
-	 * This function returns a FormImageUpload object for the uploaded file.
+	 * This method returns a FormImageUpload object for the uploaded file.
 	 * If the multiple option is used, an array of FormImageUpload objects is
-	 * returned. If no file is uploaded, this function returns false if the
+	 * returned. If no file is uploaded, this method returns false if the
 	 * multiple option is not used, or an empty array if the multiple option
 	 * is used.
 	 *
@@ -60,7 +60,7 @@ class FormImageControl extends FormFileControl {
 	/**
 	 * Get error message associated with this control.
 	 *
-	 * This function extends the error handling provided by FormFileControl.
+	 * This method extends the error handling provided by FormFileControl.
 	 * It ensures that, if a file was uploaded, the files does actually
 	 * contain an image.
 	 *
