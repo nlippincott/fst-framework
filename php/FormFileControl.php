@@ -67,7 +67,7 @@ class FormFileControl extends FormInputControl {
 	 * Get the HTML input tag for the control.
 	 *
 	 * This varies from the parent class in that if this control is designated
-	 * as a multipe file input, the name attribute has "[]" appended to it.
+	 * as a multiple file input, the name attribute has "[]" appended to it.
 	 *
 	 * @return string HTML code for input tag
 	 */
@@ -82,16 +82,17 @@ class FormFileControl extends FormInputControl {
 	/**
 	 * Get file(s) submitted through this control.
 	 *
-	 * This function returns a FormFileUpload object for the uploaded file.
+	 * This method returns a FormFileUpload object for the uploaded file.
 	 * If the multiple option is used, an array of FormFileUpload objects is
 	 * returned. If no file is uploaded, this function returns false if the
 	 * multiple option is not used, or an empty array if the multiple option
 	 * is used.
 	 *
-	 * The $type parameter is used internally, allowing derived
-	 * classes to use this method's logic to return a different type
-	 * (specifically, FormImageControl).
-	 *
+	 * This $type parameter is intended for internal use only, and is used
+	 * to change the data type of objects returned by this method. Class
+	 * FormImageControl (which is derived from this class) returns objects
+	 * of type FormImageUpload (which is derived from FormFileUpload).
+	 * 
 	 * @param string $type Class name for returned object(s)
 	 * @retval mixed See description
 	 */
@@ -170,7 +171,7 @@ class FormFileControl extends FormInputControl {
 	 * Indicate allowable upload file types.
 	 *
 	 * Sets the allowable types that are permissable for this file upload.
-	 * File type is (blindly) determined by the file name extension. By
+	 * The file type is (blindly) determined by the file name extension. By
 	 * default, there are no restrictions on the type/extension. The
 	 * extensions provided must not include the dot.
 	 *
