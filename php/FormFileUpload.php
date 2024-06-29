@@ -17,12 +17,14 @@ namespace FST;
  * object. The FormFileControl object will return objects of this type
  * only upon a successful file upload.
  *
- * Properties available for reading are:
- * - name - Original name of the file on the client machine
- * - extension - Extension of original file on client machine (lowercased)
- * - type - Mime type of the file
- * - size - Size of the file
- * - tmp_name - Temporary file name on server
+ * The following read-only properties available for objects of this type:
+ * - name, original name of the file on client machine
+ * - filename, original file name without extension
+ * - extension, original file name extension (no dot)
+ * - type, mime type of the file, if provided by browser
+ * - size, size of uploaded file in bytes
+ * - tmp_name, temporary filename as stored on the server
+ * - imagetype, image type (only for image uploads via FormImageUpload)
  */
 class FormFileUpload {
 
@@ -56,15 +58,10 @@ class FormFileUpload {
 
 	/**
 	 * Gets file upload field information.
-	 *
-	 * Properties that may be retrieved using this method are:
-	 *	- name, original name of the file on client machine
-	 *	- filename, original file name without extension
-	 *	- extension, original file name extension (no dot)
-	 *	- type, mime type of the file, if provided by browser
-	 *	- size, size of uploaded file in bytes
-	 *	- tmp_name, temporary filename as stored on the server
-	 *	- imagetype, image type (only for image uploads via FormImageUpload)
+	 * 
+	 * This method makes the following properties available for reading:
+	 * name, filename, extension, type, size, tmp_name,
+	 * imagetype (only for image uploads via FormImageUpload).
 	 *
 	 * @param string $name Information field name
 	 * @return mixed Information field value
