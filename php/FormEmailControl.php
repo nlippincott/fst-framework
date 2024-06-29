@@ -35,7 +35,7 @@ class FormEmailControl extends FormTextControl {
 	 * Cause input type as text instead of email.
 	 *
 	 * By default, the HTML input control generated is of type "email".
-	 * Call this function to cause the control to be generated with
+	 * Call this method to cause the control to be generated with
 	 * type "text".
 	 *
 	 * @return object This FormControl object
