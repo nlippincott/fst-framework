@@ -267,6 +267,6 @@ class FormImageUpload extends FormFileUpload {
 	 * @return string Image source string
 	 */
 	public function src ($dim=false) {
-		return "data:image/{$this->type};base64," . $this->base64($dim);
+		return "data:{$this->type};base64," . $this->base64($dim);
 	}
 }
