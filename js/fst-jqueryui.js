@@ -7,8 +7,8 @@
  * that interact with the framework.
  */
 
-// FST Application Framework, Version 5.5
-// Copyright (c) 2004-23, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
