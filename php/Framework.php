@@ -330,7 +330,7 @@ class Framework {
 					'controllers'=>array(), // Controller map
 					'copyright'=>self::COPYRIGHT_STD, // FST Copyright comments
 					'default'=>true, // Enable default controller selection
-					'debug'=>false, // Use false for production
+					'debug'=>null, // From .env file by default
 					'debug_error_reporting'=>E_ALL,
 						// Error reporting level, when debug is set
 					'env'=>'.env', // Location of .env file, or array or false
@@ -390,17 +390,21 @@ class Framework {
 	/** @ignore */
 	protected function __construct () {
 
-		// Set error reporting, if debug mode is set
-		if (self::config('debug')) {
-			error_reporting(self::config('debug_error_reporting'));
-			ini_set('display_errors', 1);
-		}
-
 		// Load environment variables
 		self::$_env = $_ENV;
 		if (self::config('env'))
 			foreach (is_array(self::config('env')) ? self::config('env') : [ self::config('env') ] as $env)
 				self::$_env = array_merge(self::$_env, parse_ini_file($env, true));
+
+		// If 'debug' option not set in FST config, use DEBUG from .env file if set
+		if (self::config('debug') === null && isset(self::$_env['DEBUG']))
+			self::config('debug', self::$_env['DEBUG']);
+
+		// Set error reporting, if debug mode is set
+		if (self::config('debug')) {
+			error_reporting(self::config('debug_error_reporting'));
+			ini_set('display_errors', 1);
+		}
 
 		// Register form control methods
 		require 'fst-framework.php';
