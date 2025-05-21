@@ -66,7 +66,7 @@ class FormLabel {
 	 * not instantiated directly, call FormControl::label to retrieve
 	 * FormLabel object, then call this method.
 	 *
-	 * @return object The FormControl object associated with this label (for chaining)
+	 * @return FormControl The FormControl object associated with this label (for chaining)
 	 */
 	public function html () {
 		$this->html = true;

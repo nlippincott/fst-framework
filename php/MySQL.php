@@ -116,7 +116,7 @@ final class MySQL {
 	 *
 	 * @param mixed $sql An SQL query
 	 * @param string $alias Database alias (optional)
-	 * @return mixed Query results
+	 * @return object[]|int Query results
 	 */
 	static public function query ($sql, $alias=null) {
 		try {
@@ -150,7 +150,7 @@ final class MySQL {
 	 * object is returned.
 	 *
 	 * @param string $alias Database alias (optional)
-	 * @return object PDO database object
+	 * @return \PDO PDO database object
 	 */
 	static public function _db ($alias=null) {
 		if (!$alias && static::$_database_default)
@@ -347,6 +347,7 @@ abstract class MySQLModel {
 			if (!$key)
 				$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
 			// Get document using find, and return it
+			/** @disregard P1014 Undefined type */
 			$doc = $cls::find_one(array('`' . $cls::$key . '`=?', $this->$key));
 			// If document found, save in $_refs
 			if ($doc)
@@ -418,6 +419,7 @@ abstract class MySQLModel {
 					throw new UsageException(
 						"Inconsistent object assigned to referenced field");
 				// Set foreign key in this document
+				/** @disregard P1014 Undefined type */
 				$this->$fkey = $val->{$cls::$key};
 			}
 			else if (is_scalar($val)) {
@@ -522,7 +524,7 @@ abstract class MySQLModel {
 	 * may be set directly in this method.
 	 *
 	 * @param array $rec Associative array of field values from database
-	 * @return array Associative array of field values for the object model
+	 * @return mixed[] Associative array of field values for the object model
 	 */
 	protected function read ($rec) { return $rec; }
 
@@ -627,7 +629,7 @@ abstract class MySQLModel {
 	 * of actual values to be written (by either INSERT or UPDATE).
 	 *
 	 * @param array $rec Associative array of field values from the model
-	 * @return array Associative array of field values for the database
+	 * @return mixed[] Associative array of field values for the database
 	 */
 	protected function write ($rec) { return $rec; }
 
@@ -664,7 +666,7 @@ abstract class MySQLModel {
 	 * 
 	 * @param string $fld Field name
 	 * @param mixed $whr WHERE query clause as string or array (optional)
-	 * @return array Array of distinct values for the given field
+	 * @return mixed[] Array of distinct values for the given field
 	 */
 	static public function distinct ($fld, $whr=null) {
 
@@ -702,7 +704,7 @@ abstract class MySQLModel {
 	 * thrown.
 	 * 
 	 * @param mixed $id Primary key value
-	 * @return object Object of the called class
+	 * @return MySQLModel Object of the called class
 	 */
 	static public function find ($id) {
 		$doc = static::find_one(array('`' . static::$key . '`=?', $id));
@@ -732,11 +734,11 @@ abstract class MySQLModel {
 	 * @param string $srt Order or record retrieval (optional)
 	 * @param int $skp Number of records to skip (optional)
 	 * @param string $cols Columns to be included (optional)
-	 * @return mixed Object of called class, or false
+	 * @return MySQLModel|null Object of called class, or null
 	 */
 	static public function find_one ($whr, $srt=null, $skp=null, $cols=null) {
 		$objs = static::find_all($whr, $srt, 1, $skp, $cols);
-		return count($objs) ? $objs[0] : false;
+		return count($objs) ? $objs[0] : null;
 	}
 
 	/**
@@ -755,7 +757,7 @@ abstract class MySQLModel {
 	 * @param int $lim Maximum number of records to return (optional)
 	 * @param int $skp Number of records to skip (optional)
 	 * @param string $cols Columns to be included (optional)
-	 * @return array Array of objects represeting requested records
+	 * @return MySQLModel[] Array of objects represeting requested records
 	 */
 	static public function find_all (
 			$whr=null, $srt=null, $lim=null, $skp=null, $cols=null) {

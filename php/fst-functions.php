@@ -174,7 +174,7 @@ function _config ($opt, $value=null)
  *
  * This is a convenience function for returning current FST controller.
  * 
- * @return object The Controller object for the current request
+ * @return Controller The Controller object for the current request
  */
 function _ctrl () { return FST\Framework::ctrl(); }
 
@@ -191,7 +191,7 @@ function _ctrlname () { return FST\Framework::ctrl()->ctrl(); }
  * Convenience function, calls Framework::env.
  *
  * @param string $var Environment variable name, or null for all
- * @return mixed Environment variable value
+ * @return string|string[] Environment variable value
  */
 function _env ($var=null) { return FST\Framework::env($var); }
 

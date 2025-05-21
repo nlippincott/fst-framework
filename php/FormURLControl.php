@@ -38,7 +38,7 @@ class FormURLControl extends FormTextControl {
 	 * Call this function to cause the control to be generated with
 	 * type "text".
 	 *
-	 * @return object This FormControl object
+	 * @return FormURLControl This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

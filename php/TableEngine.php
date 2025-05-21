@@ -34,7 +34,7 @@ abstract class TableEngine {
 	 * for table generation. One table row is generated for each element of
 	 * the returned array.
 	 *
-	 * @return array Array of row items
+	 * @return mixed[] Array of row items
 	 */
 	abstract protected function rows ();
 
@@ -45,7 +45,7 @@ abstract class TableEngine {
 	 * for table generation. One table column is generated for each element of
 	 * the returned array.
 	 *
-	 * @return array Array of column items
+	 * @return mixed[] Array of column items
 	 */
 	abstract protected function columns ();
 
@@ -70,7 +70,7 @@ abstract class TableEngine {
 	 * the attributes, the value returned from this function overrides any
 	 * value returned from table_class.
 	 * 
-	 * @return array Associative of attribute/value pairs
+	 * @return string[] Associative of attribute/value pairs
 	 */
 	protected function table_attr () { return array(); }
 
@@ -124,7 +124,7 @@ abstract class TableEngine {
 	 * value returned from head_class.
 	 *
 	 * @param mixed $col One item from the columns array
-	 * @return array Associative of attribute/value pairs
+	 * @return string[] Associative of attribute/value pairs
 	 */
 	protected function head_attr ($col) { return array(); }
 
@@ -202,7 +202,7 @@ abstract class TableEngine {
 	 *
 	 * @param mixed $row One item from the rows array
 	 * @param mixed $col One item from the columns array
-	 * @return array Associative array of attribute/value pairs
+	 * @return string[] Associative array of attribute/value pairs
 	 */
 	protected function cell_attr ($row, $col) { return array(); }
 
@@ -269,7 +269,7 @@ abstract class TableEngine {
 	 * value returned from foot_class.
 	 *
 	 * @param mixed $col One item from the columns array
-	 * @return array Associative of attribute/value pairs
+	 * @return string[] Associative of attribute/value pairs
 	 */
 	protected function foot_attr ($col) { return array(); }
 

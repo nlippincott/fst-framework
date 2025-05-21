@@ -28,7 +28,7 @@ abstract class ListEngine {
 	 * items for list generation. One list item is generated for each element
 	 * in the returned array.
 	 *
-	 * @return array Array of list items
+	 * @return mixed[] Array of list items
 	 */
 	abstract protected function items ();
 
@@ -51,7 +51,7 @@ abstract class ListEngine {
 	 * pairs of attributes to be included in the top-level UL or OL tag
 	 * that is generated when list output is produced.
 	 *
-	 * @return array Associative array of name/value pairs
+	 * @return string[] Associative array of name/value pairs
 	 */
 	protected function list_attr () { return array(); }
 
@@ -83,7 +83,7 @@ abstract class ListEngine {
 	 * Derived classes may override this function to provide name/value
 	 * pairs of attributes to be included in the LI tag for the given item.
 	 *
-	 * @return array Associative array of name/value pairs
+	 * @return string[] Associative array of name/value pairs
 	 */
 	protected function item_attr ($item) { return array(); }
 

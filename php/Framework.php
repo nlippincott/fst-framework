@@ -116,7 +116,7 @@ class Framework {
 	 * Returns an array of the controller arguments, relative to the
 	 * application root.
 	 *
-	 * @return array Controller arguments
+	 * @return string[] Controller arguments
 	 */
 	public static function argv () { return self::$_argv; }
 
@@ -191,7 +191,7 @@ class Framework {
 	 * returned.
 	 *
 	 * @param string $var Environment variable name (optional)
-	 * @return mixed|array Environment variable value
+	 * @return string|string[] Environment variable value
 	 */
 	public static function env ($var=null) {
 		return $var ? (isset(self::$_env[$var]) ? self::$_env[$var] : null) : self::$_env;

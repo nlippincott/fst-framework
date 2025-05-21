@@ -67,7 +67,7 @@ class FormFileUpload {
 	 *	- imagetype, image type (only for image uploads via FormImageUpload)
 	 *
 	 * @param string $name Information field name
-	 * @return mixed Information field value
+	 * @return string|int Information field value
 	 */
 	public function __get ($name) {
 		if (!isset($this->fileinfo[$name]))

@@ -93,7 +93,7 @@ abstract class Controller {
 	 * components. If arguments have been shifted, the number of shifted
 	 * arguments are removed from the vector.
 	 * 
-	 * @return array Array of controller argument strings
+	 * @return string[] Array of controller argument strings
 	 */
 	final protected function argv () { return Framework::argv(); }
 

@@ -90,7 +90,7 @@ class Form {
 	 *
 	 * @param string $fcn Method name
 	 * @param array $args Method arguments
-	 * @return object A FormControl object
+	 * @return FormControl A FormControl object
 	 */
 	public function __call ($fcn, $args) {
 		if (array_key_exists($fcn, self::$controls) === false)
@@ -148,10 +148,10 @@ class Form {
 	 * Get named form control object.
 	 *
 	 * Retrieves the form control object with the given name. If no control
-	 * with the given name exists, returns false.
+	 * with the given name exists, returns null.
 	 *
 	 * @param string $name Field name
-	 * @return mixed FormControl object or false
+	 * @return FormControl|null FormControl object or null
 	 */
 	public function ctrl ($name)
 		{ return isset($this->fld[$name]) ? $this->fld[$name] : false; }
@@ -297,7 +297,7 @@ class Form {
 	 * are indicated as informational.
 	 *
 	 * @param array $fields Array of field names (optional, or false)
-	 * @return array Name/value pairs of submitted form values
+	 * @return mixed[] Name/value pairs of submitted form values
 	 */
 	public function data ($fields=false) {
 		$data = array();
@@ -341,7 +341,7 @@ class Form {
 	 * Returns an associative array of error messages for the form. The
 	 * array is indexed by field name.
 	 *
-	 * @return array Name/value pairs of field names and error messages
+	 * @return string[] Name/value pairs of field names and error messages
 	 */
 	public function errors () { return $this->error; }
 

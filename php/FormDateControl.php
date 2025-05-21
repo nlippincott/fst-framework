@@ -64,7 +64,7 @@ class FormDateControl extends FormInputControl {
 	/**
 	 * Get error message.
 	 *
-	 * @return mixed Error message as a string, or false if no error
+	 * @return string|false Error message as a string, or false if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -82,7 +82,7 @@ class FormDateControl extends FormInputControl {
 	 * Set initial date value.
 	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @return object This FormControl object
+	 * @return FormDateControl This FormControl object
 	 */
 	public function init ($val) {
 		if ($val) {
@@ -104,7 +104,7 @@ class FormDateControl extends FormInputControl {
 	 * Set maximum date input value.
 	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @return object This FormControl object
+	 * @return FormDateControl This FormControl object
 	 */
 	public function max ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -118,7 +118,7 @@ class FormDateControl extends FormInputControl {
 	 * Set minimum date input value.
 	 *
 	 * @param mixed $val DateTime object, or date string
-	 * @return object This FormControl object
+	 * @return FormDateControl This FormControl object
 	 */
 	public function min ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -135,7 +135,7 @@ class FormDateControl extends FormInputControl {
 	 * Call this function to cause the control to be generated with
 	 * type "text".
 	 *
-	 * @return object This FormControl object
+	 * @return FormDateControl This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

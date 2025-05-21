@@ -39,7 +39,7 @@ class FormPhoneControl extends FormTextControl {
 	 * submitted, return null unless FormControl::notnull was called in which
 	 * case an empty string is returned.
 	 *
-	 * @return mixed Phone number, digits only
+	 * @return string|null Phone number, digits only
 	 */
 	public function data () {
 		$data = parent::data();
@@ -55,7 +55,7 @@ class FormPhoneControl extends FormTextControl {
 	 * value is not 10 digits, the value is used as is.
 	 *
 	 * @param string $val Initial phone number value
-	 * @return object This FormControl object
+	 * @return FormPhoneControl This FormControl object
 	 */
 	public function init ($val) {
 		if (preg_match('/^\d{10}$/', $val))

@@ -52,7 +52,7 @@ final class Mongo {
 	 * Specifies the database alias to be used to access the given database.
 	 * If the database name is not provided, the given alias is used also
 	 * as the database name. The first database defined with this function
-	 * becomes the default database. MongoDoc classes will indicate a
+	 * becomes the default database. MongoModel classes will indicate a
 	 * database alias to specify the database in which the documents
 	 * reside.
 	 *
@@ -73,7 +73,7 @@ final class Mongo {
 	 * Get database name.
 	 *
 	 * Used to retrieve actual database name for a given alias name. This
-	 * function is provided for usage by the MongoDoc base class.
+	 * function is provided for usage by the MongoModel base class.
 	 *
 	 * @param $alias string Database alias
 	 * @return string Database name
@@ -90,9 +90,9 @@ final class Mongo {
 	 * Get database manager object.
 	 *
 	 * Used to retrieve the database manager object. This function is provided
-	 * for usage by the MongoDoc base class.
+	 * for usage by the MongoModel base class.
 	 *
-	 * @return object A \\MongoDB\\Manager object
+	 * @return \MongoDB\Manager A \\MongoDB\\Manager object
 	 */
 	static public function _mgr () {
 		if (!isset(static::$_manager))
@@ -110,13 +110,13 @@ final class Mongo {
  * collection in which documents reside (or collection name may be derived
  * from the class name).
  *
- * The MongoDoc::find static method is used to create objects of this class
+ * The MongoModel::find static method is used to create objects of this class
  * to represent individual documents from the collection. Instantiation of a
  * new object of the derived class represents creation of a new document.
  * Document properties correspond to properties of the object. Each object
  * has an id property, corresponding to the string representation of the
- * document id. This base class includes methods MongoDoc::save and
- * MongoDoc::delete for saving and removing documents respectively.
+ * document id. This base class includes methods MongoModel::save and
+ * MongoModel::delete for saving and removing documents respectively.
  */
 abstract class MongoModel {
 
@@ -455,7 +455,7 @@ abstract class MongoModel {
 	 * may be set directly in this method.
 	 *
 	 * @param array $rec Associative array of field values from database
-	 * @return array Associative array of field values for the object model
+	 * @return mixed[] Associative array of field values for the object model
 	 */
 	protected function read ($rec) { return $rec; }
 
@@ -545,7 +545,7 @@ abstract class MongoModel {
 	 * of actual values to be written (by either INSERT or UPDATE).
 	 *
 	 * @param array $rec Associative array of field values from the model
-	 * @return array Associative array of field values for the database
+	 * @return mixed[] Associative array of field values for the database
 	 */
 	protected function write ($rec) { return $rec; }
 
@@ -556,7 +556,7 @@ abstract class MongoModel {
 	 * aggregation are returned as an array of objects.
 	 *
 	 * @param array $pipeline A Mongo aggregation pipeline
-	 * @return array Aggregation results
+	 * @return mixed[] Aggregation results
 	 */
 	static public function aggregate ($pipeline) {
 		$cmd = new \MongoDB\Driver\Command([
@@ -630,7 +630,7 @@ abstract class MongoModel {
 	 *
 	 * @param string $fld Property name
 	 * @param array $qry Query for qualifying documents (optional)
-	 * @return array Array of distinct values
+	 * @return mixed[] Array of distinct values
 	 */
 	static public function distinct ($fld, $qry=false) {
 
@@ -652,7 +652,7 @@ abstract class MongoModel {
 	 * is thrown.
 	 *
 	 * @param string $id Id value
-	 * @return object Document object
+	 * @return MongoModel Document object
 	 */
 	static public function find ($id) {
 
@@ -692,11 +692,11 @@ abstract class MongoModel {
 	 * @param mixed $srt Property for sorting results (optional)
 	 * @param int $skp Number of leading documents to skip (optional)
 	 * @param mixed $prj Projection properties (optional)
-	 * @return mixed Document object or false
+	 * @return MongoModel|null Document object or null
 	 */
 	static public function find_one ($qry=null, $srt=null, $skp=null, $prj=null) {
 		$objs = static::find_all($qry, $srt, 1, $skp);
-		return count($objs) ? $objs[0] : false;
+		return count($objs) ? $objs[0] : null;
 	}
 
 	/**
@@ -733,7 +733,7 @@ abstract class MongoModel {
 	 * @param int $lim Limits number of documents retrieved (optional)
 	 * @param int $skp Number of leading document to skip (optional)
 	 * @param mixed $prj Projection properties (optional)
-	 * @return mixed Document object or array of document objects
+	 * @return MongoModel[] Array of document objects
 	 */
 	static public function find_all ($qry=null, $srt=null, $lim=null, $skp=null, $prj=null) {
 

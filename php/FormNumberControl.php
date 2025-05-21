@@ -44,7 +44,7 @@ class FormNumberControl extends FormTextControl {
 	/**
 	 * Allow decmial number input.
 	 *
-	 * @return object This FormControl object
+	 * @return FormNumberControl This FormControl object
 	 */
 	public function decimal ()
 		{ $this->decimal = true; $this->attr('step', 'any'); return $this; }
@@ -78,7 +78,7 @@ class FormNumberControl extends FormTextControl {
 	 * Set maximum input value.
 	 *
 	 * @param mixed $max Maximum value
-	 * @return object This FormControl object
+	 * @return FormNumberControl This FormControl object
 	 */
 	public function max ($max)
 		{ $this->max = $max; $this->attr('max', $max); return $this; }
@@ -87,7 +87,7 @@ class FormNumberControl extends FormTextControl {
 	 * Set minimum input value.
 	 * 
 	 * @param mixed $min Minimum value
-	 * @return object This FormControl object
+	 * @return FormNumberControl This FormControl object
 	 */
 	public function min ($min)
 		{ $this->min = $min; $this->attr('min', $min); return $this; }
@@ -95,7 +95,7 @@ class FormNumberControl extends FormTextControl {
 	/**
 	 * Allow negative number input.
 	 *
-	 * @return object This FormControl object
+	 * @return FormNumberControl This FormControl object
 	 */
 	public function negative () { $this->negative = true; return $this; }
 
@@ -105,7 +105,7 @@ class FormNumberControl extends FormTextControl {
 	 * This control generates an HTML input tag with type "number". Calling
 	 * this method causes the type to be generated as "text".
 	 *
-	 * @return object This FormControl object
+	 * @return FormNumberControl This FormControl object
 	 */
 	public function text () {
 		$this->attr('type', 'text');

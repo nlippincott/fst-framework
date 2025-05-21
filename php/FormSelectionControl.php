@@ -132,7 +132,7 @@ class FormSelectionControl extends FormControl {
 	 * Set initial value for the control.
 	 * 
 	 * @param mixed $val Initial value
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function init ($val) { $this->value = $val; return $this; }
 
@@ -174,7 +174,7 @@ class FormSelectionControl extends FormControl {
 	 * @param array $opt Array of control options
 	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
 	 * @param string $group Title for options group (optional)
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function options ($opt, $assoc=null, $group=null) {
 
@@ -239,7 +239,7 @@ class FormSelectionControl extends FormControl {
 	 * buttons.
 	 *
 	 * @param string $text Prompt text
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function prompt ($text) { $this->prompt = $text; return $this; }
 
@@ -252,7 +252,7 @@ class FormSelectionControl extends FormControl {
 	 * to "glue" them horizontally in the same form row.
 	 *
 	 * @param bool $glued Display-options-horizontally flag
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function radio ($glued=false)
 		{ $this->radio = true; $this->radio_glued = $glued; return $this; }
@@ -267,7 +267,7 @@ class FormSelectionControl extends FormControl {
 	 * Calling this function for a drop-down selection box has no effect.
 	 *
 	 * @param string $name Radio group name
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function radiogroup ($name)
 		{ $this->radio_group = $name; return $this; }
@@ -275,7 +275,7 @@ class FormSelectionControl extends FormControl {
 	/**
 	 * Set control as read-only.
 	 *
-	 * @return object This FormControl object
+	 * @return FormSelectionControl This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('disabled', 'disabled'); return $this; }

@@ -16,11 +16,11 @@ namespace FST;
 class FormTextControl extends FormInputControl {
 
 	/** @ignore */
-	protected $case = false;
+	protected $case = null;
 	/** @ignore */
-	protected $datalist = false;
+	protected $datalist = null;
 	/** @ignore */
-	protected $regex = false;
+	protected $regex = null;
 	/** @ignore */
 	protected $regex_msg = '';
 
@@ -79,7 +79,7 @@ class FormTextControl extends FormInputControl {
 	 * Set autocomplete options.
 	 * 
 	 * @param array $datalist Autocomplete strings
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function datalist ($datalist)
 		{ $this->datalist = $datalist; return $this; }
@@ -101,7 +101,7 @@ class FormTextControl extends FormInputControl {
 	 * Set maximim input length.
 	 * 
 	 * @param int $length Maximim input length
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function maxlength ($length)
 		{ $this->attr['maxlength'] = $length; return $this; }
@@ -110,7 +110,7 @@ class FormTextControl extends FormInputControl {
 	 * Set the control's placeholder text.
 	 * 
 	 * @param string $placeholder Placeholder text
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function placeholder ($placeholder)
 		{ $this->attr['placeholder'] = $placeholder; return $this; }
@@ -119,7 +119,7 @@ class FormTextControl extends FormInputControl {
 	 * Set input size.
 	 * 
 	 * @param int $size Size of input control
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function size ($size) { $this->attr['size'] = $size; return $this; }
 
@@ -133,7 +133,7 @@ class FormTextControl extends FormInputControl {
 	 *
 	 * @param string $regex Regular expression (PERL-compatible)
 	 * @param string $regex_msg Error message text
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function regex ($regex, $regex_msg) {
 		$this->regex = $regex;
@@ -147,7 +147,7 @@ class FormTextControl extends FormInputControl {
 	 * Indicates that the text input should be converted to lowercase.
 	 * Conversion is done when retrieving form data.
 	 *
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function tolower () { $this->case = 'lower'; return $this; }
 
@@ -157,7 +157,7 @@ class FormTextControl extends FormInputControl {
 	 * Indicates that the text input should be converted to uppercase.
 	 * Conversion is done when retrieving form data.
 	 *
-	 * @return object This FormControl object
+	 * @return FormTextControl This FormControl object
 	 */
 	public function toupper () { $this->case = 'upper'; return $this; }
 }

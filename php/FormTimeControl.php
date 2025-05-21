@@ -63,7 +63,7 @@ class FormTimeControl extends FormInputControl {
 	/**
 	 * Get error message.
 	 * 
-	 * @return mixed Error message, or empty string if no error
+	 * @return string Error message, or empty string if no error
 	 */
 	public function error () {
 		$msg = parent::error();
@@ -81,7 +81,7 @@ class FormTimeControl extends FormInputControl {
 	 * Set initial time value.
 	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @return object This FormControl object
+	 * @return FormTimeControl This FormControl object
 	 */
 	public function init ($val) {
 		if ($val) {
@@ -103,7 +103,7 @@ class FormTimeControl extends FormInputControl {
 	 * Set maximum time input value.
 	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @return object This FormControl object
+	 * @return FormTimeControl This FormControl object
 	 */
 	public function max ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -117,7 +117,7 @@ class FormTimeControl extends FormInputControl {
 	 * Set minimum time input value.
 	 * 
 	 * @param mixed $val DateTime object, or time string
-	 * @return object This FormControl object
+	 * @return FormTimeControl This FormControl object
 	 */
 	public function min ($val) {
 		if (!is_a($val, 'DateTime'))
@@ -131,7 +131,7 @@ class FormTimeControl extends FormInputControl {
 	 * Set the step value.
 	 *
 	 * @param int $step Step value, in minutes
-	 * @return object This FormControl object
+	 * @return FormTimeControl This FormControl object
 	 */
 	public function step ($step) {
 		if ((int)$step > 0) {
@@ -149,7 +149,7 @@ class FormTimeControl extends FormInputControl {
 	 * Call this function to cause the control to be generated with
 	 * type "text".
 	 *
-	 * @return object This FormControl object
+	 * @return FormTimeControl This FormControl object
 	 */
 	public function text () { $this->attr('type', 'text'); return $this; }
 }

@@ -76,7 +76,7 @@ class FormMoneyControl extends FormNumberControl {
 	 * is formatted with two decimal places and comma separators.
 	 *
 	 * @param string $val Initial value
-	 * @return object This FormControl object
+	 * @return FormMoneyControl This FormControl object
 	 */
 	public function init ($val) {
 		return parent::init($val === false || $val === null || $val === "" ?

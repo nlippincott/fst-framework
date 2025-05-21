@@ -61,7 +61,7 @@ class FormSubmitControl extends FormInputControl {
 	 * of the presentation layer to implement the cancel function.
 	 *
 	 * @param string $text Text to appear on cancel button
-	 * @return object This FormControl object
+	 * @return FormSubmitControl This FormControl object
 	 */
 	public function cancel ($text='Cancel')
 		{ $this->cancel = $text; return $this; }
@@ -84,7 +84,7 @@ class FormSubmitControl extends FormInputControl {
 	 *
 	 * @param string $ok Text for OK button
 	 * @param string $cancel Text for Cancel button
-	 * @return object This FormControl object
+	 * @return FormSubmitControl This FormControl object
 	 */
 	public function okcancel ($ok='OK', $cancel='Cancel')
 		{ $this->init($ok); $this->cancel($cancel); return $this; }

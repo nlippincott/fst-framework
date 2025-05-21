@@ -117,7 +117,7 @@ class FormFileControl extends FormInputControl {
 	/**
 	 * Get error message for this control.
 	 *
-	 * @return mixed Error message string, or false if no error
+	 * @return string|false Error message string, or false if no error
 	 */
 	public function error () {
 
@@ -158,7 +158,7 @@ class FormFileControl extends FormInputControl {
 	 *
 	 * Indicates that multiple files may be upload via this control.
 	 *
-	 * @return object This FormFile object
+	 * @return FormFileControl This FormFile object
 	 */
 	public function multiple () {
 		$this->attr('multiple', 'multiple');
@@ -176,7 +176,7 @@ class FormFileControl extends FormInputControl {
 	 *
 	 * @param string $ext Comma-separated list of allowable file extensions
 	 * @param string $extmsg Error message if upload extension does not match
-	 * @return object This FormControl object
+	 * @return FormFileControl This FormControl object
 	 */
 	public function type ($ext, $extmsg=false) {
 		$this->attr('data-fst-type', $ext);

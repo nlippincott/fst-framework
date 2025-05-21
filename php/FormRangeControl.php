@@ -65,7 +65,7 @@ class FormRangeControl extends FormInputControl {
 	 * Set maximum value for range.
 	 * 
 	 * @param int $max Maximum value
-	 * @return object This FormControl object
+	 * @return FormRangeControl This FormControl object
 	 */
 	public function max ($max) { $this->attr('max', (int)$max); return $this; }
 
@@ -73,7 +73,7 @@ class FormRangeControl extends FormInputControl {
 	 * Set minimum value for range.
 	 * 
 	 * @param int $min Minimum value
-	 * @return object This FormControl object
+	 * @return FormRangeControl This FormControl object
 	 */
 	public function min ($min) { $this->attr('min', (int)$min); return $this; }
 
@@ -81,7 +81,7 @@ class FormRangeControl extends FormInputControl {
 	 * Set step attribute.
 	 * 
 	 * @param int $step Step value
-	 * @return object This FormControl object
+	 * @return FormRangeControl This FormControl object
 	 */
 	public function step ($step)
 		{ $this->attr('step', (int)$step); return $this; }

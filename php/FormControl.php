@@ -80,7 +80,7 @@ abstract class FormControl {
 	 * Add class name to HTML class attribute.
 	 *
 	 * @param string $classname Class name
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function addClass ($classname) {
 		if (!isset($this->attr['class']))
@@ -121,8 +121,6 @@ abstract class FormControl {
 	 * @return mixed Form data value (trimmed)
 	 */
 	public function data () {
-//		return isset($_POST[$this->name()]) && $_POST[$this->name()] ?
-//			trim($_POST[$this->name()]) : $this->nodata;
 		return isset($_POST[$this->name()]) && $_POST[$this->name()] !== '' ?
 			trim($_POST[$this->name()]) : $this->nodata;
 	}
@@ -134,11 +132,10 @@ abstract class FormControl {
 	 * validation rules. This base implementation returns an error message
 	 * if a form value is required and no value has been submitted.
 	 *
-	 * @return mixed Error message as a string, or false if no error
+	 * @return string|false Error message as a string, or false if no error
 	 */
 	public function error () {
-		return $this->is_required() && $this->no_post_data() ?
-			'Value is required' : false;
+		return $this->is_required() && $this->no_post_data() ?  'Value is required' : false;
 	}
 
 	/**
@@ -149,7 +146,7 @@ abstract class FormControl {
 	 * to be generated inline with the previous form control.
 	 *
 	 * @param bool $glued Indicates if control is to be glued
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function glue ($glued=true) { $this->glued = $glued; return $this; }
 
@@ -161,7 +158,7 @@ abstract class FormControl {
 	 * in the same row and with the same label as the previous control.
 	 *
 	 * @param bool $grouped Indicates if control is to be grouped
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function group ($grouped = true)
 		{ $this->grouped = $grouped; return $this; }
@@ -189,7 +186,7 @@ abstract class FormControl {
 	 * FormControl::data), but that data is not included when Form::data
 	 * is called to retrieve all data values submitted for a form.
 	 *
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function info () { $this->informational = true; return $this; }
 
@@ -201,7 +198,7 @@ abstract class FormControl {
 	 * FormControl object.
 	 *
 	 * @param mixed $val Initial control value
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	abstract public function init ($val);
 
@@ -253,7 +250,7 @@ abstract class FormControl {
 	 * for the control.
 	 *
 	 * @param string $label Label text, if called to set the label (optional)
-	 * @return mixed FormLabel object, empty string, or this FormControl object
+	 * @return FormControl|FormLabel|null FormLabel object, this FormControl object, or null
 	 */
 	public function label ($label=null) {
 		if ($label !== null) {
@@ -282,7 +279,7 @@ abstract class FormControl {
 	 * data was entered into the control. Calling this function will cause
 	 * the control to return an empty string instead of null in such cases.
 	 *
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function notnull () { $this->nodata = ''; return $this; }
 
@@ -292,7 +289,7 @@ abstract class FormControl {
 	 * Classes derived from FormControl must override this method to indicate
 	 * that the control should be generated as read-only.
 	 *
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	abstract public function readonly ();
 
@@ -304,7 +301,7 @@ abstract class FormControl {
 	 * supplied for the control.
 	 *
 	 * @param bool $required Control value required flag
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function required ($required=true) {
 		$this->required = $required;
@@ -316,7 +313,7 @@ abstract class FormControl {
 	 * Remove class name from HTML class attribute.
 	 *
 	 * @param string $classname Class name
-	 * @return object This FormControl object
+	 * @return FormControl This FormControl object
 	 */
 	public function removeClass ($classname) {
 		if (isset($this->attr['class'])) {

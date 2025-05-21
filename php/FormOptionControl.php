@@ -66,7 +66,7 @@ class FormOptionControl extends FormInputControl {
 	/**
 	 * Set control as read-only.
 	 *
-	 * @return object This FormControl object
+	 * @return FormOptionControl This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('disabled', 'disabled'); return $this; }
@@ -75,7 +75,7 @@ class FormOptionControl extends FormInputControl {
 	 * Set control option text.
 	 * 
 	 * @param string $text Option text
-	 * @return object This FormControl object
+	 * @return FormOptionControl This FormControl object
 	 */
 	public function text ($text) { $this->text = $text; return $this; }
 }

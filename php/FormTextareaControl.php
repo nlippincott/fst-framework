@@ -48,7 +48,7 @@ class FormTextareaControl extends FormControl {
 	 * Set number of columns for control.
 	 * 
 	 * @param int $cols Number of columns
-	 * @return object This FormControl object
+	 * @return FormTextareaControl This FormControl object
 	 */
 	public function cols ($cols) { $this->attr['cols'] = $cols; return $this; }
 
@@ -56,7 +56,7 @@ class FormTextareaControl extends FormControl {
 	 * Set initial value for control.
 	 *
 	 * @param string $val Initial value
-	 * @return object This FormControl object
+	 * @return FormTextareaControl This FormControl object
 	 */
 	public function init ($val) { $this->value = $val; return $this; }
 
@@ -64,7 +64,7 @@ class FormTextareaControl extends FormControl {
 	 * Set the control's placeholder text.
 	 * 
 	 * @param string $placeholder Placeholder text
-	 * @return object This FormControl object
+	 * @return FormTextareaControl This FormControl object
 	 */
 	public function placeholder ($placeholder)
 		{ $this->attr['placeholder'] = $placeholder; return $this; }
@@ -72,7 +72,7 @@ class FormTextareaControl extends FormControl {
 	/**
 	 * Set control as read-only.
 	 * 
-	 * @return object This FormControl object
+	 * @return FormTextareaControl This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('readonly', 'readonly'); return $this; }
@@ -81,7 +81,7 @@ class FormTextareaControl extends FormControl {
 	 * Set number of rows for control.
 	 * 
 	 * @param int $rows Number of rows
-	 * @return object This FormControl object
+	 * @return FormTextareaControl This FormControl object
 	 */
 	public function rows ($rows) { $this->attr['rows'] = $rows; return $this; }
 }

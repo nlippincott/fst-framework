@@ -52,7 +52,7 @@ class FormImageControl extends FormFileControl {
 	 * FormImageUpload. This parameter is intended for internal use only.
 	 *
 	 * @param string $type Class name for returned object(s)
-	 * @return mixed FormImageUpload object or array of FormImageUpload objects
+	 * @return FormImageUpload|FormImageUpload[]|false FormImageUpload object or array of FormImageUpload objects
 	 */
 	public function data ($type='\FST\FormImageUpload')
 		{ return parent::data($type); }

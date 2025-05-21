@@ -113,7 +113,7 @@ class FormMultipleControl extends FormControl {
 	 * checkbox controls rather than the native multiple selection control.
 	 *
 	 * @param bool $check Generate as checkboxes (default true)
-	 * @return object This FormControl object
+	 * @return FormMultipleControl This FormControl object
 	 */
 	public function checkbox ($check=true)
 		{ $this->check = $check; return $this; }
@@ -125,7 +125,7 @@ class FormMultipleControl extends FormControl {
 	 * option is set, returns a string of the selected values separated by
 	 * newlines.
 	 *
-	 * @return mixed Array or string containing the selected values
+	 * @return string[]|string Array or string containing the selected values
 	 */
 	public function data () {
 		$val = isset($_POST[$this->name()]) ? $_POST[$this->name()] : array();
@@ -153,7 +153,7 @@ class FormMultipleControl extends FormControl {
 	 * the values supplied by any previous calls are discarded.
 	 *
 	 * @param mixed $val Initial value, or array of initial values
-	 * @return object This FormControl object
+	 * @return FormMultipleControl This FormControl object
 	 */
 	public function init ($val) {
 		if (is_array($val))
@@ -175,7 +175,7 @@ class FormMultipleControl extends FormControl {
 	 * newline characters and returned as a string.
 	 *
 	 * @param bool $implode Set data method to return imploded values
-	 * @return object This FormControl object
+	 * @return FormMultipleControl This FormControl object
 	 */
 	public function implode ($implode=true)
 		{ $this->implode = $implode; return $this; }
@@ -214,7 +214,7 @@ class FormMultipleControl extends FormControl {
 	 *
 	 * @param array $opt Array of control options
 	 * @param mixed $assoc Define interpretation of $opt parameter (optional)
-	 * @return object This FormControl object
+	 * @return FormMultipleControl This FormControl object
 	 */
 	public function options ($opt, $assoc=null) {
 
@@ -262,7 +262,7 @@ class FormMultipleControl extends FormControl {
 	/**
 	 * Set control as read-only.
 	 *
-	 * @return object This FormControl object
+	 * @return FormMultipleControl This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('disabled', 'disabled'); return $this; }
@@ -271,7 +271,7 @@ class FormMultipleControl extends FormControl {
 	 * Set control size.
 	 * 
 	 * @param int $size Size of the control
-	 * @return object This FormControl object.
+	 * @return FormMultipleControl This FormControl object.
 	 */
 	public function size ($size) { $this->attr('size', $size); return $this; }
 }

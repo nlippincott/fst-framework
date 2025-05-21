@@ -29,7 +29,7 @@ abstract class FormInputControl extends FormControl {
 	/**
 	 * Sets the autofocus attribute.
 	 * 
-	 * @return object This FormControl object
+	 * @return FormInputControl This FormControl object
 	 */
 	public function autofocus ()
 		{ $this->attr('autofocus', 'autofocus'); return $this; }
@@ -38,14 +38,14 @@ abstract class FormInputControl extends FormControl {
 	 * Sets the initial value for the control.
 	 * 
 	 * @param string $val Initial value
-	 * @return object This FormControl object
+	 * @return FormInputControl This FormControl object
 	 */
 	public function init ($val) { $this->attr('value', $val); return $this; }
 
 	/**
 	 * Set control as read-only.
 	 * 
-	 * @return object This FormControl object
+	 * @return FormInputControl This FormControl object
 	 */
 	public function readonly ()
 		{ $this->attr('readonly', 'readonly'); return $this; }

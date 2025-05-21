@@ -61,7 +61,7 @@ class FormNoteControl extends FormControl {
 	 * Sets the control text or HTML.
 	 * 
 	 * @param string $val Text or HTML for the note
-	 * @return object This FormControl object
+	 * @return FormNoteControl This FormControl object
 	 */
 	public function init ($val) { $this->note = $val; return $this; }
 
@@ -71,7 +71,7 @@ class FormNoteControl extends FormControl {
 	 * Call this method to indicate that the form data provided to
 	 * FormNoteControl::init was HTML-formatted.
 	 *
-	 * @return object This FormNoteControl object
+	 * @return FormNoteControl This FormNoteControl object
 	 */
 	public function html () { $this->html = true; return $this; }
 
