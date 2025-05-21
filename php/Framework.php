@@ -137,7 +137,7 @@ class Framework {
 	public static function config ($opt, $value=null) {
 		if (isset($value))
 			self::$_cfg[$opt] = $value;
-		return self::$_cfg[$opt];
+		return isset(self::$_cfg[$opt]) ? self::$_cfg[$opt] : null;
 	}
 
 	/**
