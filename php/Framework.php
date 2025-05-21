@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.0.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -42,11 +42,11 @@ class Framework {
 
 	// FST version constants
 	/** FST version number. */
-	const VERSION = '6.0';
+	const VERSION = '6.0.1';
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-25';
 	/** FST version release date */
-	const VERSION_RELEASE = '2025-04-16';
+	const VERSION_RELEASE = '2025-05-21';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
