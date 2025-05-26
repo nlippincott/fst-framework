@@ -46,7 +46,7 @@ class Framework {
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-25';
 	/** FST version release date */
-	const VERSION_RELEASE = '2025-05-21';
+	const VERSION_RELEASE = '2025-05-25';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
@@ -333,7 +333,7 @@ class Framework {
 					'debug'=>null, // From .env file by default
 					'debug_error_reporting'=>E_ALL,
 						// Error reporting level, when debug is set
-					'env'=>'.env', // Location of .env file, or array or false
+					'env'=>false, // Environment file, array of files, or false
 					'helpers'=>true, // Define helper functions
 					'home'=>'home', // Controller name for home page
 					'meta-content-type'=>true,
@@ -393,8 +393,11 @@ class Framework {
 		// Load environment variables
 		self::$_env = $_ENV;
 		if (self::config('env'))
-			foreach (is_array(self::config('env')) ? self::config('env') : [ self::config('env') ] as $env)
-				self::$_env = array_merge(self::$_env, parse_ini_file($env, true));
+			foreach (is_array(self::config('env')) ? self::config('env') : [ self::config('env') ] as $env) {
+				if (($env_settings = parse_ini_file($env, true)) === false)
+					throw new UsageException("Error processing environment file $env");
+				self::$_env = array_merge(self::$_env, $env_settings);
+			}
 
 		// If 'debug' option not set in FST config, use DEBUG from .env file if set
 		if (self::config('debug') === null && isset(self::$_env['DEBUG']))
