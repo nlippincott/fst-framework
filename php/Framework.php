@@ -583,6 +583,7 @@ class Framework {
 		else if (file_exists("$fname.php")) { // DEPRECATED
 			// Logic same as filename format above. Extension .xml.php is
 			//	now preferred for PHP-generated templates.
+			trigger_error('Using .php extension for tempalates is deprecated, use .xml.php extension.', E_USER_DEPRECATED);
 			ob_start();
 			$fname = "$fname.php";
 			self::content($fname);
