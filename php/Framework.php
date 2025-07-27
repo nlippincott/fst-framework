@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.0.1
+// FST Application Framework, Version 6.1
 // Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
