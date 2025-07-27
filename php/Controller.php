@@ -145,9 +145,15 @@ abstract class Controller {
 	/**
 	 * Get the server's host name.
 	 * 
+	 * @deprecated This function is outdated and will be removed in a future version. Please use $_SERVER['SERVER_NAME'] or $_SERVER['HTTP_HOST'] instead.
+	 * @deprecated 6.1
 	 * @return string Host name
 	 */
-	final protected function host () { return $_SERVER['SERVER_NAME']; }
+	#[\Deprecated(reason: "This function is outdated. Use \$_SERVER['SERVER_NAME'] or \$_SERVER['HTTP_HOST'] instead.")]
+	final protected function host () {
+		trigger_error('FST\Controller::host() is outdated. Use $_SERVER[\'SERVER_NAME\'] or $_SERVER[\'HTTP_HOST\'] instead.', E_USER_DEPRECATED);
+		return $_SERVER['SERVER_NAME'];
+	}
 
 	/**
 	 * Test if controller running as an Ajax call.
