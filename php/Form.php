@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.0
+// FST Application Framework, Version 6.1
 // Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -27,7 +27,7 @@ namespace FST;
 class Form {
 
 	/** @ignore */
-	static protected $controls = array(); // Registered controls
+	static protected $controls = []; // Registered controls
 
 	/**
 	 * Register a Form control class.
@@ -43,19 +43,18 @@ class Form {
 		// Note: May be called a second time for a given function name, so
 		//	as to support override of default class name by an application.
 		if (!is_subclass_of($class_name, 'FST\FormControl'))
-			throw new UsageException(
-				"Class $class_name is not derived from FST\\FormControl");
+			throw new UsageException("Class $class_name is not derived from FST\\FormControl");
 		self::$controls[$function_name] = $class_name;
 	}
 
 	/** @ignore */
-	protected $attr = array(); // Additional attributes for form tag
+	protected $attr = []; // Additional attributes for form tag
 	/** @ignore */
 	protected $ajax = true; // Submit via Ajax, if fst-jquery installed
 	/** @ignore */
-	protected $error = array(); // Error messages for controls
+	protected $error = []; // Error messages for controls
 	/** @ignore */
-	protected $fld = array(); // Form fields
+	protected $fld = []; // Form fields
 
 	/**
 	 * Form object constructor.
@@ -69,8 +68,7 @@ class Form {
 	 */
 	public function __construct ($id, $action='') {
 		$this->attr('id', $id);
-		$this->attr('action',
-			preg_match('"^(\w+:/)?/"', $action) ? $action : "?$action");
+		$this->attr('action', preg_match('"^(\w+:/)?/"', $action) ? $action : "?$action");
 		$this->attr('method', 'post');
 	}
 
@@ -102,11 +100,7 @@ class Form {
 		$label = isset($args[1]) ? $args[1] : false;
 		if (isset($this->fld[$name]))
 			throw new UsageException("Duplicate form field: $name");
-//		if (!preg_match('/^[a-z_]\w*$/i', $name))
-//			throw new UsageException("Invalid form field name: $name");
-		$this->fld[$name] = $label === false ?
-			new $ctrlclass($this, $name) :
-			new $ctrlclass($this, $name, $label);
+		$this->fld[$name] = $label === false ? new $ctrlclass($this, $name) : new $ctrlclass($this, $name, $label);
 		return $this->fld[$name];
 	}
 
@@ -172,7 +166,7 @@ class Form {
 		print $this->html_form($class);
 
 		// Output all hidden fields, build array of non-hidden fields
-		$flds = array();
+		$flds = [];
 		foreach ($this->fld as $fld) {
 			if (is_a($fld, 'FST\FormHiddenControl'))
 				print $fld;
@@ -185,7 +179,7 @@ class Form {
 		reset($flds);
 		while (current($flds)) { // for each row
 
-			$errors = array();
+			$errors = [];
 			if (isset($this->error[current($flds)->name()]))
 				$errors[] = $this->error[current($flds)->name()];
 
@@ -250,8 +244,7 @@ class Form {
 		if (!isset($attr['data-fst']))
 			$attr['data-fst'] = $this->ajax ? 'form' : 'form-post';
 		if ($class)
-			$attr['class'] = isset($attr['class']) ?
-				"{$attr['class']} $class" : $class;
+			$attr['class'] = isset($attr['class']) ? "{$attr['class']} $class" : $class;
 		return '<form' . Framework::attr($attr) . '>';
 	}
 
@@ -300,12 +293,10 @@ class Form {
 	 * @return mixed[] Name/value pairs of submitted form values
 	 */
 	public function data ($fields=false) {
-		$data = array();
+		$data = [];
 		foreach ($this->fld as $name=>$fld)
-			if (($fields === false ||
-						array_search($name, $fields) !== false) &&
-					!$fld->is_informational())
-				$data[$name] = $fld->data();
+		if (($fields === false || array_search($name, $fields) !== false) && !$fld->is_informational())
+			$data[$name] = $fld->data();
 		return $data;
 	}
 
@@ -371,10 +362,6 @@ class Form {
 	public function init ($data) {
 		if (!is_array($data) && !is_object($data))
 			throw new UsageException('Parameter 1 is not an array or object');
-//		foreach (is_object($data) ? get_object_vars($data) : $data
-//				as $name=>$value)
-//			if (isset($this->fld[$name]))
-//				$this->fld[$name]->init($value);
 		if (is_array($data)) {
 			foreach ($data as $name=>$value)
 				if (isset($this->fld[$name]))
@@ -403,7 +390,7 @@ class Form {
 	 * @return bool Validation success flag
 	 */
 	public function validate () {
-		$this->error = array();
+		$this->error = [];
 		$this->init($_POST);
 		foreach ($this->fld as $f) {
 			$msg = $f->error();

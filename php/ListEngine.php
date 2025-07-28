@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -53,7 +53,7 @@ abstract class ListEngine {
 	 *
 	 * @return string[] Associative array of name/value pairs
 	 */
-	protected function list_attr () { return array(); }
+	protected function list_attr () { return []; }
 
 	/**
 	 * Get class for top-level list element.
@@ -85,7 +85,7 @@ abstract class ListEngine {
 	 *
 	 * @return string[] Associative array of name/value pairs
 	 */
-	protected function item_attr ($item) { return array(); }
+	protected function item_attr ($item) { return []; }
 
 	/**
 	 * Get class for the given list item.

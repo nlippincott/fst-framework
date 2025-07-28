@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.0
+// FST Application Framework, Version 6.1
 // Copyright (c) 2004-22, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -20,15 +20,13 @@ namespace FST;
  * library. It *may* work with other PDO compatible databases, but is not
  * tested with databases other than MySQL.
  *
- * This library was introduced in FST version 5.4 and is to be
- * considered experimental. It is being developed as an alternative to the
- * now-unmaintained PHP ActiveRecord library, which is not part of but often
- * used with the FST Application Framework.
+ * This library was inspired by and largely modeled after the PHP
+ * ActiveRecord library, which is no longer being maintained.
  */
 final class MySQL {
 
 	/** @ignore */
-	static private $_databases = array(); // PDO Database connections
+	static private $_databases = []; // PDO Database connections
 	/** @ignore */
 	static private $_database_default = false; // Default database connection
 	/** @ignore */
@@ -65,17 +63,13 @@ final class MySQL {
 	 * @param string $host Database host name/address (default localhost)
 	 * @param string $engine Database engine (default mysql)
 	 */
-	static public function database ($alias,
-			$database=null, $host='localhost', $engine='mysql') {
+	static public function database ($alias, $database=null, $host='localhost', $engine='mysql') {
 		if (!$database)
 			$database = $alias;
 		if (array_key_exists($alias, static::$_databases))
 			throw new UsageException('Database already defined');
 		try {
-			static::$_databases[$alias] =
-				new \PDO("$engine:host=$host;dbname=$database",
-					static::$_user, static::$_user_pass,
-					array(\PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION));
+			static::$_databases[$alias] = new \PDO("$engine:host=$host;dbname=$database", static::$_user, static::$_user_pass, [ \PDO::ATTR_ERRMODE=>\PDO::ERRMODE_EXCEPTION ]);
 		}
 		catch (\PDOException $e) {
 			throw new DatabaseException($e->getMessage());
@@ -156,8 +150,7 @@ final class MySQL {
 		if (!$alias && static::$_database_default)
 			return static::$_database_default;
 		if (!$alias || !array_key_exists($alias, static::$_databases))
-			throw new DatabaseException('Database alias ' .
-				($alias ? $alias : '<default>') . ' not defined');
+			throw new DatabaseException('Database alias ' . ($alias ? $alias : '<default>') . ' not defined');
 		return static::$_databases[$alias];
 	}
 }
@@ -230,7 +223,7 @@ abstract class MySQLModel {
 	 * rules for foreign key names applies. The third (optional) component
 	 * is the default sort order of the related documents.
 	 */
-	static protected $referenced_by = array();
+	static protected $referenced_by = [];
 
 	/**
 	 * Defines referenced documents.
@@ -245,14 +238,14 @@ abstract class MySQLModel {
 	 * converted according to class-to-table-name rules, followed by "_id"
 	 * is used.
 	 */
-	static protected $references = array();
+	static protected $references = [];
 
 	/** @ignore */
 	private $_id = null;
 	/** @ignore */
 	private $_readonly = false;
 	/** @ignore */
-	private $_refs = array();
+	private $_refs = [];
 
 	/**
 	 * Constructs a new document.
@@ -273,7 +266,7 @@ abstract class MySQLModel {
 		// If this object has no id (document is not saved), no other
 		// documents will reference it.
 		if (!isset($this->_id))
-			return array();
+			return [];
 
 		// Get class name, foreign key, and default sort order
 		list($cls, $key, $srt) = explode(":", static::$referenced_by[$fcn] . "::");
@@ -287,7 +280,7 @@ abstract class MySQLModel {
 			$srt = null;
 
 		// Build the WHERE clause
-		$whr = array("`$key`=?", $this->_id);
+		$whr = [ "`$key`=?", $this->_id ];
 		if (count($args) > 0) {
 			if (is_array($args[0])) {
 				$whr[0] .= ' and (' . $args[0][0] . ')';
@@ -334,7 +327,7 @@ abstract class MySQLModel {
 
 		// If a getter exists for field, call it
 		if (method_exists($this, "get_$fld"))
-			return call_user_func(array($this, "get_$fld"));
+			return call_user_func([ $this, "get_$fld" ]);
 
 		// If getting a referenced document, return object for document.
 		if (array_key_exists($fld, static::$references)) {
@@ -348,7 +341,7 @@ abstract class MySQLModel {
 				$key = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
 			// Get document using find, and return it
 			/** @disregard P1014 Undefined type */
-			$doc = $cls::find_one(array('`' . $cls::$key . '`=?', $this->$key));
+			$doc = $cls::find_one([ '`' . $cls::$key . '`=?', $this->$key ]);
 			// If document found, save in $_refs
 			if ($doc)
 				$this->_refs[$fld] = $doc;
@@ -361,7 +354,7 @@ abstract class MySQLModel {
 		if (array_key_exists($fld, static::$referenced_by)) {
 			// If current document has no primary key value, return empty array
 			if (!isset($this->_id))
-				return array();
+				return [];
 			// Get class name, foreign key, and default sort order
 			list($cls, $key, $srt) = explode(":", static::$referenced_by[$fld] . "::");
 			// If foreign key not explicitly given, derive from class name
@@ -371,12 +364,11 @@ abstract class MySQLModel {
 			if (!$srt)
 				$srt = null;
 			// Find documents related to this table
-			return $cls::find_all(array("`$key`=?", $this->_id), $srt);
+			return $cls::find_all([ "`$key`=?", $this->_id ], $srt);
 		}
 
 		// Attempt to retrieve invalid property
-		throw new UsageException(
-			'Invalid property ' . static::_table() . ".$fld");
+		throw new UsageException('Invalid property ' . static::_table() . ".$fld");
 	}
 
 	// Magic method to indicate whether the _id property is set or getter
@@ -385,8 +377,7 @@ abstract class MySQLModel {
 	public function __isset ($fld) {
 		if ($fld == '_id')
 			return isset($this->_id);
-		return method_exists($this, "get_$fld") &&
-			!is_null(call_user_func(array($this, "get_$fld")));
+		return method_exists($this, "get_$fld") && !is_null(call_user_func([ $this, "get_$fld" ]));
 	}
 
 	// Magic method to set properties that are not already set. This method
@@ -398,13 +389,12 @@ abstract class MySQLModel {
 	public function __set ($fld, $val) {
 
 		// May not assign reserved properties (_id, _refs)
-		if (array_search($fld, array('_id', '_refs')) !== false)
-			throw new UsageException('Update property ' .
-				static::_table() . ".$fld not allowed");
+		if (array_search($fld, [ '_id', '_refs' ]) !== false)
+			throw new UsageException('Update property ' . static::_table() . ".$fld not allowed");
 
 		// If a setter exists for this field, call the setter.
 		if (method_exists($this, "set_$fld"))
-			return call_user_func(array($this, "set_$fld"), $val);
+			return call_user_func([ $this, "set_$fld" ], $val);
 
 		// If the field being assigned is a referenced field, value must be
 		// a document object of the appropriate type, a foreign key value,
@@ -412,12 +402,10 @@ abstract class MySQLModel {
 		if (array_key_exists($fld, static::$references)) {
 			list($cls, $fkey) = explode(":", static::$references[$fld] . ":");
 			if (!$fkey)
-				$fkey = strtolower(
-					preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
+				$fkey = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $cls)) . '_id';
 			if (is_object($val)) {
 				if (get_class($val) != $cls)
-					throw new UsageException(
-						"Inconsistent object assigned to referenced field");
+					throw new UsageException("Inconsistent object assigned to referenced field");
 				// Set foreign key in this document
 				/** @disregard P1014 Undefined type */
 				$this->$fkey = $val->{$cls::$key};
@@ -431,14 +419,13 @@ abstract class MySQLModel {
 					unset($this->_refs[$fld]);
 			}
 			else
-				throw new UsageException(
-					'Invalid assignment to ' . static::_table() . ".$fld");
+				throw new UsageException('Invalid assignment to ' . static::_table() . ".$fld");
 			return;
 		}
 
 		// If a setter exists for this property, call it and return
 		if (method_exists($this, "set_$fld")) {
-			call_user_func(array($this, "set_$fld"), $val);
+			call_user_func([ $this, "set_$fld" ], $val);
 			return $this->$fld;
 		}
 
@@ -459,8 +446,7 @@ abstract class MySQLModel {
 		else if (substr($fcn, 0, 9) == 'count_by_')
 			$method = 'count';
 		else
-			throw new UsageException(
-				"Call to undefined static method: $fcn");
+			throw new UsageException("Call to undefined static method: $fcn");
 
 		// Get field names for query
 		$fields = explode('_and_', substr($fcn, strpos($fcn, '_by_') + 4));
@@ -472,17 +458,13 @@ abstract class MySQLModel {
 			$sort = null;
 		else {
 			if ($method == 'count' || count($args) != count($fields) + 1)
-				throw new UsageException(
-					"Incorrect number of arguments: $fcn");
+				throw new UsageException("Incorrect number of arguments: $fcn");
 			$sort = end($args);
 			$args = array_slice($args, 0, -1);
 		}
 
 		// Build the where clause
-		$where = array_merge(
-			array(implode(' and ', array_map(
-				function ($fld) { return "`$fld`=?"; }, $fields))),
-			$args);
+		$where = array_merge([ implode(' and ', array_map(function ($fld) { return "`$fld`=?"; }, $fields)) ], $args);
 
 		// Execute query and return the results
 		if ($method == 'count')
@@ -498,10 +480,7 @@ abstract class MySQLModel {
 	 * this object after deletion will result in an attempted insert.
 	 */
 	public function delete () {
-		MySQL::query(array(
-			'delete from `' . static::_table() . '` ' . 'where `' .
-				static::$key . '`=?',
-			$this->_id), static::$database);
+		MySQL::query([ 'delete from `' . static::_table() . '` ' . 'where `' . static::$key . '`=?', $this->_id ], static::$database);
 		// Leave all object properties intact, but clear the protected
 		// primary key value (indicating a new record).
 		$this->_id = null;
@@ -542,47 +521,36 @@ abstract class MySQLModel {
 			throw new DatabaseException('Cannot save read-only document');
 		// Changing the value of the primary key is not allowed.
 		if ($this->_id && $this->_id != $this->{static::$key})
-			throw new UsageException('Update of primary key ' .
-				static::_table() . '.' . static::$key . ' is not allowed');
+			throw new UsageException('Update of primary key ' . static::_table() . '.' . static::$key . ' is not allowed');
 		// Convert object to an array, remove all properties leading with
 		// an underscore, and pass to the write method for pre-processing.
-		$rec = $this->write(array_filter(get_object_vars($this),
-			function ($key) { return substr($key, 0, 1) != '_'; },
-			ARRAY_FILTER_USE_KEY));
+		$rec = $this->write(array_filter(get_object_vars($this), function ($key) { return substr($key, 0, 1) != '_'; }, ARRAY_FILTER_USE_KEY));
 		// Convert all boolean values to 0/1, and convert all DateTime objects
 		// to string form.
-		$rec = array_map(
-			function ($val) {
-					if (is_bool($val))
-						return $val ? 1 : 0;
-					if (is_object($val) && get_class($val) == 'DateTime')
-						return $val->format('Y-m-d H:i:s');
-					return $val;
-				}, $rec);
+		$rec = array_map(function ($val) {
+			if (is_bool($val))
+				return $val ? 1 : 0;
+			if (is_object($val) && get_class($val) == 'DateTime')
+				return $val->format('Y-m-d H:i:s');
+			return $val;
+		}, $rec);
 		// Prepare the statement. If a new record, this will be an insert,
 		// otherwise an update.
 		if ($this->_id === null) {
 			// Build SQL statement for insert
-			$sql = 'insert into `' . static::_table() . '` ' .
-				'(`' . implode('`,`', array_keys($rec)) . '`) ' .
-				'values (' .
-					implode(',', array_fill(0, count($rec), '?')) . ')';
+			$sql = 'insert into `' . static::_table() . '` ' . '(`' . implode('`,`', array_keys($rec)) . '`) ' . 'values (' . implode(',', array_fill(0, count($rec), '?')) . ')';
 		}
 		else {
 			// Remove primary key value from update fields
 			unset($rec[static::$key]);
 			// Build SQL statement for update
-			$sql = 'update `' . static::_table() . '` ' .
-				'set ' . implode(',', array_map(
-					function ($fld) { return "`$fld`=?"; }, array_keys($rec))) .
-				' where `' . static::$key . '`=?';
+			$sql = 'update `' . static::_table() . '` ' . 'set ' . implode(',', array_map(function ($fld) { return "`$fld`=?"; }, array_keys($rec))) . ' where `' . static::$key . '`=?';
 			// Include primary key value for query execution
 			$rec[] = $this->_id;
 		}
 
 		// Execute the query
-		MySQL::query(
-			array_merge(array($sql), array_values($rec)), static::$database);
+		MySQL::query(array_merge([ $sql ], array_values($rec)), static::$database);
 
 		// Set primary key value, if an insert
 		if (!$this->_id) {
@@ -608,11 +576,9 @@ abstract class MySQLModel {
 	public function set ($properties) {
 
 		if (!is_array($properties) && !is_object($properties))
-			throw new UsageException(
-				'Argument to MySQL::set must be array or object');
+			throw new UsageException('Argument to MySQL::set must be array or object');
 
-		foreach (is_object($properties) ?
-				get_object_vars($properties) : $properties as $k=>$v)
+		foreach (is_object($properties) ? get_object_vars($properties) : $properties as $k=>$v)
 			if (preg_match('/^[a-z]\w*$/i', $k))
 				$this->$k = $v;
 }
@@ -652,7 +618,7 @@ abstract class MySQLModel {
 		}
 
 		// Execute query and return the count
-		$qry = $args ? array_merge(array($sql), $args) : $sql;
+		$qry = $args ? array_merge([ $sql ], $args) : $sql;
 		$rows = MySQL::query($qry, static::$database);
 		return $rows[0]->cnt;
 	}
@@ -671,8 +637,7 @@ abstract class MySQLModel {
 	static public function distinct ($fld, $whr=null) {
 
 		// Build the SELECT statement
-		$sql = 'select distinct `' . $fld . '` from `' .
-			static::_table() . '`';
+		$sql = 'select distinct `' . $fld . '` from `' . static::_table() . '`';
 
 		// Add WHERE clause and set up arguments, if specified
 		$args = false;
@@ -686,8 +651,7 @@ abstract class MySQLModel {
 		}
 
 		// Execute the query
-		$rows = MySQL::query($args ?
-			array_merge(array($sql), $args) : $sql, static::$database);
+		$rows = MySQL::query($args ? array_merge([ $sql ], $args) : $sql, static::$database);
 
 		// Retrieve and return array of distinct values
 		$values = [];
@@ -707,10 +671,9 @@ abstract class MySQLModel {
 	 * @return MySQLModel Object of the called class
 	 */
 	static public function find ($id) {
-		$doc = static::find_one(array('`' . static::$key . '`=?', $id));
+		$doc = static::find_one([ '`' . static::$key . '`=?', $id ]);
 		if (!$doc)
-			throw new NotFoundException(
-				static::_table() . '.' . static::$key . "=$id");
+			throw new NotFoundException(static::_table() . '.' . static::$key . "=$id");
 		return $doc;
 	}
 
@@ -759,12 +722,10 @@ abstract class MySQLModel {
 	 * @param string $cols Columns to be included (optional)
 	 * @return MySQLModel[] Array of objects represeting requested records
 	 */
-	static public function find_all (
-			$whr=null, $srt=null, $lim=null, $skp=null, $cols=null) {
+	static public function find_all ($whr=null, $srt=null, $lim=null, $skp=null, $cols=null) {
 
 		// Columns to be retrieved
-		$cols = $cols === null ? '*' :
-			implode(',', array_map(function ($c) { return '`' . trim($c) . '`'; }, explode(',', $cols)));
+		$cols = $cols === null ? '*' : implode(',', array_map(function ($c) { return '`' . trim($c) . '`'; }, explode(',', $cols)));
 
 		$sql = "select $cols from `" . static::_table() . '`';
 		$args = false;
@@ -792,13 +753,12 @@ abstract class MySQLModel {
 			$sql .= " offset $skp";
 
 		// Execute the query
-		$rows = MySQL::query($args ?
-			array_merge(array($sql), $args) : $sql, static::$database);
+		$rows = MySQL::query($args ? array_merge([ $sql ], $args) : $sql, static::$database);
 
 		// Create array of objects, with each row from the database passed
 		//  as an array to the read method for post-processing.
 		$cls = get_called_class();
-		$objs = array();
+		$objs = [];
 		foreach ($rows as $row) {
 			$obj = new $cls();
 			$obj->set($obj->read(get_object_vars($row)));
@@ -838,8 +798,6 @@ abstract class MySQLModel {
 		// to lowercase and add "s". For ecample, class "User" corresponds
 		// to table "users", and class "AdminUser" corresponds to table
 		// "admin_users".
-		return static::$table ? static::$table :
-			strtolower(preg_replace(
-				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
+		return static::$table ? static::$table : strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
 	}
 }

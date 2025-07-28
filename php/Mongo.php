@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.0
+// FST Application Framework, Version 6.1
 // Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -17,13 +17,15 @@ namespace FST;
  * MongoDB Manager class. Allows definition of database aliases to multiple
  * databases.
  *
- * This library is being introduced in FST version 5.3 and is to be
- * considered experimental.
+ * This library was inspired by and largely modeled after the PHP
+ * ActiveRecord library, which is no longer being maintained. Although
+ * that libarary specifically targeted relational databases, the ideas
+ * and mechanisms are applied here to MongoDB.
  */
 final class Mongo {
 
 	/** @ignore */
-	static private $_databases = array(); // Mongo database connections
+	static private $_databases = []; // Mongo database connections
 	/** @ignore */
 	static private $_database_default = false; // Default database connection
 	/** @ignore */
@@ -163,7 +165,7 @@ abstract class MongoModel {
 	 * of attributes. Attribute names may be preceeded by a minus sign to
 	 * indicating a descending sort by that attribute.
 	 */
-	static protected $referenced_by = array();
+	static protected $referenced_by = [];
 
 	/**
 	 * Defines referenced documents.
@@ -174,14 +176,14 @@ abstract class MongoModel {
 	 * another collection. Values of the associative array are the class name
 	 * corresponding to the referenced collection.
 	 */
-	static protected $references = array();
+	static protected $references = [];
 
 	/** @ignore */
 	private $_id = null;
 	/** @ignore */
-	private $_id_refs = array();
+	private $_id_refs = [];
 	/** @ignore */
-	private $_docs = array();
+	private $_docs = [];
 	/** @ignore */
 	private $_readonly = false;
 
@@ -208,7 +210,7 @@ abstract class MongoModel {
 		// If this object has no id (document is not saved), no other
 		// documents will reference it.
 		if (!isset($this->_id))
-			return array();
+			return [];
 
 		// Get class name, foreign property, and default sort order
 		list($cls, $fld, $srt) = explode(":", static::$referenced_by[$fcn] . "::");
@@ -229,7 +231,7 @@ abstract class MongoModel {
 		// Query must be an array. Other arguments may be array or string and
 		// are validated by self::find_all.
 		if (!is_array($qry))
-				throw new UsageException("Invalid query parameter");
+			throw new UsageException("Invalid query parameter");
 
 		// Include this object in criteria for the query
 		$qry[$fld] = $this;
@@ -265,7 +267,7 @@ abstract class MongoModel {
 
 		// If getter exists for field, call it
 		if (method_exists($this, "get_$fld"))
-			return call_user_func(array($this, "get_$fld"));
+			return call_user_func([ $this, "get_$fld" ]);
 
 		// If getting a referenced document, return object for document.
 		if (array_key_exists($fld, static::$references)) {
@@ -301,8 +303,7 @@ abstract class MongoModel {
 		case '_id':
 			return isset($this->_id);
 		}
-		return method_exists($this, "get_$fld") &&
-			!is_null(call_user_func(array($this, "get_$fld")));
+		return method_exists($this, "get_$fld") && !is_null(call_user_func([ $this, "get_$fld" ]));
 	}
 
 	// Magic method to set properties that are not already set. This method
@@ -315,13 +316,11 @@ abstract class MongoModel {
 
 		// May not assign 'id', '_id', or '_id_refs'
 		if ($fld == 'id' || $fld == '_id' || preg_match('/^_id_/', $fld))
-			throw new UsageException(
-				'Assignment to id member is not allowed');
+			throw new UsageException('Assignment to id member is not allowed');
 
 		// May not assign '_docs'
 		if ($fld == '_docs')
-			throw new UsageException(
-				'Assignment to _docs member is not allowed');
+			throw new UsageException('Assignment to _docs member is not allowed');
 
 		// If the field being assigned is a referenced field, value must be
 		//	a document object or an object id, in which case the object id
@@ -349,12 +348,10 @@ abstract class MongoModel {
 			// $val must be an object of type specified in $references.
 			if (!is_object($val) ||
 					get_class($val) != static::$references[$fld])
-				throw new UsageException(
-					"Inconsistent object assigned to referenced field");
+				throw new UsageException("Inconsistent object assigned to referenced field");
 			// $val must be a saved object (i.e. must have an _id)
 			if (!isset($val->_id))
-				throw new UsageException(
-					"Unsaved object assigned to referenced field");
+				throw new UsageException("Unsaved object assigned to referenced field");
 			$this->_id_refs[$fld] = $val->_id;
 			$this->_docs[$fld] = $val;
 			return $val;
@@ -362,7 +359,7 @@ abstract class MongoModel {
 
 		// If a setter exists for this object, call it and return
 		if (method_exists($this, "set_$fld")) {
-			call_user_func(array($this, "set_$fld"), $val);
+			call_user_func([ $this, "set_$fld" ], $val);
 			return $this->$fld;
 		}
 
@@ -392,8 +389,7 @@ abstract class MongoModel {
 		else if (substr($fcn, 0, 9) == 'count_by_')
 			$method = 'count';
 		else
-			throw new UsageException(
-				"Call to undefined static method: $fcn");
+			throw new UsageException("Call to undefined static method: $fcn");
 
 		// Get field names for query
 		$fields = explode('_and_', substr($fcn, strpos($fcn, '_by_') + 4));
@@ -405,8 +401,7 @@ abstract class MongoModel {
 			$sort = null;
 		else {
 			if ($method == 'count' || count($args) != count($fields) + 1)
-				throw new UsageException(
-					"Incorrect number of arguments: $fcn");
+				throw new UsageException("Incorrect number of arguments: $fcn");
 			$sort = end($args);
 			$args = array_slice($args, 0, -1);
 		}
@@ -430,9 +425,8 @@ abstract class MongoModel {
 		// Remove the current document
 		if ($this->_id) {
 			$write = new \MongoDB\Driver\BulkWrite();
-			$write->delete(array('_id'=>$this->_id));
-			Mongo::_mgr()->executeBulkWrite(
-				static::_database() . '.' . static::_collection(), $write);
+			$write->delete([ '_id'=>$this->_id ]);
+			Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
 		}
 		// Initialize document id
 		$this->_id = null;
@@ -483,30 +477,28 @@ abstract class MongoModel {
 		//	something I was doing wrong. Creating an empty document to get
 		//	an id, however, worked consistently.
 		if (!($this->_id))
-			$this->_id = $write->insert(array());
+			$this->_id = $write->insert([]);
 
 		// Convert document to an array, remove all properties leading with
 		// an underscore, and pass to the write method for pre-processing.
-		$doc = $this->write(array_filter(get_object_vars($this),
-			function ($key) { return substr($key, 0, 1) != '_'; },
-			ARRAY_FILTER_USE_KEY));
+		$doc = $this->write(array_filter(get_object_vars($this), function ($key) {
+			return substr($key, 0, 1) != '_';
+		}, ARRAY_FILTER_USE_KEY));
 
 		// Convert convert all DateTime objects to string form.
-		$doc = array_map(
-			function ($val) {
-					if (is_object($val) && get_class($val) == 'DateTime')
-						return $val->format('Y-m-d H:i:s');
-					return $val;
-				}, $doc);
+		$doc = array_map(function ($val) {
+			if (is_object($val) && get_class($val) == 'DateTime')
+				return $val->format('Y-m-d H:i:s');
+			return $val;
+		}, $doc);
 
 		// Set entries for referenced documents.
 		foreach ($this->_id_refs as $ref=>$obj_id)
 			$doc["_id_$ref"] = $obj_id;
 
 		// Save document
-		$write->update(array('_id'=>$this->_id), $doc);
-		Mongo::_mgr()->executeBulkWrite(
-			static::_database() . '.' . static::_collection(), $write);
+		$write->update([ '_id'=>$this->_id ], $doc);
+		Mongo::_mgr()->executeBulkWrite(static::_database() . '.' . static::_collection(), $write);
 	}
 
 	/**
@@ -523,11 +515,9 @@ abstract class MongoModel {
 	public function set ($properties) {
 
 		if (!is_array($properties) && !is_object($properties))
-			throw new UsageException(
-				'Argument to Mongo::set must be array or object');
+			throw new UsageException('Argument to Mongo::set must be array or object');
 
-		foreach (is_object($properties) ?
-				get_object_vars($properties) : $properties as $k=>$v)
+		foreach (is_object($properties) ? get_object_vars($properties) : $properties as $k=>$v)
 			if (preg_match('/^[a-z]\w*$/i', $k))
 				$this->$k = $v;
 	}
@@ -562,7 +552,7 @@ abstract class MongoModel {
 		$cmd = new \MongoDB\Driver\Command([
 			'aggregate'=>static::_collection(),
 			'pipeline'=>$pipeline,
-			'cursor'=>[ 'batchSize'=>0 ]
+			'cursor'=>[ 'batchSize'=>0 ],
 		]);
 		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
 		return $cur->toArray();
@@ -606,7 +596,7 @@ abstract class MongoModel {
 
 		if ($qry === true)
 			// Delete all documents in the collection
-			$qry = array();
+			$qry = [];
 		else {
 			// Ensure a query is given (invalid if no criteria).
 			if (!is_array($qry) || !count($qry))
@@ -638,8 +628,7 @@ abstract class MongoModel {
 		$qry = static::_query($qry);
 
 		// Get distinct values
-		$cmd = new \MongoDB\Driver\Command(
-			[ 'distinct'=>static::_collection(), 'key'=>$fld, 'query'=>$qry ]);
+		$cmd = new \MongoDB\Driver\Command([ 'distinct'=>static::_collection(), 'key'=>$fld, 'query'=>$qry ]);
 		$cur = Mongo::_mgr()->executeCommand(static::_database(), $cmd);
 		return $cur->toArray()[0]->values;
 	}
@@ -657,19 +646,15 @@ abstract class MongoModel {
 	static public function find ($id) {
 
 		// Query the document and get cursor.
-		$qry = new \MongoDB\Driver\Query(
-			array('_id'=>new \MongoDB\BSON\ObjectId($id)));
-		$cur = Mongo::_mgr()->executeQuery(
-			static::_database() . '.' . static::_collection(), $qry);
+		$qry = new \MongoDB\Driver\Query([ '_id'=>new \MongoDB\BSON\ObjectId($id) ]);
+		$cur = Mongo::_mgr()->executeQuery(static::_database() . '.' . static::_collection(), $qry);
 
 		// If no document found, throw exception.
 		if (!$cur)
-			throw new NotFoundException(
-				static::_collection() . ':' . $id);
+			throw new NotFoundException(static::_collection() . ':' . $id);
 		$arr = $cur->toArray();
 		if (!count($arr))
-			throw new NotFoundException(
-				static::_collection() . ':' . $id);
+			throw new NotFoundException(static::_collection() . ':' . $id);
 
 		// Build and return object from query results.
 		$cls = get_called_class();
@@ -744,13 +729,13 @@ abstract class MongoModel {
 		$cls = get_called_class();
 
 		// Build options for query.
-		$options = array();
+		$options = [];
 
 		// Sort option.
 		if ($srt) {
 			if (is_string($srt)) {
 				$tmp = array_map('trim', explode(',', $srt));
-				$srt = array();
+				$srt = [];
 				foreach ($tmp as $attr)
 					if (substr($attr, 0, 1) == '-')
 						$srt[substr($attr, 1)] = -1;
@@ -758,8 +743,7 @@ abstract class MongoModel {
 						$srt[$attr] = 1;
 			}
 			if (!is_array($srt))
-				throw new UsageException(
-					'Sort option must be a string or array');
+				throw new UsageException('Sort option must be a string or array');
 			$options['sort'] = $srt;
 		}
 
@@ -786,23 +770,21 @@ abstract class MongoModel {
 				if (!$incl)
 					$prj = trim(substr($prj, 1));
 				$tmp = array_map('trim', explode(',', $prj));
-				$prj = array();
+				$prj = [];
 				foreach ($tmp as $attr)
 					$prj[$attr] = $incl;
 			}
 			if (!is_array($prj))
-				throw new UsageException(
-					'Projection option must be a string or array');
+				throw new UsageException('Projection option must be a string or array');
 			$options['projection'] = $prj;
 		}
 
 		// Execute query.
 		$qry = new \MongoDB\Driver\Query($qry, $options);
-		$cur = Mongo::_mgr()->executeQuery(
-			static::_database() . '.' . static::_collection(), $qry);
+		$cur = Mongo::_mgr()->executeQuery(static::_database() . '.' . static::_collection(), $qry);
 
 		// Build and return objects from query results
-		$objs = array();
+		$objs = [];
 		foreach ($cur as $doc) {
 			$obj = new $cls();
 			$obj->_init($obj->read(get_object_vars($doc)));
@@ -815,7 +797,7 @@ abstract class MongoModel {
 
 	// Helper method to initialize properties from an associative array.
 	/** @ignore */
-	private function _init ($doc=array()) {
+	private function _init ($doc=[]) {
 
 		// Set object id.
 		$this->_id = isset($doc['_id']) ? $doc['_id'] : null;
@@ -823,8 +805,7 @@ abstract class MongoModel {
 		// Set properties.
 		foreach ($doc as $key=>$val) {
 			// Referenced document, as described in static::$references?
-			if (substr($key, 0, 4) == '_id_' && array_key_exists(
-					substr($key, 4), static::$references))
+			if (substr($key, 0, 4) == '_id_' && array_key_exists(substr($key, 4), static::$references))
 				$this->_id_refs[substr($key, 4)] = $val;
 			// All other properties, except '_id'.
 			else if ($key != '_id')
@@ -841,9 +822,7 @@ abstract class MongoModel {
 		//	convert to lowercase and add "s". For example, class "User"
 		//	corresponds to collection "users", and class "AdminUser"
 		//	corresponds to collection "admin_users".
-		return static::$collection ? static::$collection :
-			strtolower(preg_replace(
-				'/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
+		return static::$collection ? static::$collection : strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', get_called_class())) . 's';
 	}
 
 	// Helper function to return the database object
@@ -856,7 +835,7 @@ abstract class MongoModel {
 	static private function _query ($qry) {
 
 		// Ensure query is given as an array or as null.
-		if (!$qry) $qry = array();
+		if (!$qry) $qry = [];
 		if (!is_array($qry))
 			throw new UsageException('Query must be an array');
 
@@ -864,8 +843,7 @@ abstract class MongoModel {
 		foreach ($qry as $k=>$v) {
 			if (array_key_exists($k, static::$references)) {
 				if (!is_object($v) || get_class($v) != static::$references[$k])
-					throw new UsageException(
-						'Inconsistent document type in query');
+					throw new UsageException('Inconsistent document type in query');
 				$qry["_id_$k"] = $v->_id;
 				unset($qry[$k]);
 			}

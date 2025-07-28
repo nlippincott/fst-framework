@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -31,9 +31,9 @@ class NameValueTable extends TableEngine {
 	/** @ignore */
 	protected $class;
 	/** @ignore */
-	protected $header = array('name'=>'', 'value'=>'');
+	protected $header = [ 'name'=>'', 'value'=>'' ];
 	/** @ignore */
-	protected $table_rows = array();
+	protected $table_rows = [];
 
 	/**
 	 * Initialize the NameValueTable object
@@ -59,14 +59,13 @@ class NameValueTable extends TableEngine {
 	 * @param string $class Class name to be applied to the row
 	 */
 	public function row ($name, $value, $class='') {
-		$this->table_rows[] =
-			array('name'=>$name, 'value'=>$value, 'class'=>$class);
+		$this->table_rows[] = [ 'name'=>$name, 'value'=>$value, 'class'=>$class ];
 	}
 
 	/** @ignore */
 	protected function rows () { return $this->table_rows; }
 	/** @ignore */
-	protected function columns () { return array('name', 'value'); }
+	protected function columns () { return [ 'name', 'value' ]; }
 
 	/** @ignore */
 	protected function cell ($row, $col) { return $row[$col]; }

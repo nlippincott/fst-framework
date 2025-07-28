@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -46,8 +46,7 @@ abstract class CalendarEngine extends TableEngine {
 		// If $ym is an object, convert to string
 		if (is_object($ym)) {
 			if (!is_a($ym, '\DateTime'))
-				throw new UsageException(
-					"Parameter 1 is not a DateTime object");
+				throw new UsageException("Parameter 1 is not a DateTime object");
 			$ym = $ym->format('Y-m');
 		}
 
@@ -67,8 +66,7 @@ abstract class CalendarEngine extends TableEngine {
 
 		// Number of weeks required for calendar
 		$this->weeks = 4;
-		while (date('Y-m', strtotime($this->dt) +
-				$this->weeks * 7*24*60*60 + 3601) <= $ym)
+		while (date('Y-m', strtotime($this->dt) + $this->weeks * 7*24*60*60 + 3601) <= $ym)
 			$this->weeks++;
 	}
 
@@ -110,13 +108,11 @@ abstract class CalendarEngine extends TableEngine {
 	final protected function cell ($row, $col) {
 
 		// Determine date for current block
-		$dt = date('Y-m-d',
-			strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
+		$dt = date('Y-m-d', strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
 
 		// If date is outside month and not showing outside dates, return
 		//	a non-breaking space, else return date's content
-		return $this->show_outside() || substr($dt, 0, 7) == $this->ym ?
-			$this->date($dt) : '&nbsp;';
+		return $this->show_outside() || substr($dt, 0, 7) == $this->ym ? $this->date($dt) : '&nbsp;';
 	}
 
 	// Get class name(s) for a table cell.
@@ -126,8 +122,7 @@ abstract class CalendarEngine extends TableEngine {
 	final protected function cell_class ($row, $col) {
 
 		// Determine date for current block
-		$dt = date('Y-m-d',
-			strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
+		$dt = date('Y-m-d', strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
 
 		// Determine if date is outside current month
 		$outside = substr($dt, 0, 7) != $this->ym;
@@ -135,8 +130,7 @@ abstract class CalendarEngine extends TableEngine {
 		// Build class string; if date is outside current month, include
 		//	class name 'outside', if showing the date, include current date's
 		//	class
-		$class = !$outside || $this->show_outside() ?
-			$this->date_class($dt) : '';
+		$class = !$outside || $this->show_outside() ? $this->date_class($dt) : '';
 		if ($outside)
 			$class = trim("$class outside");
 
@@ -155,8 +149,7 @@ abstract class CalendarEngine extends TableEngine {
 			return 1;
 
 		// Determine date for current block
-		$dt = date('Y-m-d',
-			strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
+		$dt = date('Y-m-d', strtotime($this->dt) + ($row * 7 + $col) * 24*60*60 + 3601);
 
 		// If date within current month, no column span
 		if (substr($dt, 0, 7) == $this->ym)

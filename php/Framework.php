@@ -298,51 +298,42 @@ class Framework {
 	 *
 	 * @param array $cfg Configuration settings
 	 */
-	public static function init ($cfg = array()) {
+	public static function init ($cfg = []) {
 
 		try {
 
 			if (!is_null(self::$_fst))
 				throw new UsageException('Framework is already initialized');
 			if (!is_array($cfg))
-				throw new UsageException(
-					'Framework configuration parameter is not an array');
+				throw new UsageException('Framework configuration parameter is not an array');
 
 			self::$_cfg = array_merge(
-				array(
-
+				[
 					'root'=>'/', // Application root, including trailing slash
 
 					// Application directories, no trailing slash
 					'app'=>'app', // Controller directory
-					'class'=>'class',
-						// Directory or array of directories for autoload
-						//	classes, or false
+					'class'=>'class', // Directory or array of directories for autoload classes, or false
 					'content'=>'content', // Directory for content includes
 					'inc'=>'inc', // Directory for template includes
-					'lib'=>'lib',
-						// Directory or array of directories for library
-						//	includes, or false
+					'lib'=>'lib', // Directory or array of directories for library includes, or false
 					'template'=>'template', // Directory for templates
 
 					// Application options
 					'ajax'=>true, // Handle Ajax requests
-					'controllers'=>array(), // Controller map
+					'controllers'=>[], // Controller map
 					'copyright'=>self::COPYRIGHT_STD, // FST Copyright comments
 					'default'=>true, // Enable default controller selection
 					'debug'=>null, // From .env file by default
-					'debug_error_reporting'=>E_ALL,
-						// Error reporting level, when debug is set
+					'debug_error_reporting'=>E_ALL, // Error reporting level, when debug is set
 					'env'=>false, // Environment file, array of files, or false
 					'helpers'=>true, // Define helper functions
 					'home'=>'home', // Controller name for home page
-					'meta-content-type'=>true,
-						// Generate default meta content-type tag
-					'meta-viewport'=>true,
-						// Generate default meta viewport tag
+					'meta-content-type'=>true, // Generate default meta content-type tag
+					'meta-viewport'=>true, // Generate default meta viewport tag
 					'timezone'=>false, // Timezone, or false for system default
 					'session'=>false, // session name, false for no session
-				),
+				],
 				$cfg);
 
 			self::$_fst = new self();
@@ -351,17 +342,14 @@ class Framework {
 			if (self::config('debug')) {
 				$fstdir = dirname(__FILE__);
 				foreach ($e->getTrace() as $trace) {
-					if (isset($trace['file']) &&
-							dirname($trace['file']) != $fstdir) {
+					if (isset($trace['file']) && dirname($trace['file']) != $fstdir) {
 						$file = $trace['file'];
 						$line = $trace['line'];
 						break;
 					}
 				}
 			}
-			$msg = isset($file, $line) ?
-				"FST Error in $file at line $line: {$e->getMessage()}" :
-				"FST Error: {$e->getMessage()}";
+			$msg = isset($file, $line) ? "FST Error in $file at line $line: {$e->getMessage()}" : "FST Error: {$e->getMessage()}";
 			error_log($msg);
 			if (self::config('debug'))
 				print $msg;
@@ -437,11 +425,7 @@ class Framework {
 			}
 			static $autoload_directories = null;
 			if ($autoload_directories === null)
-				$autoload_directories =
-					($autoload_config = self::config('class')) ?
-						(is_array($autoload_config) ?
-							$autoload_config : array($autoload_config)) :
-						array();
+				$autoload_directories = ($autoload_config = self::config('class')) ? (is_array($autoload_config) ? $autoload_config : [ $autoload_config ]) : [];
 			foreach ($autoload_directories as $d)
 				if (file_exists("$d/$cls.php")) {
 					require "$d/$cls.php";
@@ -451,19 +435,16 @@ class Framework {
 
 		// Application include libraries
 		if (self::config('lib'))
-			foreach (is_array(self::config('lib')) ?
-					self::config('lib') : array(self::config('lib')) as $d)
+			foreach (is_array(self::config('lib')) ? self::config('lib') : [ self::config('lib') ] as $d)
 				foreach (glob("$d/*.php") as $f)
 					require $f;
 
 		// Get controller arguments from URI
-		self::$_args = preg_replace(
-			array("'^" . self::config('root') . "'", '/\?.*$/'),
-			'', $_SERVER['REQUEST_URI']);
+		self::$_args = preg_replace([ "'^" . self::config('root') . "'", '/\?.*$/' ], '', $_SERVER['REQUEST_URI']);
 		self::$_argv = explode('/', self::$_args);
 
 		// Get controller action, if specified (from QUERY_STRING)
-		list(self::$_action) = count($_GET) ? array_keys($_GET) : array(false);
+		list(self::$_action) = count($_GET) ? array_keys($_GET) : [ false ];
 
 		// Determine the controller name (first match in controllers config)
 		self::$_ctrlname = false;
@@ -475,17 +456,14 @@ class Framework {
 		if (!self::$_ctrlname) {
 			if (!self::arg(0) && self::config('home'))
 				self::$_ctrlname = self::config('home');
-			else if (self::config('default') &&
-					preg_match('/^[a-z][\w\-]*$/i', self::arg(0)))
-				self::$_ctrlname = lcfirst(implode('', array_map('ucfirst',
-					explode('-', strtolower(self::arg(0))))));
+			else if (self::config('default') && preg_match('/^[a-z][\w\-]*$/i', self::arg(0)))
+				self::$_ctrlname = lcfirst(implode('', array_map('ucfirst', explode('-', strtolower(self::arg(0))))));
 		}
 
 		// If still no match, no controller is configured
 		if (!self::$_ctrlname) {
 			if (self::config('debug'))
-				throw new UsageException(
-					"No controller configured for '" . self::args() . "'");
+				throw new UsageException("No controller configured for '" . self::args() . "'");
 			self::header_404();
 		}
 
@@ -493,26 +471,23 @@ class Framework {
 		$ctrlclass = self::$_ctrlname . '_controller';
 		if (!class_exists($ctrlclass)) {
 			if (self::config('debug'))
-				throw new UsageException(
-					"Controller class not found: $ctrlclass");
+				throw new UsageException("Controller class not found: $ctrlclass");
 			self::header_404();
 		}
 		$rc = new \ReflectionClass($ctrlclass);
 		if ($rc->isAbstract()) {
 			if (self::config('debug'))
-				throw new UsageException(
-					"Controller class is abstract: $ctrlclass");
+				throw new UsageException("Controller class is abstract: $ctrlclass");
 			self::header_404();
 		}
 		self::$_ctrl = new $ctrlclass();
 		if (!is_a(self::$_ctrl, 'FST\Controller'))
-			throw new UsageException(
-				"Class $ctrlclass is not derived from FST\\Controller");
+			throw new UsageException("Class $ctrlclass is not derived from FST\\Controller");
 
 		// Build list of traits used by this controller and any of its
 		//	parent controllers.
 		$class = $ctrlclass;
-		$traits = array();
+		$traits = [];
 		while ($class) {
 			$traits = array_merge(class_uses($class), $traits);
 			$class = get_parent_class($class);
@@ -538,9 +513,7 @@ class Framework {
 		}
 
 		// If an Ajax request, invoke the Ajax handler and exit.
-		if (self::config('ajax') &&
-				isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-				$_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+		if (self::config('ajax') && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
 			self::ctrl()->_invoke_ajax_handler();
 			exit;
 		} 
@@ -563,11 +536,11 @@ class Framework {
 	protected $parser;
 
 	/** @ignore */
-	protected $stack = array();		// Parser element stack
+	protected $stack = []; // Parser element stack
 	/** @ignore */
-	protected $head = false;		// HEAD element encountered
+	protected $head = false; // HEAD element encountered
 	/** @ignore */
-	protected $body = false;		// BODY element encountered
+	protected $body = false; // BODY element encountered
 
 	/** @ignore */
 	protected function generate_page () {
@@ -583,7 +556,7 @@ class Framework {
 		else if (file_exists("$fname.php")) { // DEPRECATED
 			// Logic same as filename format above. Extension .xml.php is
 			//	now preferred for PHP-generated templates.
-			trigger_error('Using .php extension for tempalates is deprecated, use .xml.php extension.', E_USER_DEPRECATED);
+			trigger_error('Using .php extension for tempalates is outdated, use .xml.php extension instead.', E_USER_DEPRECATED);
 			ob_start();
 			$fname = "$fname.php";
 			self::content($fname);
@@ -594,8 +567,7 @@ class Framework {
 			$template = file($fname, FILE_IGNORE_NEW_LINES);
 		}
 		else
-			throw new UsageException(
-				"Template '" . self::ctrl()->template . "' not found");
+			throw new UsageException("Template '" . self::ctrl()->template . "' not found");
 
 		// Output HTML5 DOCTYPE
 		print "<!DOCTYPE HTML>\n";
@@ -607,30 +579,26 @@ class Framework {
 			print "<!-- Template: $fname\n";
 			$ln = 1;
 			foreach ($template as $line)
-				printf("%4d: %s\n", $ln++, str_replace(
-					array('<!--', '-->'), array('<! -', '- >'), $line));
+				printf("%4d: %s\n", $ln++, str_replace([ '<!--', '-->' ], [ '<! -', '- >' ], $line));
 			print "-->\n";
 		}
 
 		// Parse the template.
 		$this->parser = xml_parser_create();
 		xml_parser_set_option($this->parser, XML_OPTION_CASE_FOLDING, 0);
-		xml_set_character_data_handler($this->parser, array(&$this, 'data'));
-		xml_set_element_handler($this->parser,
-			array(&$this, 'element'), array(&$this, 'element_end'));
+		xml_set_character_data_handler($this->parser, [ &$this, 'data' ]);
+		xml_set_element_handler($this->parser, [ &$this, 'element' ], [ &$this, 'element_end' ]);
 
 		try {
 			$ln = 0;
 			$cnt = count($template);
 			foreach ($template as $line)
 				if (!xml_parse($this->parser, "$line\n", ++$ln == $cnt))
-					throw new TemplateException(
-						xml_error_string(xml_get_error_code($this->parser)));
+					throw new TemplateException(xml_error_string(xml_get_error_code($this->parser)));
 		}
 		catch (TemplateException $e) {
 			$line = xml_get_current_line_number($this->parser);
-			$msg = "FST Error in " .
-				realpath($fname) . " at line $line: {$e->getMessage()}";
+			$msg = "FST Error in " . realpath($fname) . " at line $line: {$e->getMessage()}";
 			error_log($msg);
 			if (self::config('debug'))
 				print $msg;
@@ -654,13 +622,10 @@ class Framework {
 				break;
 			case 'script':
 				if (!ctype_space($data))
-					throw new TemplateException(
-						'Embedded scripts not allowed');
+					throw new TemplateException('Embedded scripts not allowed');
 			default:
 				if (!ctype_space($data))
-					throw new TemplateException(
-						'Element data not allowed in <' .
-							end($this->stack) . '>');
+					throw new TemplateException('Element data not allowed in <' . end($this->stack) . '>');
 		}
 	}
 
@@ -680,8 +645,7 @@ class Framework {
 
 			// If PRE attribute, include named file prior to HTML tag
 			if (array_key_exists('pre-inc', $attr)) {
-				self::content(
-					self::config('inc') . '/' . $attr['pre-inc'] . '.php');
+				self::content(self::config('inc') . '/' . $attr['pre-inc'] . '.php');
 				unset($attr['pre-inc']);
 			}
 
@@ -698,19 +662,12 @@ class Framework {
 				$this->copyright();
 			print "<title>" . htmlentities(self::ctrl()->title) . "</title>\n";
 			if (self::config('copyright') != self::COPYRIGHT_STEALTH)
-				print '<meta name="generator" ' .
-					'content="FST Application Framework, Ver. ' .
-					self::VERSION . ' (' . self::VERSION_RELEASE .
-					')" />' . "\n";
+				print '<meta name="generator" content="FST Application Framework, Ver. ' . self::VERSION . ' (' . self::VERSION_RELEASE . ')" />' . "\n";
 			if (self::config('meta-content-type'))
-				print '<meta http-equiv="Content-type" ' .
-					'content="text/html;charset=UTF-8" />' . "\n";
+				print '<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />' . "\n";
 			if (self::config('meta-viewport'))
-				print '<meta name="viewport" ' .
-					'content="width=device-width, initial-scale=1.0" />' .
-					"\n";
-			print '<script>var _approot = "' .
-				self::config('root') . '";</script>' . "\n";
+				print '<meta name="viewport" content="width=device-width, initial-scale=1.0" />' . "\n";
+			print '<script>var _approot = "' . self::config('root') . '";</script>' . "\n";
 			break;
 
 		case 'body':
@@ -718,7 +675,7 @@ class Framework {
 				throw new TagException($tag);
 			if (!$this->head) {
 				array_pop($this->stack);
-				$this->element($p, 'head', array());
+				$this->element($p, 'head', []);
 				$this->element_end($p, 'head');
 				array_push($this->stack, 'body');
 			}
@@ -752,8 +709,7 @@ class Framework {
 			// Invoke content pre-processor
 			if (isset($attr['name'])) {
 				if (self::config('debug')) $name = $attr['name'];
-				$content = self::ctrl()
-					->_invoke_content_preprocessor($attr['name']);
+				$content = self::ctrl()->_invoke_content_preprocessor($attr['name']);
 				unset($attr['name']);
 			}
 			else {
@@ -781,15 +737,13 @@ class Framework {
 			}
 			else if (is_object($content)) { // Object to string
 				if (!method_exists($content, '__toString'))
-					throw new TemplateException(
-						'Content object does not implement __toString');
+					throw new TemplateException('Content object does not implement __toString');
 				if (self::config('debug'))
 					print "<!-- Object -->";
 				print $content->__toString();
 			}
 			else if (!is_string($content)) // Invalid return type
-				throw new TemplateException(
-					'Content type ' . gettype($content) . ' is not valid');
+				throw new TemplateException('Content type ' . gettype($content) . ' is not valid');
 			else if (substr($content, 0, 1) == '<') { // HTML string
 				if (self::config('debug'))
 					print "<!-- HTML -->";
@@ -817,8 +771,7 @@ class Framework {
 				if (count($this->stack) > 3)
 					throw new TagException($tag);
 				foreach ($attr as $k=>$v)
-					if (array_search($k, array(
-							'custom', 'name', 'required', 'tag')) === false)
+					if (array_search($k, [ 'custom', 'name', 'required', 'tag' ]) === false)
 						throw new TagException($tag, $k);
 			}
 			if (!isset($attr['name']))
@@ -840,11 +793,8 @@ class Framework {
 			$ext = '.php';
 			if ($tag == 'script') $ext = '.js';
 			if ($tag == 'style') $ext = '.css';
-			$fname_default = 
-				realpath(self::config('inc')) . "/{$attr['name']}$ext";
-			$fname_custom =
-				realpath(self::config('inc')) . "/{$attr['name']}_" .
-					self::ctrlname() . $ext;
+			$fname_default = realpath(self::config('inc')) . "/{$attr['name']}$ext";
+			$fname_custom = realpath(self::config('inc')) . "/{$attr['name']}_" . self::ctrlname() . $ext;
 			unset($attr['name']);
 
 			// Determine which include files exist
@@ -854,8 +804,7 @@ class Framework {
 			// Get custom option
 			if (isset($attr['custom'])) {
 				$custom = $attr['custom'];
-				if (array_search($custom, array(
-						'after', 'before', 'ignore', 'replace')) === false)
+				if (array_search($custom, [ 'after', 'before', 'ignore', 'replace' ]) === false)
 					throw new TagException('inc', 'custom', $custom);
 				unset($attr['custom']);
 			}
@@ -929,8 +878,7 @@ class Framework {
 				$attr['src'] .= '?' . md5(filemtime($attr['path']));
 				unset($attr['path']);
 			}
-			else if (!preg_match('"^(\w+:|/)"', $attr['src']) &&
-					file_exists($attr['src']))
+			else if (!preg_match('"^(\w+:|/)"', $attr['src']) && file_exists($attr['src']))
 				$attr['src'] .= '?' . md5(filemtime($attr['src']));
 
 			$attr['src'] = self::uri($attr['src']);
@@ -942,8 +890,7 @@ class Framework {
 				throw new TagException($tag);
 			if (!isset($attr['href']))
 				throw new TagAttReqException($tag, 'href');
-			if (!isset($attr['rel']) &&
-					preg_match('/\.(css|less)(\?.*)?$/', $attr['href'])) {
+			if (!isset($attr['rel']) && preg_match('/\.(css|less)(\?.*)?$/', $attr['href'])) {
 				$attr['rel'] = 'stylesheet';
 				if (preg_match('/\.less(\?.*)?$/', $attr['href']))
 					$attr['rel'] .= '/less';
@@ -955,8 +902,7 @@ class Framework {
 					$attr['href'] .= '?' . md5(filemtime($attr['path']));
 					unset($attr['path']);
 				}
-				else if (!preg_match('"^(\w+:|/)"', $attr['href']) &&
-						file_exists($attr['href']))
+				else if (!preg_match('"^(\w+:|/)"', $attr['href']) && file_exists($attr['href']))
 					$attr['href'] .= '?' . md5(filemtime($attr['href']));
 			}
 			$attr['href'] = self::uri($attr['href']);
@@ -964,8 +910,7 @@ class Framework {
 			break;
 
 		case 'title':
-			if (count($this->stack) < 4 || !preg_match(
-					'/^h[1-6]$/', $this->stack[count($this->stack)-2]))
+			if (count($this->stack) < 4 || !preg_match('/^h[1-6]$/', $this->stack[count($this->stack)-2]))
 				throw new TagException($tag);
 			print htmlspecialchars(self::ctrl()->title);
 			break;
@@ -1036,10 +981,8 @@ class Framework {
 	protected function copyright () {
 		print "<!--\n";
 		print "  Generated by FST Application Framework\n\n";
-		print '  FST Application Framework, Ver. ' . self::VERSION .
-			' (' . self::VERSION_RELEASE . ')' . "\n";
-		print '  Copyright (c) ' . self::VERSION_COPYRIGHT .
-			", Norman Lippincott Jr, Saylorsburg PA USA\n";
+		print '  FST Application Framework, Ver. ' . self::VERSION . ' (' . self::VERSION_RELEASE . ')' . "\n";
+		print '  Copyright (c) ' . self::VERSION_COPYRIGHT . ", Norman Lippincott Jr, Saylorsburg PA USA\n";
 		print "  All Rights Reserved\n";
 		print "-->\n";
 	}
@@ -1069,20 +1012,14 @@ class ContentException extends TemplateException {
 /** @ignore */
 class IncludeException extends TemplateException {
 	public function __construct ($fname, $fname2=false) {
-		parent::__construct($fname2 ?
-			"Include file $fname or $fname2 not found" :
-			"Include file $fname not found");
+		parent::__construct($fname2 ? "Include file $fname or $fname2 not found" : "Include file $fname not found");
 	}
 }
 
 /** @ignore */
 class TagException extends TemplateException {
 	public function __construct ($tag, $attr=false, $value=false) {
-		parent::__construct($attr ?
-			($value ?
-				"<$tag $attr=\"$value\"> is not valid" :
-				"<$tag $attr> is not valid") :
-			"<$tag> not allowed here");
+		parent::__construct($attr ? ($value ? "<$tag $attr=\"$value\"> is not valid" : "<$tag $attr> is not valid") : "<$tag> not allowed here");
 	}
 }
 
