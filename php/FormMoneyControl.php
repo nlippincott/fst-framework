@@ -48,7 +48,7 @@ class FormMoneyControl extends FormNumberControl {
 	public function data () {
 		$data = parent::data();
 		if ($data && preg_match('/^\$?\d{1,3}(,\d{3})*(.\d\d)?$/', $data))
-			return str_replace(array('$', ','), '', $data);
+			return str_replace([ '$', ',' ], '', $data);
 		return $data;
 	}
 
@@ -79,7 +79,6 @@ class FormMoneyControl extends FormNumberControl {
 	 * @return FormMoneyControl This FormControl object
 	 */
 	public function init ($val) {
-		return parent::init($val === false || $val === null || $val === "" ?
-			"" : number_format((float)$val, 2));
+		return parent::init($val === false || $val === null || $val === "" ? "" : number_format((float)$val, 2));
 	}
 }

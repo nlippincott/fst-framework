@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -52,9 +52,7 @@ class FormNoteControl extends FormControl {
 	 */
 	public function __toString () {
 		$note = $this->note === null ? '' : $this->note;
-		return '<span' . Framework::attr($this->attr) . '>' .
-			($this->html ? $note : htmlspecialchars($note)) .
-			'</span>';
+		return '<span' . Framework::attr($this->attr) . '>' . ($this->html ? $note : htmlspecialchars($note)) . '</span>';
 	}
 
 	/**

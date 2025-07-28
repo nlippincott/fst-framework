@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -42,10 +42,7 @@ class FormOptionControl extends FormInputControl {
 	 * @return string HTML code
 	 */
 	public function __toString () {
-		return '<input' . Framework::attr($this->attr) . ' />' .
-			'<label for="' . $this->attr['id'] . '">' .
-			($this->text ? htmlspecialchars($this->text) : '') .
-			'</label>';
+		return '<input' . Framework::attr($this->attr) . ' />' . '<label for="' . $this->attr['id'] . '">' . ($this->text ? htmlspecialchars($this->text) : '') . '</label>';
 	}
 
 	/**

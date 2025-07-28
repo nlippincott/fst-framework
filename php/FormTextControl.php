@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -52,8 +52,7 @@ class FormTextControl extends FormInputControl {
 		ob_start();
 		print '<datalist id="' . $this->attr['id'] . '-datalist">';
 		foreach ($this->datalist as $list_item)
-			print '<option' .
-				Framework::attr(array('value'=>$list_item)) . ' />';
+			print '<option' . Framework::attr(array('value'=>$list_item)) . ' />';
 		print '</datalist>';
 		return parent::__toString() . ob_get_clean();
 	}
@@ -92,8 +91,7 @@ class FormTextControl extends FormInputControl {
 	public function error () {
 		$msg = parent::error();
 		if (!$msg && $this->regex && $this->data())
-			$msg = preg_match($this->regex, $this->data()) ?
-				false : $this->regex_msg;
+			$msg = preg_match($this->regex, $this->data()) ? false : $this->regex_msg;
 		return $msg;
 	}
 

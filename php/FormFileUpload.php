@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -39,8 +39,7 @@ class FormFileUpload {
 		$this->fileinfo = $fileinfo;
 		$tmp = pathinfo($this->fileinfo['name']);
 		$this->fileinfo['filename'] = $tmp['filename']; // Name w/o extension
-		$this->fileinfo['extension'] = // Extension, lowercased
-			isset($tmp['extension']) ? strtolower($tmp['extension']) : '';
+		$this->fileinfo['extension'] = isset($tmp['extension']) ? strtolower($tmp['extension']) : ''; // Extension, lowercased
 	}
 
 	/**
@@ -71,8 +70,7 @@ class FormFileUpload {
 	 */
 	public function __get ($name) {
 		if (!isset($this->fileinfo[$name]))
-			throw new UsageException(
-				get_class($this) . ": Invalid fileinfo property, $name");
+			throw new UsageException(get_class($this) . ": Invalid fileinfo property, $name");
 		return $this->fileinfo[$name];
 	}
 

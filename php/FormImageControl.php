@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -34,8 +34,7 @@ class FormImageControl extends FormFileControl {
 		parent::__construct($form, $name, $label);
 		$this->attr('accept', 'image/*');
 		$this->attr('data-fst', 'form-control-file-image');
-		$this->type('jpg,jpeg,gif,png,svg',
-			'Image file (jpeg, png, svg, gif) required');
+		$this->type('jpg,jpeg,gif,png,svg', 'Image file (jpeg, png, svg, gif) required');
 	}
 
 	/**
