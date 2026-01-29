@@ -42,11 +42,11 @@ class Framework {
 
 	// FST version constants
 	/** FST version number. */
-	const VERSION = '6.0.2';
+	const VERSION = '6.0.3';
 	/** FST copyright dates */
-	const VERSION_COPYRIGHT = '2004-25';
+	const VERSION_COPYRIGHT = '2004-26';
 	/** FST version release date */
-	const VERSION_RELEASE = '2025-08-04';
+	const VERSION_RELEASE = '2026-01-29';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
@@ -521,9 +521,13 @@ class Framework {
 		// Initialize any traits used by the controller. Trait initialization
 		//	methods are the same as the trait followed by '_init'.
 		foreach ($traits as $trait) {
-			$method = "{$trait}_init";
-			if (method_exists(self::ctrl(), $method))
-				self::ctrl()->$method();
+			// Note that trait name includes namespace designation, if any
+			$tmp = array_slice(explode("\\", $trait), -1);
+			if (count($tmp) > 0) {
+				$method = "{$tmp[0]}_init";
+				if (method_exists(self::ctrl(), $method))
+					self::ctrl()->$method();
+			}
 		}
 
 		// Initialize the controller. First, call the controller's init
