@@ -316,7 +316,7 @@ class Framework {
 
 					// Application directories, no trailing slash
 					'class'=>'class', // Directory or array of directories for autoload classes, or false
-					'lib'=>'lib', // Directory or array of directories for library includes, or false
+					'lib'=>'lib', // Directory/file or array of directories/files for library includes, or false
 
 					// Application options
 					'debug'=>null, // From .env file by default
@@ -334,7 +334,7 @@ class Framework {
 					'class'=>'class', // Directory or array of directories for autoload classes, or false
 					'content'=>'content', // Directory for content includes
 					'inc'=>'inc', // Directory for template includes
-					'lib'=>'lib', // Directory or array of directories for library includes, or false
+					'lib'=>'lib', // Directory/file or array of directories/files for library includes, or false
 					'template'=>'template', // Directory for templates
 
 					// Application options
@@ -462,9 +462,15 @@ class Framework {
 
 		// Application include libraries
 		if (self::config('lib'))
-			foreach (is_array(self::config('lib')) ? self::config('lib') : [ self::config('lib') ] as $d)
-				foreach (glob("$d/*.php") as $f)
-					require $f;
+			foreach (is_array(self::config('lib')) ? self::config('lib') : [ self::config('lib') ] as $d) {
+				if (is_file($d))
+					require_once $d;
+				else if (is_dir($d))
+					foreach (glob("$d/*.php") as $f)
+						require_once $f;
+				else
+					throw new UsageException("Library path not found: $d");
+			}
 
 		// If in CLI mode, no further processing
 		if (self::$_cli)
