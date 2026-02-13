@@ -158,18 +158,6 @@ function __button_img ($uri, $src, $alt, $attr=array())
 	{ print _button_img($uri, $src, $alt, $attr); }
 
 /**
- * Get (or set) FST configuration option.
- *
- * This is a convenience function for calling Framework::config.
- * 
- * @param string $opt Option name
- * @param mixed $value Set value for option (optional)
- * @return mixed Option value
- */
-function _config ($opt, $value=null)
-	{ return FST\Framework::config($opt, $value); }
-
-/**
  * Get the FST Controller object.
  *
  * This is a convenience function for returning current FST controller.
@@ -184,16 +172,6 @@ function _ctrl () { return FST\Framework::ctrl(); }
  * @return string Controller name
  */
 function _ctrlname () { return FST\Framework::ctrl()->ctrl(); }
-
-/**
- * Get environment variable value.
- * 
- * Convenience function, calls Framework::env.
- *
- * @param string $var Environment variable name, or null for all
- * @return string|string[] Environment variable value
- */
-function _env ($var=null) { return FST\Framework::env($var); }
 
 /**
  * Get HTML IMG tag.
