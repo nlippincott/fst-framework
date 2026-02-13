@@ -527,7 +527,8 @@ class Framework {
 		// Initialize any traits used by the controller. Trait initialization
 		//	methods are the same as the trait followed by '_init'.
 		foreach ($traits as $trait) {
-			$method = "{$trait}_init";
+			// Account for namespaced traits by stripping off namespace and leading backslashes
+			$method = preg_replace('/.*\\\\/', '', $trait) . '_init';
 			if (method_exists(self::ctrl(), $method))
 				self::ctrl()->$method();
 		}
