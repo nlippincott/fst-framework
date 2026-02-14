@@ -319,11 +319,11 @@ class Framework {
 					'lib'=>'lib', // Directory/file or array of directories/files for library includes, or false
 
 					// Application options
-					'debug'=>null, // From .env file by default
+					'debug'=>null, // From .env file "DEBUG" by default
 					'debug_error_reporting'=>E_ALL, // Error reporting level, when debug is set
 					'env'=>false, // Environment file, array of files, or false
 					'helpers'=>true, // Define helper functions
-					'timezone'=>false, // Timezone, or false for system default
+					'timezone'=>null, // Timezone, from .env file "TZ" by default
 				] : [
 					// Default configuration for web mode
 
@@ -349,7 +349,7 @@ class Framework {
 					'home'=>'home', // Controller name for home page
 					'meta-content-type'=>true, // Generate default meta content-type tag
 					'meta-viewport'=>true, // Generate default meta viewport tag
-					'timezone'=>false, // Timezone, or false for system default
+					'timezone'=>null, // Timezone, from .env file "TZ" by default
 					'session'=>false, // session name, false for no session
 				], $cfg);
 
@@ -407,6 +407,10 @@ class Framework {
 		// If 'debug' option not set in FST config, use DEBUG from .env file if set
 		if (self::config('debug') === null && isset(self::$_env['DEBUG']))
 			self::config('debug', self::$_env['DEBUG']);
+
+		// If 'timezone' option not set in FST config, use TIMEZONE from .env file if set
+		if (self::config('timezone') === null && isset(self::$_env['TIMEZONE']))
+			self::config('timezone', self::$_env['TIMEZONE']);
 
 		// Set error reporting, if debug mode is set
 		if (self::config('debug')) {
