@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -11,10 +11,12 @@
 // This file is to be the first file included in the application's index.php
 // file, and defines the various classes and function to support the
 // framework.
-//
-// In addition, this file registers all the standard form controls included
-// with the framework so that they are available with the Form class
-// @see <a href="fst-form-controls.html">FST Form Controls</a>
+
+
+// This file is used by the framework to register all standard form controls
+// included with the framework so that they are available with the Form class.
+// If is called (via 'require') as part of the framework initialization and
+// is not intended to be user-callable.
 
 require 'Form.php';
 require 'FormLabel.php';

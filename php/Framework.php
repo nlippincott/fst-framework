@@ -1,7 +1,7 @@
 <?php
 
 // FST Application Framework, Version 6.1
-// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may

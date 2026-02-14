@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -39,9 +39,7 @@ class FormTextareaControl extends FormControl {
 	 * @return string HTML code
 	 */
 	public function __toString () {
-		return '<textarea' . Framework::attr($this->attr) . '>' .
-			($this->value ? htmlspecialchars($this->value) : '') .
-			'</textarea>';
+		return '<textarea' . Framework::attr($this->attr) . '>' . ($this->value ? htmlspecialchars($this->value) : '') . '</textarea>';
 	}
 
 	/**

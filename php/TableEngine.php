@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -72,7 +72,7 @@ abstract class TableEngine {
 	 * 
 	 * @return string[] Associative of attribute/value pairs
 	 */
-	protected function table_attr () { return array(); }
+	protected function table_attr () { return []; }
 
 	/**
 	 * Get table class string.
@@ -126,7 +126,7 @@ abstract class TableEngine {
 	 * @param mixed $col One item from the columns array
 	 * @return string[] Associative of attribute/value pairs
 	 */
-	protected function head_attr ($col) { return array(); }
+	protected function head_attr ($col) { return []; }
 
 	/**
 	 * Get header cell class string.
@@ -204,7 +204,7 @@ abstract class TableEngine {
 	 * @param mixed $col One item from the columns array
 	 * @return string[] Associative array of attribute/value pairs
 	 */
-	protected function cell_attr ($row, $col) { return array(); }
+	protected function cell_attr ($row, $col) { return []; }
 
 	/**
 	 * Get cell class string.
@@ -271,7 +271,7 @@ abstract class TableEngine {
 	 * @param mixed $col One item from the columns array
 	 * @return string[] Associative of attribute/value pairs
 	 */
-	protected function foot_attr ($col) { return array(); }
+	protected function foot_attr ($col) { return []; }
 
 	/**
 	 * Get footer cell class string.
@@ -321,9 +321,9 @@ abstract class TableEngine {
 		$rows = $this->rows();
 		$columns = $this->columns();
 		if (!is_array($rows))
-			$rows = array($rows);
+			$rows = [ $rows ];
 		if (!is_array($columns))
-			$columns = array($columns);
+			$columns = [ $columns ];
 
 		// If no rows or no columns, return an empty string.
 		if (!count($rows) || !count($columns))
@@ -345,7 +345,7 @@ abstract class TableEngine {
 			$html .= "<caption>$caption</caption>";
 
 		// Get content for header cells
-		$content = array();
+		$content = [];
 		$count = 0;
 		$idx = 0;
 		foreach ($columns as $col)
@@ -362,7 +362,8 @@ abstract class TableEngine {
 					$span--;
 				else {
 					$attr = $this->head_attr($col);
-					if (!is_array($attr)) $attr = array();
+					if (!is_array($attr))
+						$attr = [];
 					$class = trim($this->col_class($col) . ' ' .
 						$this->head_class($col));
 					if ($class && !isset($attr['class']))
@@ -371,8 +372,7 @@ abstract class TableEngine {
 					$span = $colspan > 1 ? $colspan - 1 : 0;
 					if ($colspan > 1)
 						$attr['colspan'] = $colspan;
-					$html .= '<th' . Framework::attr($attr) . '>' .
-						$content[$idx] . '</th>';
+					$html .= '<th' . Framework::attr($attr) . '>' . $content[$idx] . '</th>';
 				}
 				$idx++;
 			}
@@ -397,9 +397,8 @@ abstract class TableEngine {
 						$span--;
 					else {
 						$attr = $this->cell_attr($row, $col);
-						if (!is_array($attr)) $attr = array();
-						$class = trim($this->col_class($col) . ' ' .
-							$this->cell_class($row, $col));
+						if (!is_array($attr)) $attr = [];
+						$class = trim($this->col_class($col) . ' ' . $this->cell_class($row, $col));
 						if ($class && !isset($attr['class']))
 							$attr['class'] = $class;
 						$id = $this->cell_id($row, $col);
@@ -409,8 +408,7 @@ abstract class TableEngine {
 						$span = $colspan > 1 ? $colspan - 1 : 0;
 						if ($colspan > 1)
 							$attr['colspan'] = $colspan;
-						$html .= '<td' . Framework::attr($attr) . '>' .
-							$this->cell($row, $col) . '</td>';
+						$html .= '<td' . Framework::attr($attr) . '>' . $this->cell($row, $col) . '</td>';
 					}
 				}
 
@@ -421,7 +419,7 @@ abstract class TableEngine {
 		}
 
 		// Get content for footer cells
-		$content = array();
+		$content = [];
 		$count = 0;
 		$idx = 0;
 		foreach ($columns as $col)
@@ -438,17 +436,16 @@ abstract class TableEngine {
 					$span--;
 				else {
 					$attr = $this->foot_attr($col);
-					if (!is_array($attr)) $attr = array();
-					$class = trim($this->col_class($col) . ' ' .
-						$this->foot_class($col));
+					if (!is_array($attr))
+						$attr = [];
+					$class = trim($this->col_class($col) . ' ' . $this->foot_class($col));
 					if ($class && !isset($attr['class']))
 						$attr['class'] = $class;
 					$colspan = (int)$this->foot_colspan($col);
 					$span = $colspan > 1 ? $colspan - 1 : 0;
 					if ($colspan > 1)
 						$attr['colspan'] = $colspan;
-					$html .= '<td' . Framework::attr($attr) . '>' .
-						$content[$idx] . '</td>';
+					$html .= '<td' . Framework::attr($attr) . '>' . $content[$idx] . '</td>';
 				}
 				$idx++;
 			}

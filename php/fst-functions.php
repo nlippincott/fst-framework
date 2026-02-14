@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -52,7 +52,7 @@ function __ ($s) { print _s($s); }
  * @param array $attr Associative array of attributes
  * @return string HTML A tag
  */
-function _a ($uri, $text, $attr=array())
+function _a ($uri, $text, $attr=[])
 	{ return _a_html($uri, htmlspecialchars($text), $attr); }
 
 /**
@@ -62,7 +62,7 @@ function _a ($uri, $text, $attr=array())
  * @param string $text Text to serve as hyperlink
  * @param array $attr Associative array of attributes
  */
-function __a ($uri, $text, $attr=array()) { print _a($uri, $text, $attr); }
+function __a ($uri, $text, $attr=[]) { print _a($uri, $text, $attr); }
 
 /**
  * Generate HTML A tag with HTML content.
@@ -72,7 +72,7 @@ function __a ($uri, $text, $attr=array()) { print _a($uri, $text, $attr); }
  * @param array $attr Associative array of attributes
  * @return string HTML A tag
  */
-function _a_html ($uri, $html, $attr=array()) {
+function _a_html ($uri, $html, $attr=[]) {
 	$attr['href'] = _uri($uri);
 	return _tag('a', $html, $attr);
 }
@@ -84,7 +84,7 @@ function _a_html ($uri, $html, $attr=array()) {
  * @param string $html HTML code to serve as hyperlink
  * @param array $attr Associative array of attributes
  */
-function __a_html ($uri, $html, $attr=array())
+function __a_html ($uri, $html, $attr=[])
 	{ print _a_html($uri, $html, $attr); }
 
 /**
@@ -95,7 +95,7 @@ function __a_html ($uri, $html, $attr=array())
  * @param array $attr Associative array of attributes
  * @return string HTML INPUT tag
  */
-function _button ($uri, $text, $attr=array())
+function _button ($uri, $text, $attr=[])
 	{ return _button_html($uri, htmlspecialchars($text), $attr); }
 
 /**
@@ -105,7 +105,7 @@ function _button ($uri, $text, $attr=array())
  * @param string $text Text to appear on button
  * @param array $attr Associative array of attributes
  */
-function __button ($uri, $text, $attr=array())
+function __button ($uri, $text, $attr=[])
 	{ print _button($uri, $text, $attr); }
 
 /**
@@ -116,12 +116,8 @@ function __button ($uri, $text, $attr=array())
  * @param array $attr Associative array of attributes
  * @return string HTML BUTTON tag
  */
-function _button_html ($uri, $html, $attr=array()) {
-	return _tag('button', $html,
-			array_merge(array(
-					'type'=>'button',
-					'data-fst-href'=>_uri($uri),
-				), $attr));
+function _button_html ($uri, $html, $attr=[]) {
+	return _tag('button', $html, array_merge([ 'type'=>'button', 'data-fst-href'=>_uri($uri), ], $attr));
 }
 
 /**
@@ -131,7 +127,7 @@ function _button_html ($uri, $html, $attr=array()) {
  * @param string $html Text to appear on button
  * @param array $attr Associative array of attributes
  */
-function __button_html ($uri, $html, $attr=array())
+function __button_html ($uri, $html, $attr=[])
 	{ print _button_html($uri, $html, $attr); }
 
 /**
@@ -143,7 +139,7 @@ function __button_html ($uri, $html, $attr=array())
  * @param array $attr Associative array of attributes
  * @return string HTML BUTTON tag
  */
-function _button_img ($uri, $src, $alt, $attr=array())
+function _button_img ($uri, $src, $alt, $attr=[])
 	{ return _button_html($uri, _img($src, $alt), $attr); }
 
 /**
@@ -154,7 +150,7 @@ function _button_img ($uri, $src, $alt, $attr=array())
  * @param string $alt Alternate text
  * @param array $attr Associative array of attributes
  */
-function __button_img ($uri, $src, $alt, $attr=array())
+function __button_img ($uri, $src, $alt, $attr=[])
 	{ print _button_img($uri, $src, $alt, $attr); }
 
 /**
@@ -181,7 +177,7 @@ function _ctrlname () { return FST\Framework::ctrl()->ctrl(); }
  * @param array $attr Associative array of attributes
  * @return string HTML IMG tag
  */
-function _img ($uri, $alt, $attr=array()) {
+function _img ($uri, $alt, $attr=[]) {
 	$attr['src'] = _uri($uri);
 	$attr['alt'] = $alt;
 	if (!isset($attr['title']))
@@ -196,7 +192,7 @@ function _img ($uri, $alt, $attr=array()) {
  * @param string $alt Alternate text
  * @param array $attr Associative array of attributes
  */
-function __img ($uri, $alt, $attr=array()) { print _img($uri, $alt, $attr); }
+function __img ($uri, $alt, $attr=[]) { print _img($uri, $alt, $attr); }
 
 /**
  * Convert string to HTML for printing.
@@ -217,9 +213,8 @@ function _s ($s) { return $s ? nl2br(htmlspecialchars($s)) : ''; }
  * @param array $attr Associative array of attributes
  * @return string HTML element
  */
-function _tag ($tag, $html, $attr=array()) {
-	return "<$tag" . FST\Framework::attr($attr) .
-		($html === false ? ' />' : ">$html</$tag>");
+function _tag ($tag, $html, $attr=[]) {
+	return "<$tag" . FST\Framework::attr($attr) . ($html === false ? ' />' : ">$html</$tag>");
 }
 
 /**
@@ -229,7 +224,7 @@ function _tag ($tag, $html, $attr=array()) {
  * @param mixed $html HTML code for element content, or false for short tag
  * @param array $attr Associative array of attributes
  */
-function __tag ($tag, $html, $attr=array()) { print _tag($tag, $html, $attr); }
+function __tag ($tag, $html, $attr=[]) { print _tag($tag, $html, $attr); }
 
 /**
  * Generate HTML from class derived from TableEngine.
@@ -257,14 +252,13 @@ function __tag ($tag, $html, $attr=array()) { print _tag($tag, $html, $attr); }
  * @param mixed $args Constructor argument or array of constructor arguments
  * @return string Return value from __toString method of given class
  */
-function _table ($classname, $args=array()) {
+function _table ($classname, $args=[]) {
 	if (!is_string($classname) || !class_exists($classname))
 		throw new FST\UsageException("Parameter 1 must be a class name");
 	if (!is_subclass_of($classname, '\FST\TableEngine'))
-		throw new FST\UsageException(
-			"Class $classname is not derived from FST\\TableEngine");
+		throw new FST\UsageException("Class $classname is not derived from FST\\TableEngine");
 	$class = new ReflectionClass($classname);
-	$obj = $class->newInstanceArgs(is_array($args) ? $args : array($args));
+	$obj = $class->newInstanceArgs(is_array($args) ? $args : [ $args ]);
 	return $obj->__toString();
 }
 
@@ -276,7 +270,7 @@ function _table ($classname, $args=array()) {
  * @param string $classname Class name
  * @param mixed $args Constructor argument or array of constructor arguments
  */
-function __table ($classname, $args=array())
+function __table ($classname, $args=[])
 	{ print _table($classname, $args); }
 
 /**

@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -28,9 +28,9 @@ class FormMultipleControl extends FormControl {
 	/** @ignore */
 	private $implode = false;
 	/** @ignore */
-	private $options = array();
+	private $options = [];
 	/** @ignore */
-	private $value = array();
+	private $value = [];
 
 	/**
 	 * Control constructor.
@@ -59,15 +59,9 @@ class FormMultipleControl extends FormControl {
 		ob_start();
 
 		if ($this->check) {
-			print '<div' . Framework::attr(array(
-				'id'=>$this->attr['id'],
-				'data-fst'=>'form-control-multiple',
-				'data-fst-name'=>$this->attr['name'])) . '>';
+			print '<div' . Framework::attr([ 'id'=>$this->attr['id'], 'data-fst'=>'form-control-multiple', 'data-fst-name'=>$this->attr['name'] ]) . '>';
 
-			$attr = array(
-				'data-fst'=>'form-control-multiple-option',
-				'name'=>$this->attr['name'],
-				'type'=>'checkbox');
+			$attr = [ 'data-fst'=>'form-control-multiple-option', 'name'=>$this->attr['name'], 'type'=>'checkbox' ];
 
 			$cnt = 0;
 			foreach ($this->options as $k=>$v) {
@@ -128,7 +122,7 @@ class FormMultipleControl extends FormControl {
 	 * @return string[]|string Array or string containing the selected values
 	 */
 	public function data () {
-		$val = isset($_POST[$this->name()]) ? $_POST[$this->name()] : array();
+		$val = isset($_POST[$this->name()]) ? $_POST[$this->name()] : [];
 		return $this->implode ? implode("\n", $val) : $val;
 	}
 
@@ -138,8 +132,7 @@ class FormMultipleControl extends FormControl {
 	 * @return Error message string, or false if no error
 	 */
 	public function error () {
-		return $this->is_required() && !($this->implode ? strlen($this->data()) : count($this->data())) ?
-			'Value required' : false;
+		return $this->is_required() && !($this->implode ? strlen($this->data()) : count($this->data())) ? 'Value required' : false;
 	}
 
 	/**
@@ -160,8 +153,7 @@ class FormMultipleControl extends FormControl {
 			$this->value = $val;
 		else
 			$this->value[] = $val;
-		$this->value = is_array($val) ?
-			$val : array_map('trim', explode("\n", trim($val)));
+		$this->value = is_array($val) ? $val : array_map('trim', explode("\n", trim($val)));
 		return $this;
 	}
 
@@ -247,7 +239,7 @@ class FormMultipleControl extends FormControl {
 			$desc = $key;
 
 		// Build an associative array of options.
-		$this->options = array();
+		$this->options = [];
 		$this->assoc = true;
 		if (is_object($opt[0]))
 			foreach ($opt as $row)

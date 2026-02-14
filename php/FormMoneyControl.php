@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -48,7 +48,7 @@ class FormMoneyControl extends FormNumberControl {
 	public function data () {
 		$data = parent::data();
 		if ($data && preg_match('/^\$?\d{1,3}(,\d{3})*(.\d\d)?$/', $data))
-			return str_replace(array('$', ','), '', $data);
+			return str_replace([ '$', ',' ], '', $data);
 		return $data;
 	}
 
@@ -79,7 +79,6 @@ class FormMoneyControl extends FormNumberControl {
 	 * @return FormMoneyControl This FormControl object
 	 */
 	public function init ($val) {
-		return parent::init($val === false || $val === null || $val === "" ?
-			"" : number_format((float)$val, 2));
+		return parent::init($val === false || $val === null || $val === "" ? "" : number_format((float)$val, 2));
 	}
 }

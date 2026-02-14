@@ -1,23 +1,12 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
 // be used only with the expressed permission of the copyright holder.
 // Usage without permission is strictly prohibited.
-
-// Revisions, ver 5.2
-//	- Function save, if second parameter is int now represents maximum
-//		dimension for resize
-// Revisions, ver 5.3
-//	- Added additional cases for jpeg rotations
-//	- Moved scaling operations to image method
-//	- Added read method, overrides parent::read, includes scaling option
-//	- Added base64 method
-//	- Added src method
-//	- Added support for SVG upload
 
 namespace FST;
 
@@ -91,7 +80,7 @@ class FormImageUpload extends FormFileUpload {
 	 * Returns false if called for an SVG image upload.
 	 *
 	 * @param mixed $dim Max scaling dimension, or dimension options array
-	 * @return resource Image resource
+	 * @return \GdImage Image resource
 	 */
 	public function image ($dim=false) {
 		switch ($this->imagetype) {

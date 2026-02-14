@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -47,9 +47,7 @@ class FormSubmitControl extends FormInputControl {
 
 		print parent::__toString();
 		if ($this->cancel)
-			print '<button id="' . $this->id() . '-1" ' .
-				'data-fst="form-cancel" type="button">' .
-				htmlspecialchars($this->cancel) . '</button>';
+			print '<button id="' . $this->id() . '-1" ' . 'data-fst="form-cancel" type="button">' . htmlspecialchars($this->cancel) . '</button>';
 
 		return ob_get_clean();
 	}

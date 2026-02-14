@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -38,7 +38,6 @@ class FormNumberControl extends FormTextControl {
 		parent::__construct($form, $name, $label);
 		$this->attr('data-fst', 'form-control-number');
 		$this->attr('type', 'number');
-		//$this->size(8);
 	}
 
 	/**

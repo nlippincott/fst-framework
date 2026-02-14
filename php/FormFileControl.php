@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -22,7 +22,7 @@ class FormFileControl extends FormInputControl {
 	/** @ignore */
 	protected $extmsg;
 	/** @ignore */
-	protected $files = array();
+	protected $files = [];
 	/** @ignore */
 	protected $multiple = false;
 
@@ -50,13 +50,13 @@ class FormFileControl extends FormInputControl {
 			if (is_array($_FILES[$name]['name'])) {
 				for ($i = 0; $i < count($_FILES[$name]['name']); $i++)
 					if ($_FILES[$name]['error'][$i] != UPLOAD_ERR_NO_FILE)
-						$this->files[] = array(
+						$this->files[] = [
 							'name'=>$_FILES[$name]['name'][$i],
 							'type'=>$_FILES[$name]['type'][$i],
 							'size'=>$_FILES[$name]['size'][$i],
 							'tmp_name'=>$_FILES[$name]['tmp_name'][$i],
 							'error'=>$_FILES[$name]['error'][$i],
-						);
+						];
 			}
 			else if ($_FILES[$name]['error'] != UPLOAD_ERR_NO_FILE)
 				$this->files[] = $_FILES[$name];
@@ -102,14 +102,13 @@ class FormFileControl extends FormInputControl {
 
 		if ($this->multiple) {
 			// For multiple file control, return array of upload objects.
-			$this->data = array();
+			$this->data = [];
 			foreach ($this->files as $f)
 				$this->data[] = new $type($f);
 		}
 		else
 			// For single file control, return upload object or false.
-			$this->data = count($this->files) ?
-				new $type($this->files[0]) : false;
+			$this->data = count($this->files) ? new $type($this->files[0]) : false;
 
 		return $this->data;
 	}
@@ -145,9 +144,7 @@ class FormFileControl extends FormInputControl {
 		// Check for valid extension.
 		if (isset($this->ext))
 			foreach ($this->files as $f)
-				if (array_search(
-						strtolower(pathinfo($f['name'], PATHINFO_EXTENSION)),
-						$this->ext) === false)
+				if (array_search(strtolower(pathinfo($f['name'], PATHINFO_EXTENSION)), $this->ext) === false)
 					return $this->extmsg;
 
 		return false;
@@ -182,8 +179,7 @@ class FormFileControl extends FormInputControl {
 		$this->attr('data-fst-type', $ext);
 		$this->ext = explode(',', strtolower($ext));
 		$this->extmsg = $extmsg;
-		$this->attr('accept', implode(',',
-			array_map(function ($t) { return '.' . $t; }, $this->ext)));
+		$this->attr('accept', implode(',', array_map(function ($t) { return '.' . $t; }, $this->ext)));
 		return $this;
 	}
 }

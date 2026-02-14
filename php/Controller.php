@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -43,7 +43,7 @@ abstract class Controller {
 	// automatically-called methods for initializing, validating, and
 	// processing forms.
 	/** @ignore */
-	private $_forms = array();
+	private $_forms = [];
 
 	/**
 	 * Perform controller initialization.
@@ -132,8 +132,7 @@ abstract class Controller {
 
 		$this->$id = $this->_forms[$name] = new $class($id, "_form=$name");
 		if (!is_a($this->$id, 'FST\Form'))
-			throw new UsageException(
-				"Class $class is not derived from FST\\Form");
+			throw new UsageException("Class $class is not derived from FST\\Form");
 
 		$method = "form_$name";
 		if (method_exists($this, $method))
@@ -145,9 +144,15 @@ abstract class Controller {
 	/**
 	 * Get the server's host name.
 	 * 
+	 * @deprecated This function is outdated and will be removed in a future version. Please use $_SERVER['SERVER_NAME'] or $_SERVER['HTTP_HOST'] instead.
+	 * @deprecated 6.1
 	 * @return string Host name
 	 */
-	final protected function host () { return $_SERVER['SERVER_NAME']; }
+	#[\Deprecated(reason: "This function is outdated. Use \$_SERVER['SERVER_NAME'] or \$_SERVER['HTTP_HOST'] instead.")]
+	final protected function host () {
+		trigger_error('FST\Controller::host() is outdated. Use $_SERVER[\'SERVER_NAME\'] or $_SERVER[\'HTTP_HOST\'] instead.', E_USER_DEPRECATED);
+		return $_SERVER['SERVER_NAME'];
+	}
 
 	/**
 	 * Test if controller running as an Ajax call.
@@ -155,9 +160,7 @@ abstract class Controller {
 	 * @return bool Is running as Ajax flag
 	 */
 	final protected function is_ajax () {
-		return Framework::config('ajax') &&
-			isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-			$_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
+		return Framework::config('ajax') && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 	}
 
 	/**
@@ -227,9 +230,7 @@ abstract class Controller {
 	// determined by the action.
 	/** @ignore */
 	final public function _invoke_ajax_handler () {
-		$handler = method_exists($this, "ajax_{$this->action()}") ?
-			"ajax_{$this->action()}" :
-			(method_exists($this, 'ajax') ? 'ajax' : null);
+		$handler = method_exists($this, "ajax_{$this->action()}") ? "ajax_{$this->action()}" : (method_exists($this, 'ajax') ? 'ajax' : null);
 		if ($handler) {
 			header('Content-type: application/json');
 			print json_encode($this->$handler());
@@ -270,35 +271,29 @@ abstract class Controller {
 		//	by the error count on the form (this behavior is new in version
 		//	5.1).
 		$method = "form_{$name}_validate";
-//		$valid = $form->validate() &&
-//			(!method_exists($this, $method) || $this->$method($form));
-		$valid = $form->validate() ?
-			(method_exists($this, $method) ? $this->$method($form) : true) :
-			false;
+		$valid = $form->validate() ?  (method_exists($this, $method) ? $this->$method($form) : true) : false;
 		if ($valid === null)
 			$valid = !$form->error_count();
 
 		// Successful form submission...
 		if ($valid) {
 			$method = "form_{$name}_submit";
-			return array(
-					'name'=>$name,
-					'valid'=>true,
-					'errors'=>false,
-					'data'=>method_exists($this, $method) ?
-						$this->$method($form) : null
-				);
+			return [
+				'name'=>$name,
+				'valid'=>true,
+				'errors'=>false,
+				'data'=>method_exists($this, $method) ? $this->$method($form) : null,
+			];
 		}
 
 		// Failed form submission...
 		$method = "form_{$name}_submit_fail";
-		return array(
-				'name'=>$name,
-				'valid'=>false,
-				'errors'=>$form->errors(),
-				'data'=>method_exists($this, $method) ?
-					$this->$method($form) : null
-			);
+		return [
+			'name'=>$name,
+			'valid'=>false,
+			'errors'=>$form->errors(),
+			'data'=>method_exists($this, $method) ? $this->$method($form) : null,
+		];
 	}
 
 	// Invoke the page preprocessor (final).
@@ -306,24 +301,23 @@ abstract class Controller {
 	// will only be called in page generation context.
 	/** @ignore */
 	final public function _invoke_page_preprocessor () {
-		//{ if (method_exists($this, 'page')) $this->page(); }
 		$preprocessor = method_exists($this, 'page') ? 'page' : null;
-		if ($preprocessor) $this->$preprocessor();
+		if ($preprocessor)
+			$this->$preprocessor();
 	}
 
-	// @brief Invoke the POST handler.
+	// Invoke the POST handler.
 	//
 	// This calls the appropriate POST handler when data is sent to the
 	// controller in a non-Ajax call.
 	/** @ignore */
 	final public function _invoke_post_handler () {
-		$handler = method_exists($this, "post_{$this->action()}") ?
-			"post_{$this->action()}" :
-			(method_exists($this, 'post') ? 'post' : null);
-		if ($handler) $this->$handler();
+		$handler = method_exists($this, "post_{$this->action()}") ? "post_{$this->action()}" : (method_exists($this, 'post') ? 'post' : null);
+		if ($handler)
+			$this->$handler();
 	}
 
-	// @brief Ajax handler for producing dynamic content (final).
+	// Ajax handler for producing dynamic content (final).
 	/** @ignore */
 	final public function ajax__content () {
 
@@ -335,8 +329,7 @@ abstract class Controller {
 
 		// Produce requested content based on preprocessor result
 		if ($pre === null) { // Default content file
-			$fname = Framework::config('content') . '/' .
-				Framework::ctrlname() . ($name ? "_$name.php" : '.php');
+			$fname = Framework::config('content') . '/' . Framework::ctrlname() . ($name ? "_$name.php" : '.php');
 			ob_start();
 			Framework::content($fname);
 			$content = ob_get_clean();

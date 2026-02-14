@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -20,9 +20,9 @@ namespace FST;
 class FormSelectionControl extends FormControl {
 
 	/** @ignore */
-	private $options = array();
+	private $options = [];
 	/** @ignore */
-	private $options_group = array();
+	private $options_group = [];
 	/** @ignore */
 	private $prompt = null;
 	/** @ignore */
@@ -79,8 +79,7 @@ class FormSelectionControl extends FormControl {
 				if ($cnt > 1) print $this->radio_glued ? ' ' : '<br />';
 
 				print '<input' . Framework::attr($attr) . ' />';
-				print '<label for="' . $attr['id'] . '">' .
-					htmlspecialchars($label) . '</label>';
+				print '<label for="' . $attr['id'] . '">' . htmlspecialchars($label) . '</label>';
 			}
 
 			print '</span>';
@@ -89,8 +88,7 @@ class FormSelectionControl extends FormControl {
 			print '<select' . Framework::attr($this->attr) . '>';
 
 			if ($this->prompt)
-				print '<option value="">' . htmlspecialchars($this->prompt) .
-					'</option>';
+				print '<option value="">' . htmlspecialchars($this->prompt) . '</option>';
 
 			foreach ($this->options as $value=>$label) {
 				print '<option value="' . htmlspecialchars($value) . '"';
@@ -123,8 +121,7 @@ class FormSelectionControl extends FormControl {
 	 */
 	public function data () {
 		if ($this->radio && $this->radio_group)
-			return isset($_POST[$this->radio_group]) ?
-				$_POST[$this->radio_group] : $this->nodata;
+			return isset($_POST[$this->radio_group]) ? $_POST[$this->radio_group] : $this->nodata;
 		return parent::data();
 	}
 
@@ -216,7 +213,7 @@ class FormSelectionControl extends FormControl {
 			$desc = $key;
 
 		// Build an associative array of options.
-		$opts = array();
+		$opts = [];
 		if (is_object($opt[0]))
 			foreach ($opt as $row)
 				$opts[$row->$key] = $row->$desc;

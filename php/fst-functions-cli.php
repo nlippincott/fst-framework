@@ -24,8 +24,7 @@
  * @param mixed $value Set value for option (optional)
  * @return mixed Option value
  */
-function _config ($opt, $value=null)
-	{ return FST\Framework::config($opt, $value); }
+function _config ($opt, $value=null) { return FST\Framework::config($opt, $value); }
 
 /**
  * Get environment variable value.

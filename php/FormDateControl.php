@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-20, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -71,8 +71,7 @@ class FormDateControl extends FormInputControl {
 		if (!$msg && $this->data()) {
 			if (!preg_match('/^\d{4}-\d\d-\d\d$/', $this->data))
 				$msg = 'Invalid date';
-			else if (($this->min && $this->data < $this->min) ||
-					($this->max && $this->data > $this->max))
+			else if (($this->min && $this->data < $this->min) || ($this->max && $this->data > $this->max))
 				$msg = 'Date is out of range';
 		}
 		return $msg;
@@ -91,8 +90,7 @@ class FormDateControl extends FormInputControl {
 					$val = date_create("$val");
 				}
 				catch (\Exception $e) {
-					throw new UsageException(
-						'Invalid init value for date control.');
+					throw new UsageException('Invalid init value for date control.');
 				}
 			}
 			$this->attr('value', $val->format('Y-m-d'));

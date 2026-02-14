@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -59,8 +59,7 @@ class FormPhoneControl extends FormTextControl {
 	 */
 	public function init ($val) {
 		if (preg_match('/^\d{10}$/', $val))
-			$val = '(' . substr($val, 0, 3) . ')' . substr($val, 3, 3) .
-				'-' . substr($val, 6);
+			$val = '(' . substr($val, 0, 3) . ')' . substr($val, 3, 3) . '-' . substr($val, 6);
 		parent::init($val);
 	}
 }

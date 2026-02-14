@@ -1,7 +1,7 @@
 <?php
 
-// FST Application Framework, Version 6.0
-// Copyright (c) 2004-24, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
@@ -25,7 +25,7 @@ namespace FST;
 abstract class FormControl {
 
 	/** @ignore */
-	protected $attr = array();
+	protected $attr = [];
 
 	/** @ignore */
 	protected $glued = false;
@@ -121,8 +121,7 @@ abstract class FormControl {
 	 * @return mixed Form data value (trimmed)
 	 */
 	public function data () {
-		return isset($_POST[$this->name()]) && $_POST[$this->name()] !== '' ?
-			trim($_POST[$this->name()]) : $this->nodata;
+		return isset($_POST[$this->name()]) && $_POST[$this->name()] !== '' ? trim($_POST[$this->name()]) : $this->nodata;
 	}
 
 	/**
@@ -317,7 +316,7 @@ abstract class FormControl {
 	 */
 	public function removeClass ($classname) {
 		if (isset($this->attr['class'])) {
-			$classes = array();
+			$classes = [];
 			$idx = array_search($classname, $classes);
 			if ($idx !== false)
 				array_splice($classes, $idx, 1);
