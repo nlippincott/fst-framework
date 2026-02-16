@@ -87,8 +87,9 @@ class Framework {
 	 * @param int $idx Zero-based index
 	 * @return string Controller argument value
 	 */
-	public static function arg ($idx)
-		{ return isset(self::$_argv[$idx]) ? self::$_argv[$idx] : ''; }
+	public static function arg ($idx) {
+		return isset(self::$_argv[$idx]) ? self::$_argv[$idx] : '';
+	}
 
 	/**
 	 * Get controller argument count.
@@ -211,17 +212,14 @@ class Framework {
 		if (self::config('debug')) {
 			$fstdir = dirname(__FILE__);
 			foreach (debug_backtrace() as $trace) {
-				if (isset($trace['file']) &&
-						dirname($trace['file']) != $fstdir) {
+				if (isset($trace['file']) && dirname($trace['file']) != $fstdir) {
 					$file = $trace['file'];
 					$line = $trace['line'];
 					break;
 				}
 			}
 		}
-		$msg = isset($file, $line) ?
-			"FST Error in $file at line $line: $msg" :
-			"FST Error: $msg";
+		$msg = isset($file, $line) ? "FST Error in $file at line $line: $msg" : "FST Error: $msg";
 		error_log($msg);
 		if (self::config('debug'))
 			print $msg;
@@ -234,20 +232,16 @@ class Framework {
 	 * Sends a 404 Not Found header to the client and exits.
 	 */
 	public static function header_404 () {
-		function_exists('http_response_code') ?
-			http_response_code(404) :
-			header('HTTP/1.0 404 Not Found', true, 404);
-			print '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">';
-			print '<html><head>';
-			print '<title>404 Not Found</title>';
-			print '</head><body>';
-			print '<h1>Not Found</h1>';
-			print '<p>The requested URL /' . self::args() .
-				' was not found on this server.</p>';
-			print '<hr>';
-			print '<address>Server at ' . $_SERVER['SERVER_NAME'] .
-				' Port ' . $_SERVER['SERVER_PORT'] . '</address>';
-			print '</body></html>';
+		function_exists('http_response_code') ? http_response_code(404) : header('HTTP/1.0 404 Not Found', true, 404);
+		print '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">';
+		print '<html><head>';
+		print '<title>404 Not Found</title>';
+		print '</head><body>';
+		print '<h1>Not Found</h1>';
+		print '<p>The requested URL /' . self::args() . ' was not found on this server.</p>';
+		print '<hr>';
+		print '<address>Server at ' . $_SERVER['SERVER_NAME'] . ' Port ' . $_SERVER['SERVER_PORT'] . '</address>';
+		print '</body></html>';
 		exit;
 	}
 
@@ -269,8 +263,7 @@ class Framework {
 	public static function uri ($uri=null) {
 		if (!$uri)
 			return self::config('root');
-		return preg_match('"^(\w+:|/|\?|#)"', $uri) ?
-			$uri : self::config('root') . $uri;
+		return preg_match('"^(\w+:|/|\?|#)"', $uri) ? $uri : self::config('root') . $uri;
 	}
 
 	/**
@@ -794,8 +787,7 @@ class Framework {
 			else { // Named content file
 				if (self::config('debug'))
 					print "<!-- File: $content.php -->";
-				$fname = realpath(self::config('content')) .
-					'/' . $content . '.php';
+				$fname = realpath(self::config('content')) . '/' . $content . '.php';
 				if (!file_exists($fname))
 					throw new ContentException($fname);
 				self::content($fname);
@@ -1035,20 +1027,23 @@ class Framework {
 
 /** @ignore */
 class TemplateException extends \Exception {
-	public function __construct ($msg)
-		{ parent::__construct(htmlspecialchars($msg)); }
+	public function __construct ($msg) {
+		parent::__construct(htmlspecialchars($msg));
+	}
 }
 
 /** @ignore */
 class UsageException extends \Exception {
-	public function __construct ($msg)
-		{ parent::__construct(htmlspecialchars($msg)); }
+	public function __construct ($msg) {
+		parent::__construct(htmlspecialchars($msg));
+	}
 }
 
 /** @ignore */
 class ContentException extends TemplateException {
-	public function __construct ($fname)
-		{ parent::__construct("Content file $fname not found"); }
+	public function __construct ($fname) {
+		parent::__construct("Content file $fname not found");
+	}
 }
 
 /** @ignore */
@@ -1067,18 +1062,23 @@ class TagException extends TemplateException {
 
 /** @ignore */
 class TagAttReqException extends TemplateException {
-	public function __construct ($tag, $attr)
-		{ parent::__construct("<$tag> requires $attr attribute"); }
+	public function __construct ($tag, $attr) {
+		parent::__construct("<$tag> requires $attr attribute");
+	}
 }
 
 /** @ignore */
 class DatabaseException extends UsageException {
-	public function __construct ($msg) { parent::__construct($msg); }
+	public function __construct ($msg) {
+		parent::__construct($msg);
+	}
 }
 
 /** @ignore */
 class NotFoundException extends DatabaseException {
-	public function __construct ($msg) { parent::__construct($msg); }
+	public function __construct ($msg) {
+		parent::__construct($msg);
+	}
 }
 
 /// @endcond
