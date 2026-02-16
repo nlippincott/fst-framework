@@ -640,7 +640,9 @@ class Framework {
 			exit;
 		}
 
-		xml_parser_free($this->parser);
+		// As of PHP 8, xml_parser_free is deprecated, just unset the parser object to free parser
+		// xml_parser_free($this->parser);
+		unset($this->parser); // The object will be garbage collected automatically
 	}
 
 	/** @ignore */
