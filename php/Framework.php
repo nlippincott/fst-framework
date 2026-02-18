@@ -291,6 +291,7 @@ class Framework {
 	 *	- root: "/" The application root (include leading and trailing slash)
 	 *	- session: "false" Session name, or false if no session
 	 *	- template: "template" Relative path to the template directory
+	 *	- timezone: "null" Application time zone, if not system time zone
 	 *
 	 * @param array $cfg Configuration settings
 	 */
@@ -316,7 +317,7 @@ class Framework {
 					'debug_error_reporting'=>E_ALL, // Error reporting level, when debug is set
 					'env'=>false, // Environment file, array of files, or false
 					'helpers'=>true, // Define helper functions
-					'timezone'=>null, // Timezone, from .env file "TZ" by default
+					'timezone'=>null, // Timezone, from .env file "TIMEZONE" by default
 				] : [
 					// Default configuration for web mode
 
@@ -342,7 +343,7 @@ class Framework {
 					'home'=>'home', // Controller name for home page
 					'meta-content-type'=>true, // Generate default meta content-type tag
 					'meta-viewport'=>true, // Generate default meta viewport tag
-					'timezone'=>null, // Timezone, from .env file "TZ" by default
+					'timezone'=>null, // Timezone, from .env file "TIMEZONE" by default
 					'session'=>false, // session name, false for no session
 				], $cfg);
 
@@ -1082,5 +1083,3 @@ class NotFoundException extends DatabaseException {
 		parent::__construct($msg);
 	}
 }
-
-/// @endcond
