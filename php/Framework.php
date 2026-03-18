@@ -49,7 +49,7 @@ class Framework {
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-26';
 	/** FST version release date */
-	const VERSION_RELEASE = '2026-02-18';
+	const VERSION_RELEASE = '2026-03-18';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
@@ -477,6 +477,14 @@ class Framework {
 		// Get controller arguments from URI
 		self::$_args = preg_replace([ "'^" . self::config('root') . "'", '/\?.*$/' ], '', $_SERVER['REQUEST_URI']);
 		self::$_argv = explode('/', self::$_args);
+
+		// If the controller argument string matches any FST JavaScript file, serve that file with appropriate content type and exit.
+		// TODO: Consider adding a configuration option for JavaScript directories, and for whether to allow this feature at all.
+		if (self::$_args && file_exists(__DIR__ . '/../js/' . self::$_args)) {
+			header('Content-Type: text/javascript');
+			readfile(__DIR__ . '/../js/' . self::$_args);
+			exit;
+		}
 
 		// Get controller action, if specified (from QUERY_STRING)
 		list(self::$_action) = count($_GET) ? array_keys($_GET) : [ false ];
