@@ -232,16 +232,8 @@ class Framework {
 	 * Sends a 404 Not Found header to the client and exits.
 	 */
 	public static function header_404 () {
-		function_exists('http_response_code') ? http_response_code(404) : header('HTTP/1.0 404 Not Found', true, 404);
-		print '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">';
-		print '<html><head>';
-		print '<title>404 Not Found</title>';
-		print '</head><body>';
-		print '<h1>Not Found</h1>';
-		print '<p>The requested URL /' . self::args() . ' was not found on this server.</p>';
-		print '<hr>';
-		print '<address>Server at ' . $_SERVER['SERVER_NAME'] . ' Port ' . $_SERVER['SERVER_PORT'] . '</address>';
-		print '</body></html>';
+		http_response_code(404);
+		require('fst-404.php');
 		exit;
 	}
 
