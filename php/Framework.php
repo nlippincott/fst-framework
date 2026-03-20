@@ -237,6 +237,52 @@ class Framework {
 		exit;
 	}
 
+	/**
+	 * Send content of file to client.
+	 * 
+	 * Sends the content of the given file to the client, with an appropriate
+	 * content type header, and exits. This function is typically used to serve
+	 * static files such as images, CSS, and JavaScript files.
+	 * 
+	 * @param string $fname File name
+	 */
+	public static function serve ($fname) {
+
+		if (!file_exists($fname))
+			throw new UsageException("File not found: $fname");
+
+		// Determine last modified time of file and send appropriate headers for caching
+		$last_modified_time = filemtime($fname);
+
+		// Check if browser sent If-Modified-Since header, and if so, compare with last modified time of file. If file has not been modified since the time specified in the header, send 304 Not Modified response and exit.
+		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+			$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+			if ($if_modified_since >= $last_modified_time) {
+				http_response_code(304);
+				exit;
+			}
+		}
+
+		// Get file mime type and send appropriate headers for caching and content type.
+		$content_type = mime_content_type($fname);
+
+		// Adjust content type for CSS and JavaScript files, which may be misidentified by mime_content_type.
+		if ($content_type == 'text/plain') {
+			if (preg_match('/\.css$/', $fname))
+				$content_type = 'text/css';
+			else if (preg_match('/\.js$/', $fname))
+				$content_type = 'text/javascript';
+		}
+
+		// If page has been modified since time specified in If-Modified-Since header, or if no such header sent, send content of file with appropriate content type header
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $last_modified_time) . ' GMT');
+		header('Cache-Control: public, max-age=2592000, must-revalidate'); // Cache for 30 days
+		header('Content-Type: ' . $content_type);
+		readfile($fname);
+
+		exit;
+	}
+
 	/** 
 	 * Convert relative URI to absolute URI.
 	 *
@@ -472,11 +518,8 @@ class Framework {
 
 		// If the controller argument string matches any FST JavaScript file, serve that file with appropriate content type and exit.
 		// TODO: Consider adding a configuration option for JavaScript directories, and for whether to allow this feature at all.
-		if (self::$_args && file_exists(__DIR__ . '/../js/' . self::$_args)) {
-			header('Content-Type: text/javascript');
-			readfile(__DIR__ . '/../js/' . self::$_args);
-			exit;
-		}
+		if (self::$_args && file_exists(__DIR__ . '/../js/' . self::$_args))
+			self::serve(__DIR__ . '/../js/' . self::$_args);
 
 		// Get controller action, if specified (from QUERY_STRING)
 		list(self::$_action) = count($_GET) ? array_keys($_GET) : [ false ];
