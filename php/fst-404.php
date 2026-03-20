@@ -19,7 +19,7 @@
 		h1 { color: #c00; margin: 0.5em 0 0 0; }
 		svg { margin-top: 0.25em;}
 		p { margin-top: 0.25em; }
-		p b { font-family: monospace; }
+		p span.uri { font-family: monospace; font-weight: bold; color: #c00; }
 	</style>
 <title>404 Not Found</title>
 </head><body>
@@ -33,5 +33,5 @@
 	</g>
 </g>
 </svg>
-<p>The requested URL <b><?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?></b> was not found.</p>
+<p>The requested URL <span class="uri"><?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?></span> was not found.</p>
 </body></html>
