@@ -246,7 +246,7 @@ class Framework {
 	 * 
 	 * @param string $fname File name
 	 */
-	public static function serve ($fname) {
+	public static function send_static ($fname) {
 
 		if (!file_exists($fname))
 			throw new UsageException("File not found: $fname");
@@ -254,7 +254,9 @@ class Framework {
 		// Determine last modified time of file and send appropriate headers for caching
 		$last_modified_time = filemtime($fname);
 
-		// Check if browser sent If-Modified-Since header, and if so, compare with last modified time of file. If file has not been modified since the time specified in the header, send 304 Not Modified response and exit.
+		// Check if browser sent If-Modified-Since header, and if so, compare with
+		// last modified time of file. If file has not been modified since the time
+		// specified in the header, send 304 Not Modified response and exit.
 		if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			$if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 			if ($if_modified_since >= $last_modified_time) {
@@ -274,7 +276,8 @@ class Framework {
 				$content_type = 'text/javascript';
 		}
 
-		// If page has been modified since time specified in If-Modified-Since header, or if no such header sent, send content of file with appropriate content type header
+		// If page has been modified since time specified in If-Modified-Since header,
+		// or if no such header sent, send content of file with appropriate content type header.
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $last_modified_time) . ' GMT');
 		header('Cache-Control: public, max-age=2592000, must-revalidate'); // Cache for 30 days
 		header('Content-Type: ' . $content_type);
