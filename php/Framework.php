@@ -45,11 +45,11 @@ class Framework {
 
 	// FST version constants
 	/** FST version number. */
-	const VERSION = '6.1-beta';
+	const VERSION = '6.1-rc1';
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-26';
 	/** FST version release date */
-	const VERSION_RELEASE = '2026-03-18';
+	const VERSION_RELEASE = '2026-03-24';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
