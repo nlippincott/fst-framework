@@ -276,6 +276,12 @@ class Framework {
 				$content_type = 'text/javascript';
 		}
 
+		// Adjust content type for CSS files misidentified as text/csv
+		if ($content_type == 'text/csv') {
+			if (preg_match('/\.css$/', $fname))
+				$content_type = 'text/css';
+		}
+
 		// If page has been modified since time specified in If-Modified-Since header,
 		// or if no such header sent, send content of file with appropriate content type header.
 		header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $last_modified_time) . ' GMT');
