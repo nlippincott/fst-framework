@@ -6,8 +6,8 @@ FST Application Framework. This module includes support for dialog boxes
 that interact with the framework.
 ***********************************************************************/
 
-// FST Application Framework, Version 6.0.2
-// Copyright (c) 2004-25, Norman Lippincott Jr, Saylorsburg PA USA
+// FST Application Framework, Version 6.1
+// Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
 // The FST Application Framework, and its associated libraries, may
