@@ -369,7 +369,7 @@ class Form {
 		}
 		else /* is_object($data) */ {
 			foreach ($this->fld as $name=>$obj)
-				if (property_exists($data, $name) || isset($data->$name))
+				if (isset($data->$name))
 					$this->fld[$name]->init($data->$name);
 		}
 	}
