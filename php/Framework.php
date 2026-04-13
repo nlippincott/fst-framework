@@ -229,11 +229,15 @@ class Framework {
 	/**
 	 * Send 404 Not Found header.
 	 *
-	 * Sends a 404 Not Found header to the client and exits.
+	 * Sends a 404 Not Found header and error page to the client then exits.
+	 * If file "404.php" exists in the app directory, that file is
+	 * used as the error page. Otherwise, a default FST error page is used.
 	 */
 	public static function header_404 () {
 		http_response_code(404);
-		require('fst-404.php');
+		if (!file_exists($fname = self::config('app') . '/404.php'))
+			$fname = __DIR__ . '/fst-404.php';		
+		require $fname;
 		exit;
 	}
 
