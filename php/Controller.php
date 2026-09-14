@@ -157,19 +157,21 @@ abstract class Controller {
 	/**
 	 * Test if controller running as an Ajax call.
 	 * 
+	 * As of FST version 6.2, all POST requests are assumed to be Ajax
+	 * requests. As such, this function simply checks REQUEST_TYPE.
+	 * 
 	 * @return bool Is running as Ajax flag
 	 */
-	final protected function is_ajax () {
-		return Framework::config('ajax') && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
-	}
+	final protected function is_ajax () { return $_SERVER['REQUEST_METHOD'] == 'POST'; }
 
 	/**
 	 * Test if controller is processing (non-Ajax) POST data.
 	 * 
-	 * @return bool Is processing POST data flag
+	 * @deprecated This function is outdated and will be removed in a future version. As of FST 6.2 non-Ajax POST requests are not supported.
+	 * @deprecated 6.2
+	 * @return bool Is processing POST data flag (always returns false)
 	 */
-	final protected function is_post ()
-		{ return !$this->is_ajax() && $_SERVER['REQUEST_METHOD'] == 'POST'; }
+	final protected function is_post () { return false; }
 
 	/**
 	 * Test if running on the SSL port.
@@ -260,8 +262,8 @@ abstract class Controller {
 
 	// Invoke the form handler.
 	//
-	// This is called by the framework when a form is submitted via Ajax or
-	// POST using "_form" as its action.
+	// This is called by the framework when a form is submitted via Ajax with
+	// "_form" as its action.
 	/** @ignore */
 	final public function _invoke_form_handler () {
 
@@ -315,17 +317,6 @@ abstract class Controller {
 		$preprocessor = method_exists($this, 'page') ? 'page' : null;
 		if ($preprocessor)
 			$this->$preprocessor();
-	}
-
-	// Invoke the POST handler.
-	//
-	// This calls the appropriate POST handler when data is sent to the
-	// controller in a non-Ajax call.
-	/** @ignore */
-	final public function _invoke_post_handler () {
-		$handler = method_exists($this, "post_{$this->action()}") ? "post_{$this->action()}" : (method_exists($this, 'post') ? 'post' : null);
-		if ($handler)
-			$this->$handler();
 	}
 
 	// Ajax handler for producing dynamic content (final).

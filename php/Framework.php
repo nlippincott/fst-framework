@@ -596,10 +596,11 @@ class Framework {
 		// Initialize the controller.
 		self::ctrl()->init();
 
-		// If Ajax is enabled and a POST request, retrieve posted data whether
-		// through $_POST or JSON input.
-		// Beginning with FST 6.2, all POST requests are assumed to be Ajax.
-		if (self::config('ajax') && $_SERVER['REQUEST_METHOD'] == 'POST') {
+		// If a POST request, it is assumed to be an Ajax request (as of FST
+		// version 6.2). Retrieve the posted data, whether through $_POST (for
+		// legacy Ajax requests via fst-jquery.js) or JSON input (for modern
+		// Ajax requests fia fst.js).
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$data = isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false ? json_decode(file_get_contents('php://input'), true) : $_POST;
 
 			// Call data initialization methods for data values. Initialization
@@ -616,11 +617,6 @@ class Framework {
 			self::ctrl()->_invoke_ajax_handler($data);
 			exit;
 		}
-
-		// If a (non-Ajax) POST request, invoke the POST handler (no exit).
-		// This funcitonality is deprecated and will be removed in FST 7.
-		if ($_SERVER['REQUEST_METHOD'] == 'POST')
-			self::ctrl()->_invoke_post_handler();
 
 		// Invoke the page pre-processor.
 		self::ctrl()->_invoke_page_preprocessor();
