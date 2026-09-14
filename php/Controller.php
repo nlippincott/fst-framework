@@ -229,12 +229,23 @@ abstract class Controller {
 	// via an Ajax call. This invokes the appropriate Ajax handler as
 	// determined by the action.
 	/** @ignore */
-	final public function _invoke_ajax_handler () {
+	final public function _invoke_ajax_handler ($data = null) {
 		$handler = method_exists($this, "ajax_{$this->action()}") ? "ajax_{$this->action()}" : (method_exists($this, 'ajax') ? 'ajax' : null);
 		if ($handler) {
-			header('Content-type: application/json');
-			print json_encode($this->$handler());
-			exit;
+			// For legacy Ajax calls, call the handler without arguments.
+			// For modern Ajax calls, $data will be provided and is passed to the handler.
+			$ret = $data === null ? $this->$handler() : $this->$handler($data);
+			// If the return value is an array or an object, convert to JSON and print
+			// to pass back to the client. Otherwise, just print thus passing back
+			// plain text.
+			if (is_array($ret) || is_object($ret)) {
+				header('Content-type: application/json');
+				print json_encode($ret);
+			}
+			else {
+				header('Content-type: text/plain');
+				print $ret;
+			}
 		}
 	}
 
@@ -319,10 +330,11 @@ abstract class Controller {
 
 	// Ajax handler for producing dynamic content (final).
 	/** @ignore */
-	final public function ajax__content () {
+	final public function ajax__content ($data = null) {
 
 		// Get name of content area
-		$name = isset($_POST['_content']) ? $_POST['_content'] : null;
+		// For legacy calls, name is found in $_POST, else $data
+		$name = $data === null ? ($_POST['_content'] ?? null) : ($data['_content'] ?? null);
 
 		// Invoke content preprocessor
 		$pre = $this->_invoke_content_preprocessor($name);
@@ -334,11 +346,15 @@ abstract class Controller {
 			Framework::content($fname);
 			$content = ob_get_clean();
 		}
-		else if (is_string($pre)) { // Named content file
-			$fname = Framework::config('content') . '/' . "$pre.php";
-			ob_start();
-			Framework::content($fname);
-			$content = ob_get_clean();
+		else if (is_string($pre)) { // Named content file, or raw HTML
+			if (substr($pre, 0, 1) == '<') // Raw HTML
+				$content = $pre;
+			else { // Named content file
+				$fname = Framework::config('content') . '/' . "$pre.php";
+				ob_start();
+				Framework::content($fname);
+				$content = ob_get_clean();
+			}
 		}
 		else if (is_object($pre)) // Object
 			$content = "$pre";

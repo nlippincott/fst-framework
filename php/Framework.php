@@ -45,11 +45,11 @@ class Framework {
 
 	// FST version constants
 	/** FST version number. */
-	const VERSION = '6.1';
+	const VERSION = '6.2-alpha';
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-26';
 	/** FST version release date */
-	const VERSION_RELEASE = '2026-07-10';
+	const VERSION_RELEASE = '2026-08-24';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
@@ -593,24 +593,32 @@ class Framework {
 				self::ctrl()->$method();
 		}
 
-		// Initialize the controller. First, call the controller's init
-		//	method (which virtual abstract in FST\Controller). Then, call
-		//	post data initialization methods for all post names that are
-		//	given (post names beginning with an underscore are ignored).
+		// Initialize the controller.
 		self::ctrl()->init();
-		foreach ($_POST as $k=>$v) {
-			$method = "init_$k";
-			if ($k[0] != '_' && method_exists(self::ctrl(), $method))
-				self::ctrl()->$method($v);
+
+		// If Ajax is enabled and a POST request, retrieve posted data whether
+		// through $_POST or JSON input.
+		// Beginning with FST 6.2, all POST requests are assumed to be Ajax.
+		if (self::config('ajax') && $_SERVER['REQUEST_METHOD'] == 'POST') {
+			$data = isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false ? json_decode(file_get_contents('php://input'), true) : $_POST;
+
+			// Call data initialization methods for data values. Initialization
+			// methods have name init_KEY where KEY is the key of any data
+			// value provided. The value is passed as an argument. Any key
+			// values beginning with '_' are ignored.
+			foreach ($data as $k=>$v) {
+				$method = "init_$k";
+				if ($k[0] != '_' && method_exists(self::ctrl(), $method))
+					self::ctrl()->$method($v);
+			}
+
+			// Invoke Ajax handler, passing data received, then exit.
+			self::ctrl()->_invoke_ajax_handler($data);
+			exit;
 		}
 
-		// If an Ajax request, invoke the Ajax handler and exit.
-		if (self::config('ajax') && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
-			self::ctrl()->_invoke_ajax_handler();
-			exit;
-		} 
-
 		// If a (non-Ajax) POST request, invoke the POST handler (no exit).
+		// This funcitonality is deprecated and will be removed in FST 7.
 		if ($_SERVER['REQUEST_METHOD'] == 'POST')
 			self::ctrl()->_invoke_post_handler();
 
