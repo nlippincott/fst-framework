@@ -249,6 +249,9 @@ abstract class Controller {
 				print $ret;
 			}
 		}
+		// If no handler, just send back empty plain text response
+		else
+			header('Content-type: text/plain');
 	}
 
 	// Invoke the content preprocessor (final).
