@@ -60,14 +60,14 @@ const fst = {
 			};
 
 			// Type checks on options
-			try { fst.ajax.options._validate(options); }
+			try { fst.ajax.options._validate(opts); }
 			catch (err) { throw new TypeError(`fst.ajax(): ${err.message}`); }
 
 			// Call preprocess funciton passing options, which may be modified
 			opts.preprocess.call(this, opts);
 
 			// Type checks on options again, after preprocess
-			try { fst.ajax.options._validate(options); }
+			try { fst.ajax.options._validate(opts); }
 			catch (err) { throw new TypeError(`fst.ajax(): ${err.message}`); }
 
 			// Handle confirmation if confirm option present
