@@ -871,6 +871,8 @@ const fst = {
 	trigger: (name, fcn) => {
 
 		// Type checks
+		if (!(typeof name == 'string' || name instanceof String))
+			throw new TypeError("fst.trigger(): 'name' must be a string");
 		if (!(typeof fcn == 'function'))
 			throw new TypeError("fst.trigger(): 'fcn' must be a function");
 
