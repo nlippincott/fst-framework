@@ -238,8 +238,8 @@ const fst = {
 				postprocess: () => { },
 				preprocess: () => { },
 				...fst.content._options['_default'],
-				...fst(fst.content._options[name] ?? { }),
-				...fst(options ?? { })
+				...(fst.content._options[name] ?? { }),
+				...(options ?? { })
 			};
 
 			// Type checks on options
@@ -515,6 +515,58 @@ const fst = {
 				// Present the confirmation using fst.dialog
 				fst.dialog(html, btn => { callback(btn == opts.button); }, [ opts.button, opts.button_cancel ], { escape: opts.escape });
 			},
+
+			/***********************************************************************
+			## fst.dialog.content (String name, Object options) {#fst-dialog-alert}
+
+			Opens a modal informational dialog box with Controller-provided content
+
+			- ***name***: String, name of the content area
+			- ***options***: Object, options:
+				- *buttons*: Array of Strings for buttons, default ['Close']
+				- *callback*: Function, called upon dialog close
+				- *escape*: Boolean, allow Escape key to close, default true
+
+			Opens a modal dialog box, populating content with HTML provided by
+			the Controller.
+			
+			If *callback* is provided, it is called when the dialog box is closed.
+			The button text is passed as an argument, or an empty string if closed
+			using the Escape key.
+			***********************************************************************/
+			content: (name, options) => {
+				// Type checks
+				if (!(typeof name == 'string' || name instanceof String))
+					throw new TypeError("fst.dialog.content(): 'name' must be a string");
+				if (options && !(typeof options == 'object'))
+					throw new TypeError("fst.dialog.content(): 'options' must be an object");
+				if (options.buttons && !(options.buttons instanceof Array))
+					throw new TypeError("fst.content(): option 'buttons' must be an array of strings");
+				options.buttons.forEach(btn => {
+					if (!(typeof btn == 'string' || btn instanceof String))
+						throw new TypeError("fst.content(): option 'buttons' must be an array of strings");
+				});
+
+				const opts = {
+					buttons: [ 'Close' ],
+					callback: resp => { },
+					escape: true,
+					...(options ?? { })
+				};
+
+				// Type checks on options
+				if (!(typeof opts.button == 'string' || opts.button instanceof String))
+					throw new TypeError("fst.dialog.alert(): option 'button' must be a string");
+				if (!(typeof opts.callback == 'function'))
+					throw new TypeError("fst.dialog.alert(): option 'callback' must be a function");
+
+				fst.ajax('_content', {
+					data: { _content: name },
+					callback: resp => {
+						fst.dialog(resp, opts.callback, opts.buttons, opts);
+					}
+				});
+			}
 		}
 	),
 	
