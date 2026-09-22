@@ -535,33 +535,29 @@ const fst = {
 			using the Escape key.
 			***********************************************************************/
 			content: (name, options) => {
+
 				// Type checks
 				if (!(typeof name == 'string' || name instanceof String))
 					throw new TypeError("fst.dialog.content(): 'name' must be a string");
 				if (options && !(typeof options == 'object'))
 					throw new TypeError("fst.dialog.content(): 'options' must be an object");
-				if (options.buttons && !(options.buttons instanceof Array))
-					throw new TypeError("fst.content(): option 'buttons' must be an array of strings");
-				options.buttons.forEach(btn => {
-					if (!(typeof btn == 'string' || btn instanceof String))
-						throw new TypeError("fst.content(): option 'buttons' must be an array of strings");
-				});
 
 				const opts = {
 					buttons: [ 'Close' ],
 					callback: resp => { },
+					data: { },
 					escape: true,
 					...(options ?? { })
 				};
 
 				// Type checks on options
-				if (!(typeof opts.button == 'string' || opts.button instanceof String))
-					throw new TypeError("fst.dialog.alert(): option 'button' must be a string");
+				if (!(opts.buttons instanceof Array))
+					throw new TypeError("fst.dialog.alert(): option 'buttons' must be an array");
 				if (!(typeof opts.callback == 'function'))
 					throw new TypeError("fst.dialog.alert(): option 'callback' must be a function");
 
 				fst.ajax('_content', {
-					data: { _content: name },
+					data: {...opts.data, _content: name },
 					callback: resp => {
 						fst.dialog(resp, opts.callback, opts.buttons, opts);
 					}
