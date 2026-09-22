@@ -64,7 +64,8 @@ const fst = {
 			catch (err) { throw new TypeError(`fst.ajax(): ${err.message}`); }
 
 			// Call preprocess funciton passing options, which may be modified
-			opts.preprocess.call(this, opts);
+			if (opts.preprocess.call(this, opts) === false)
+				return false;
 
 			// Type checks on options again, after preprocess
 			try { fst.ajax.options._validate(opts); }
@@ -222,24 +223,65 @@ const fst = {
 	content of the main content area.
 	***********************************************************************/
 	content: Object.assign(
-		name => {
+		(name, options) => {
 
 			// Type checks
 			if (!(typeof name == 'string' || name instanceof String))
 				throw new TypeError("fst.content(): 'name' must be a string");
+			if (options && !(typeof options == 'object'))
+				throw new TypeError("fst.content(): 'options' must be an object");
+
+			// Set up options
+			const opts = {
+				confirm: null,
+				data: { },
+				postprocess: () => { },
+				preprocess: () => { },
+				...fst.content._options['_default'],
+				...fst(fst.content._options[name] ?? { }),
+				...fst(options ?? { })
+			};
+
+			// Type checks on options
+			try { fst.content.options._validate(opts); }
+			catch (err) { throw new TypeError(`fst.content(): ${err.message}`); }
 
 			// Check for valid content area
-			if (!fst.content.area(name))
+			if (!fst.content.element(name))
 				throw new TypeError(`fst.content(): content area "${name}" is not valid`);
+
+			// Call preprocess function passing options, which may be modified
+			if (opts.preprocess.call(this, opts) === false)
+				return;
+
+			// Type checks on options again, after preprocess
+			try { fst.content.options._validate(opts); }
+			catch (err) { throw new TypeError(`fst.content(): ${err.message}`); }
+
+			// Handle confirmation if confirm option present
+			if (opts.confirm) {
+				fst.dialog.confirm(opts.confirm, confirmed => {
+					if (confirmed)
+						fst.content.call(this, name, {
+							confirm: null,
+							data: opts.data(),
+							postprocess: opts.postprocess,
+							preprocess: opts => { }
+						});
+					else
+						opts.postprocess.call(this);
+				});
+				return;
+			}
 
 			// Get content via ajax
 			fst.ajax('_content', {
-				callback: resp => fst.content.area(name).innerHTML = resp,
+				callback: resp => fst.content.element(name).innerHTML = resp,
 				data: { _content: name }
 			});
 		}, {
 			/***********************************************************************
-			## fst.content.area (String name) {#fst-content-area}
+			## fst.content.element (String name) {#fst-content-element}
 
 			Get DOM element for FST content area
 
@@ -248,14 +290,61 @@ const fst = {
 			Returns the DOM element for the named FST content area. If name
 			is not given, returns the DOM element of the main content area.
 			***********************************************************************/
-			area: name => {
+			element: name => {
 
 				// Type check
 				if (!(typeof name == 'string' || name instanceof String))
-					throw new TypeError("fst.content.area(): 'name' must be a string");
+					throw new TypeError("fst.content.element(): 'name' must be a string");
 
 				return document.querySelector(name ? `[data-fst="content-${name}"]` : '[data-fst="content"');
-			}
+			},
+
+			_options: { _default: { }},
+			options: Object.assign(
+				(name, options) => {
+					fst.content._options[name] = options;
+
+					// type checks
+					if (!(typeof name == 'string' || name instanceof String))
+						throw new TypeError("fst.content.options(): 'name' must be a string");
+					if (name == '_default')
+						throw new TypeError("fst.content.options(): cannot set default options, use fst.content.options.default()");
+					if (!(options === null || typeof options == 'object'))
+						throw new TypeError("fst.content.options(): 'options' must be an object")
+
+					try { fst.content.options._validate(options); }
+					catch (err) { throw new TypeError(`fst.content.options(): ${err.message}`); }
+
+					if (options === null)
+						delete fst.content._options[name];
+					else
+						fst.ajax._options[name] = options;
+				} , {
+					default: options => {
+
+						// Type checks
+						if (!(options === null || typeof options == 'object'))
+							throw new TypeError("fst.content.options(): 'options' must be an object")
+						try { fst.content.options._validate(options); }
+						catch (err) { throw new TypeError(`fst.content.options(): ${err.message}`); }
+
+						if (options === null)
+							fst.ajax._options['_default'] = { };
+						else
+							fst.content._options[_default] = options;
+					},
+
+					_validate: options => {
+						// Validate Ajax options object
+						if (options.confirm && !(typeof options.confirm == 'string' || options.confirm instanceof String))
+							throw new TypeError("'confirm' option must be a string");
+						if (options.preprocess && !(typeof options.preprocess == 'function'))
+							throw new TypeError("'preprocess' option must be a function");
+						if (options.postprocess && !(typeof options.postprocess == 'function'))
+							throw new TypeError("'postprocess' option must be a function");
+					}
+				}
+			)
 		}
 	),
 
