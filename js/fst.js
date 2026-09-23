@@ -363,7 +363,9 @@ const fst = {
 	with buttons to close the dialog.
 	
 	The *buttons* options is to be supplied as an array of Strings, one for
-	each button to appear.
+	each button to appear. This may be explicitly given as null in which case
+	no buttons will appear. If passed as null, the dialog can only be closed
+	programatically.
 
 	The *callback* function is called upon dialog close. Function receives
 	one String argument, the text of the button used to close the dialog. If
@@ -381,12 +383,13 @@ const fst = {
 				throw new TypeError("fst.dialog(): 'html' must be a string");
 			if (!(typeof callback == 'function'))
 				throw new TypeError("fst.dialog(): 'callback' must be a function");
-			if (!(buttons instanceof Array))
+			if (!(buttons === null || buttons instanceof Array))
 				throw new TypeError("fst.dialog(): 'buttons' must be an array of strings");
-			buttons.forEach(btn => {
-				if (!(typeof btn == 'string' || btn instanceof String))
-					throw new TypeError("fst.dialog(): 'buttons' must be an array of strings");
-			});
+			if (buttons)
+				buttons.forEach(btn => {
+					if (!(typeof btn == 'string' || btn instanceof String))
+						throw new TypeError("fst.dialog(): 'buttons' must be an array of strings");
+				});
 			if (options && !(typeof options == 'object'))
 				throw new TypeError("fst.dialog(): 'options' must be an object");
 
@@ -398,7 +401,7 @@ const fst = {
 			dlg.dataset.fst = 'dialog';
 
 			// Create the dialog content
-			dlg.innerHTML = `<div>${html}</div><hr /><form method="dialog"></form>`;
+			dlg.innerHTML = buttons ? `<div>${html}</div><hr /><form method="dialog"></form>` : `<div>${html}</div>`;
 
 			// Add the buttons
 			const frm = dlg.querySelector('form');
@@ -473,6 +476,17 @@ const fst = {
 
 				// Present the alert using fst.dialog
 				fst.dialog(html, opts.callback, [ opts.button ], { escape: opts.escape });
+			},
+
+			/***********************************************************************
+			## fst.dialog.close () {#fst-dialog-close}
+
+			Closes the dialog box
+			***********************************************************************/
+			close: () => {
+				const dlg = document.querySelector('dialog[data-fst="dialog"]');
+				if (dlg)
+					dlg.close();
 			},
 
 			/***********************************************************************
