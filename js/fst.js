@@ -372,6 +372,10 @@ const fst = {
 	dialog: Object.assign(
 		(html, callback, buttons, options) => {
 
+			// Ensure no dialog is currently open
+			if (document.querySelector('dialog[data-fst="dialog"]'))
+				return;
+
 			// Type checks
 			if (!(typeof html == 'string' || html instanceof String))
 				throw new TypeError("fst.dialog(): 'html' must be a string");
