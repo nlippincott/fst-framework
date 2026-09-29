@@ -84,10 +84,3 @@ FST\Form::register('file', 'FST\FormFileControl');
 require 'FormImageControl.php';
 require 'FormImageUpload.php';
 FST\Form::register('image', 'FST\FormImageControl');
-
-if (PHP_VERSION_ID >= 70000) {
-	// The Mongo and MySQL data models *may* use features that require PHP 7,
-	// so are only included only if PHP 7 or higher.
-	require 'Mongo.php';
-	require 'MySQL.php';
-}
