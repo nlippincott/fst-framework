@@ -51,7 +51,7 @@ class Framework {
 	/** FST copyright dates */
 	const VERSION_COPYRIGHT = '2004-26';
 	/** FST version release date */
-	const VERSION_RELEASE = '2026-08-24';
+	const VERSION_RELEASE = '2026-09-29';
 
 	// Minimum PHP version required
 	/** @ignore */
