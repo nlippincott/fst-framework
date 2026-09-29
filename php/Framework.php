@@ -356,7 +356,7 @@ class Framework {
 
 		// Ensure PHP version 8.0 or higher
 		if (!version_compare(PHP_VERSION, self::VERSION_PHP_MIN, '>='))
-			die("FST version " . self::VERSION . " required PHP version " . self::VERSION_PHP_MIN . " or higher");
+			die("FST version " . self::VERSION . " requires PHP version " . self::VERSION_PHP_MIN . " or higher");
 
 		try {
 
