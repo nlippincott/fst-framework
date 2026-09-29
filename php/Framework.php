@@ -53,6 +53,10 @@ class Framework {
 	/** FST version release date */
 	const VERSION_RELEASE = '2026-08-24';
 
+	// Minimum PHP version required
+	/** @ignore */
+	const VERSION_PHP_MIN = '8.0';
+
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
 	const COPYRIGHT_STD = 1;
@@ -349,6 +353,10 @@ class Framework {
 	 * @param array $cfg Configuration settings
 	 */
 	public static function init ($cfg = []) {
+
+		// Ensure PHP version 8.0 or higher
+		if (!version_compare(PHP_VERSION, self::VERSION_PHP_MIN, '>='))
+			die("FST version " . self::VERSION . " required PHP version " . self::VERSION_PHP_MIN . " or higher");
 
 		try {
 
