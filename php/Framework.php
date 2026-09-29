@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.1
+// FST Application Framework, Version 6.2
 // Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -9,6 +9,8 @@
 // Usage without permission is strictly prohibited.
 
 namespace FST;
+
+use XMLParser;
 
 /**
  * Framework initialization and request processing.
@@ -20,28 +22,28 @@ namespace FST;
 class Framework {
 
 	/** @ignore */
-	protected static $_fst = null;	// Framework instance
+	protected static ?Framework $_fst = null; // Framework instance
 
 	/** @ignore */
-	protected static $_ctrl;		// Controller object
+	protected static Controller $_ctrl; // Controller object
 	/** @ignore */
-	protected static $_ctrlname;	// Controller name
+	protected static string $_ctrlname; // Controller name
 
 	/** @ignore */
-	protected static $_args;	// Controller argument string
+	protected static string $_args; // Controller argument string
 	/** @ignore */
-	protected static $_argv;	// Controller argument array
+	protected static array $_argv; // Controller argument array
 	/** @ignore */
-	protected static $_cfg;		// Controller configuration
+	protected static array $_cfg; // Controller configuration
 
 	/** @ignore */
-	protected static $_action;	// Controller action
+	protected static string $_action; // Controller action
 
 	/** @ignore */
-	protected static $_env;		// App environment variables
+	protected static array $_env; // App environment variables
 
 	/** @ignore */
-	public static $_cli = PHP_SAPI === 'cli'; // Running in CLI mode
+	public static bool $_cli = PHP_SAPI === 'cli'; // Running in CLI mode
 
 	// FST version constants
 	/** FST version number. */
@@ -208,7 +210,7 @@ class Framework {
 	//	find the first occurrence of a source file that is not part of the
 	//	FST system directory (or the same directory as this source file).
 	/** @ignore */
-	public static function error ($msg) {
+	public static function error (string $msg) {
 		if (self::config('debug')) {
 			$fstdir = dirname(__FILE__);
 			foreach (debug_backtrace() as $trace) {
@@ -629,7 +631,7 @@ class Framework {
 	}
 
 	/** @ignore */
-	protected $parser;
+	protected XMLParser $parser;
 
 	/** @ignore */
 	protected $stack = []; // Parser element stack
@@ -707,7 +709,7 @@ class Framework {
 	}
 
 	/** @ignore */
-	protected function data ($p, $data) {
+	protected function data ($p, string $data) {
 		$tag = end($this->stack);
 		switch ($tag) {
 			case 'h1':
@@ -728,7 +730,7 @@ class Framework {
 	}
 
 	/** @ignore */
-	protected function element ($p, $tag, $attr) {
+	protected function element (XMLParser $p, string $tag, array $attr) {
 
 		if (!count($this->stack) && $tag != 'html')
 			throw new TagException($tag);
@@ -1039,7 +1041,7 @@ class Framework {
 	}
 
 	/** @ignore */
-	protected function element_end ($p, $tag) {
+	protected function element_end ($p, string $tag) {
 		switch ($tag) {
 
 		case 'html':
@@ -1090,56 +1092,56 @@ class Framework {
 
 /** @ignore */
 class TemplateException extends \Exception {
-	public function __construct ($msg) {
+	public function __construct (string $msg) {
 		parent::__construct(htmlspecialchars($msg));
 	}
 }
 
 /** @ignore */
 class UsageException extends \Exception {
-	public function __construct ($msg) {
+	public function __construct (string $msg) {
 		parent::__construct(htmlspecialchars($msg));
 	}
 }
 
 /** @ignore */
 class ContentException extends TemplateException {
-	public function __construct ($fname) {
+	public function __construct (string $fname) {
 		parent::__construct("Content file $fname not found");
 	}
 }
 
 /** @ignore */
 class IncludeException extends TemplateException {
-	public function __construct ($fname, $fname2=false) {
+	public function __construct (string $fname, ?string $fname2=null) {
 		parent::__construct($fname2 ? "Include file $fname or $fname2 not found" : "Include file $fname not found");
 	}
 }
 
 /** @ignore */
 class TagException extends TemplateException {
-	public function __construct ($tag, $attr=false, $value=false) {
+	public function __construct (string $tag, ?string $attr=null, ?string $value=null) {
 		parent::__construct($attr ? ($value ? "<$tag $attr=\"$value\"> is not valid" : "<$tag $attr> is not valid") : "<$tag> not allowed here");
 	}
 }
 
 /** @ignore */
 class TagAttReqException extends TemplateException {
-	public function __construct ($tag, $attr) {
+	public function __construct (string $tag, string $attr) {
 		parent::__construct("<$tag> requires $attr attribute");
 	}
 }
 
 /** @ignore */
 class DatabaseException extends UsageException {
-	public function __construct ($msg) {
+	public function __construct (string $msg) {
 		parent::__construct($msg);
 	}
 }
 
 /** @ignore */
 class NotFoundException extends DatabaseException {
-	public function __construct ($msg) {
+	public function __construct (string $msg) {
 		parent::__construct($msg);
 	}
 }
