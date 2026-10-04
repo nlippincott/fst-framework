@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.1
+// FST Application Framework, Version 6.2
 // Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -28,17 +28,17 @@ abstract class FormControl {
 	protected $attr = [];
 
 	/** @ignore */
-	protected $glued = false;
+	protected bool $glued = false;
 	/** @ignore */
-	protected $grouped = false;
+	protected bool $grouped = false;
 	/** @ignore */
-	protected $label = null;
+	protected ?string $label = null;
 	/** @ignore */
-	protected $informational = false;
+	protected bool $informational = false;
 	/** @ignore */
-	protected $nodata = null;
+	protected ?string $nodata = null;
 	/** @ignore */
-	protected $required = false;
+	protected bool $required = false;
 
 	/**
 	 * Control constructor.
@@ -336,5 +336,5 @@ abstract class FormControl {
 	// @param mixed $val Initial control value
 	// @return This FormControl object
 	/** @ignore */
-	final public function value ($val) { return $this->init($val); }
+	final public function value (mixed $val) { return $this->init($val); }
 }
