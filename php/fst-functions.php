@@ -1,6 +1,6 @@
 <?php
 
-// FST Application Framework, Version 6.1
+// FST Application Framework, Version 6.2
 // Copyright (c) 2004-26, Norman Lippincott Jr, Saylorsburg PA USA
 // All Rights Reserved
 //
@@ -158,7 +158,7 @@ function __button_img ($uri, $src, $alt, $attr=[])
  *
  * This is a convenience function for returning current FST controller.
  * 
- * @return Controller The Controller object for the current request
+ * @return FST\Controller The Controller object for the current request
  */
 function _ctrl () { return FST\Framework::ctrl(); }
 
