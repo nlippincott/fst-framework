@@ -36,7 +36,7 @@ const fst = {
 		- *confirm*: Optional confirmation message. Ajax call proceeds only if user responds in the affirmative.
 		- *data*: Data to be passed to the server.
 		- *postprocess*: Function to be called after the callback function or user action to cancel upon confirmation. No arguments are passed.
-		- *preprocess*: Function to be called prior to confirmation message and Ajax call. Options are passed as the argument. Function may set up and/or modify confirm option.
+		- *preprocess*: Function to be called prior to confirmation message and Ajax call. Options are passed as the argument. Function may set up and/or options.
 	***********************************************************************/
 	ajax: Object.assign(
 		async function (name, options) {
@@ -141,7 +141,7 @@ const fst = {
 			Register options for an Ajax handler.
 
 			- ***name***: Ajax handler name
-			- ***options***: Handler options
+			- ***options***: Handler options (see fst-ajax)
 
 			Registers default options to be associated with the given named
 			Ajax handler. These options override the default options for Ajax
@@ -175,7 +175,7 @@ const fst = {
 
 					Register options for an Ajax handler.
 
-					- ***options***: Default Ajax handler options
+					- ***options***: Default Ajax handler options (see fst-ajax)
 
 					Registers default options to be associated with Ajax calls. Upon
 					initiating an Ajax call, any options specified by the named Ajax
@@ -218,8 +218,8 @@ const fst = {
 
 	Sends an Ajax request to the framework, which produces HTML content to
 	replace the content of the named content area in the page. The content
-	area is (usually) a DIV element that was generated when the framework
-	was initially producing the page. If name is not given, replaces the
+	area is an HTML element that was generated when the framework
+	initially produced the page. If name is not given, replaces the
 	content of the main content area.
 	***********************************************************************/
 	content: Object.assign(
@@ -349,11 +349,12 @@ const fst = {
 	),
 
 	/***********************************************************************
-	## fst.dialog (String html, Options options) {#fst-dialog}
+	## fst.dialog (String html, Function callback, Array buttons, Object options) {#fst-dialog}
 
 	Opens a modal dialog
 
 	- ***html***: String, plain text or HTML, message to appear in dialog
+	- ***options***: Dialog options:
 	- ***callback***: Function, called upon dialog close
 	- ***buttons***: Array, Strings for dialog buttons
 	- ***options***: Object, options:
@@ -362,7 +363,7 @@ const fst = {
 	Opens a modal dialog box, populating content with the provided HTML code,
 	with buttons to close the dialog.
 	
-	The *buttons* options is to be supplied as an array of Strings, one for
+	The *buttons* array is to be supplied as an array of Strings, one for
 	each button to appear. This may be explicitly given as null in which case
 	no buttons will appear. If passed as null, the dialog can only be closed
 	programatically.
@@ -585,7 +586,7 @@ const fst = {
 	),
 	
 	/***********************************************************************
-	## fst.form (String|object form) {#fst-form}
+	## fst.form (String|Object form) {#fst-form}
 
 	Get FST form element
 
@@ -614,7 +615,7 @@ const fst = {
 			return null;
 		}, {
 			/***********************************************************************
-			## fst.form.options (String name, Object opts) {#fst-form-options}
+			## fst.form.options (String name, Object options) {#fst-form-options}
 
 			Register options for an FST form.
 
@@ -625,7 +626,7 @@ const fst = {
 			FST form. These options override the default options for form
 			submits specifically for the named form, and may be overridden.
 
-			If opts is passed as null, options for the named form are deleted.
+			If *options* is passed as null, options for the named form are deleted.
 			***********************************************************************/
 			_options: { _default: { } },
 			options: Object.assign(
@@ -650,7 +651,7 @@ const fst = {
 
 					Register default form options.
 
-					- ***options***: Default form options
+					- ***options***: Default form options (see fst-form-submit)
 
 					Registers default options to be associated with forms. Upon
 					submitting a form, any options specified for the named form
@@ -800,6 +801,12 @@ const fst = {
 
 			- ***form***: FST form name or DOM element
 			- ***options***: Form options
+				- *callback*: Function called after successful server form processing. Receives the server response as its argument.
+				- *callback_fail*: Function called after failed server form processing. Receives the server response as its argument.
+				- *confirm*: Optional confirmation message. Form submission proceeds only if user responds in the affirmative.
+				- *preprocess*: Function to be called prior to form submission. Options are passed as the argument. Function may set up and/or modify options.
+				- *preprocess*: Function to be called after server form processing and callback (success or fail). Receives no arguments.
+				- *progress*: Show progress indicator. Default is true if form has a file input, false otherwise.
 
 			Submits the FST *form* element with the given name. Name is the name
 			as assigned when created by the FST controller.
@@ -1069,7 +1076,7 @@ const fst = {
 	page elements. Call wait.off to remove the overlay.
 	***********************************************************************/
 	wait: Object.assign(
-		msg => {
+		() => {
 			const wait = document.querySelector('div[data-fst="wait"]');
 			wait.style.display = 'flex';
 		}, {
