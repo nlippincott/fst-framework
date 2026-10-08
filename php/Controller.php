@@ -20,6 +20,17 @@ namespace FST;
 abstract class Controller {
 
 	/**
+	 * Callable client metnods.
+	 * 
+	 * This defines member functions which may be called from the client using
+	 * the fst.call function in the fst.js library. Override this member as
+	 * an array of strings, each of which is the name of a Controller method.
+	 * Any requests from the client via fst.call with a callable name not
+	 * listed here will simply return null.
+	 */
+	static protected $callables = [];
+
+	/**
 	 * Template name.
 	 *
 	 * This is used by the Template Engine during page generation. Controllers
@@ -228,15 +239,35 @@ abstract class Controller {
 
 	// Invoke the Ajax handler specified by the action (final).
 	// This is called by the framework when the controller is instantiated
-	// via an Ajax call. This invokes the appropriate Ajax handler as
-	// determined by the action.
+	// via an Ajax call (when using fst-jquery.js). This invokes the
+	// appropriate Ajax handler as determined by the action.
 	/** @ignore */
-	final public function _invoke_ajax_handler ($data = null) {
+	final public function _invoke_ajax_handler () {
 		$handler = method_exists($this, "ajax_{$this->action()}") ? "ajax_{$this->action()}" : (method_exists($this, 'ajax') ? 'ajax' : null);
 		if ($handler) {
-			// For legacy Ajax calls, call the handler without arguments.
-			// For modern Ajax calls, $data will be provided and is passed to the handler.
-			$ret = $data === null ? $this->$handler() : $this->$handler($data);
+			header('Content-type: application/json');
+			print json_encode($this->$handler());
+			exit;
+		}
+	}
+
+	// Invoke the Call handler specified by the callable name (final).
+	// This is called by the framework when the controller is instantiated
+	// via a fetch initiated by fst.call in the fst.js library. This invokes
+	// the Controller method given by the callable name ($this->action), but
+	// only if that name is listed in the static member $callables. The data
+	// object passed via fst.call is passed to the function as an associative
+	// array.
+	final public function _invoke_call_handler (array $data) {
+		$handler = $this->action();
+		if ($handler == '_content') {
+			// For backward compatibility - revisit when old libraries go away
+			header('Content-type: application/json');
+			print json_encode($this->ajax__content($data));
+		}
+		else if (array_search($handler, static::$callables) !== false && method_exists($this, $handler)) {
+			// Call handler, save return value
+			$ret = $this->$handler($data);
 			// If the return value is an array or an object, convert to JSON and print
 			// to pass back to the client. Otherwise, just print thus passing back
 			// plain text.
@@ -249,9 +280,11 @@ abstract class Controller {
 				print $ret;
 			}
 		}
-		// If no handler, just send back empty plain text response
-		else
-			header('Content-type: text/plain');
+		// If no handler, send back a no-content response
+		else {
+			http_response_code(204);
+			header('Content-length: 0');
+		}
 	}
 
 	// Invoke the content preprocessor (final).

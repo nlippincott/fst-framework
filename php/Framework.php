@@ -606,12 +606,19 @@ class Framework {
 		// Initialize the controller.
 		self::ctrl()->init();
 
-		// If a POST request, it is assumed to be an Ajax request (as of FST
-		// version 6.2). Retrieve the posted data, whether through $_POST (for
-		// legacy Ajax requests via fst-jquery.js) or JSON input (for modern
-		// Ajax requests fia fst.js).
+		// If a POST request, it is assumed to be an Ajax or fetch request
+		// from the client (as of FST version 6.2). Retrieve the posted data,
+		// whether through $_POST (for legacy Ajax requests via fst-jquery.js
+		// or a form submission) or JSON input (for modern fetch requests via
+		// fst.js).
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$data = isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false ? json_decode(file_get_contents('php://input'), true) : $_POST;
+
+			// Determine if data is passed as JSON.
+			$is_json = isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false;
+
+			// Get data passed. If passed as JSON decode it, otherwise it is
+			// passed via $_POST.
+			$data = $is_json ? json_decode(file_get_contents('php://input'), true) : $_POST;
 
 			// Call data initialization methods for data values. Initialization
 			// methods have name init_KEY where KEY is the key of any data
@@ -623,8 +630,9 @@ class Framework {
 					self::ctrl()->$method($v);
 			}
 
-			// Invoke Ajax handler, passing data received, then exit.
-			self::ctrl()->_invoke_ajax_handler($data);
+			// If data was passed as JSON invoke the call handler, otherwise
+			// invoke the Ajax handler (which also handles form submissions).
+			$is_json ? self::ctrl()->_invoke_call_handler($data) : self::ctrl()->_invoke_ajax_handler();
 			exit;
 		}
 

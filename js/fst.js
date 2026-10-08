@@ -2,7 +2,7 @@
 # FST JavaScript Library
 
 A JavaScript library providing client-side support for FST Framework
-applications. This module includes support for Ajax calls and form
+applications. This module includes support for fetch-based calls and form
 submissions to the framework, as well as convenience functions for
 modal dialogs.
 
@@ -26,26 +26,26 @@ This is considered experimental in FST version 6.2.
 const fst = {
 
 	/***********************************************************************
-	## fst.ajax (String name, Object opts) {#fst-ajax}
+	## fst.call (String name, Object opts) {#fst-call}
 
-	Initiates an Ajax call to the FST Controller
+	Initiates a call to an FST Controller method
 
-	- ***name***: Ajax handler name
-	- ***options***: Ajax options:
-		- *callback*: Callback function following the Ajax call. Receives the server response as its argument.
-		- *confirm*: Optional confirmation message. Ajax call proceeds only if user responds in the affirmative.
-		- *data*: Data to be passed to the server.
+	- ***name***: Controller method name
+	- ***options***: Call options:
+		- *callback*: Callback function following the Call. Receives the server response as its argument.
+		- *confirm*: Optional confirmation message. Call proceeds only if user responds in the affirmative.
+		- *data*: Data to be passed to the Controller method.
 		- *postprocess*: Function to be called after the callback function or user action to cancel upon confirmation. No arguments are passed.
-		- *preprocess*: Function to be called prior to confirmation message and Ajax call. Options are passed as the argument. Function may set up and/or options.
+		- *preprocess*: Function to be called prior to confirmation message and Call. Options are passed as the argument. Function may set up and/or options.
 	***********************************************************************/
-	ajax: Object.assign(
+	call: Object.assign(
 		async function (name, options) {
 
 			// Type checks
 			if (!(typeof name == 'string' || name instanceof String))
-				throw new TypeError("fst.ajax(): 'name' must be a string");
+				throw new TypeError("fst.call(): 'name' must be a string");
 			if (options && !(typeof options == 'object'))
-				throw new TypeError("fst.ajax(): 'options' must be an object");
+				throw new TypeError("fst.call(): 'options' must be an object");
 
 			// Set up options
 			const opts = {
@@ -54,28 +54,28 @@ const fst = {
 				data: { },
 				postprocess: () => { },
 				preprocess: opts => { },
-				...fst.ajax._options['_default'],
-				...(fst.ajax._options[name] ?? { }),
+				...fst.call._options['_default'],
+				...(fst.call._options[name] ?? { }),
 				...(options ?? { })
 			};
 
 			// Type checks on options
-			try { fst.ajax.options._validate(opts); }
-			catch (err) { throw new TypeError(`fst.ajax(): ${err.message}`); }
+			try { fst.call.options._validate(opts); }
+			catch (err) { throw new TypeError(`fst.call(): ${err.message}`); }
 
 			// Call preprocess funciton passing options, which may be modified
 			if (opts.preprocess.call(this, opts) === false)
 				return false;
 
 			// Type checks on options again, after preprocess
-			try { fst.ajax.options._validate(opts); }
-			catch (err) { throw new TypeError(`fst.ajax(): ${err.message}`); }
+			try { fst.call.options._validate(opts); }
+			catch (err) { throw new TypeError(`fst.call(): ${err.message}`); }
 
 			// Handle confirmation if confirm option present
 			if (opts.confirm) {
 				fst.dialog.confirm(opts.confirm, confirmed => {
 					if (confirmed)
-						fst.ajax.call(this, name, {
+						fst.call.call(this, name, {
 							callback: opts.callback,
 							confirm: null,
 							data: opts.data,
@@ -98,33 +98,41 @@ const fst = {
 
 				// Error check
 				if (!response.ok)
-					throw new Error(`Ajax request failed, server status: ${response.status}`);
+					throw new Error(`Call request failed, server status: ${response.status}`);
 
-				// Copy of response stream (for error checking)
-				const response_clone = response.clone();
-
-				// Parse the response and call the callback function
-				const ct = response.headers.get('content-type');
-				if (ct && ct.includes('application/json')) {
-					try {
-						const data = await response.json();
-						opts.callback.call(this, data);
-					}
-					catch (jsonError) {
-						// Failed to parse JSON response, log the response to the console
-						const text = await response_clone.text();
-						console.warn("Server did not return JSON. Raw output logged below:");
-						console.error(text);
-					}
+				if (response.status == 204) {
+					// No response, send null to callback function
+					opts.callback.call(this, null);
 				}
 				else {
-					const text = await response.text();
-					if (ct && ct.includes('text/plain'))
-						opts.callback.call(this, text);
+					// Copy of response stream (for error checking)
+					const response_clone = response.clone();
+
+					// Parse the response and call the callback function
+					const ct = response.headers.get('content-type');
+					if (ct && ct.includes('application/json')) {
+						// Response is JSON, send object to callback function
+						try {
+							const data = await response.json();
+							opts.callback.call(this, data);
+						}
+						catch (jsonError) {
+							// Failed to parse JSON response, log the response to the console
+							const text = await response_clone.text();
+							console.warn("Server did not return JSON. Raw output logged below:");
+							console.error(text);
+						}
+					}
 					else {
-						// In event of server-side error, content type is 'text/html'
-						console.warn("Server returned unexpected response. Raw output logged below:");
-						console.error(text);
+						const text = await response.text();
+						if (ct && ct.includes('text/plain'))
+							// Response is plain text, sent text to callback function
+							opts.callback.call(this, text);
+						else {
+							// In event of server-side error, content type is 'text/html'
+							console.warn("Server returned unexpected response. Raw output logged below:");
+							console.error(text);
+						}
 					}
 				}
 			}
@@ -136,19 +144,19 @@ const fst = {
 			opts.postprocess.call(this);
 		}, {
 			/***********************************************************************
-			## fst.ajax.options (String name, Object opts) {#fst-ajax-callback}
+			## fst.call.options (String name, Object opts) {#fst-call-callback}
 
-			Register options for an Ajax handler.
+			Register options for a Call handler.
 
-			- ***name***: Ajax handler name
-			- ***options***: Handler options (see fst-ajax)
+			- ***name***: Controller method name
+			- ***options***: Handler options (see fst-call)
 
 			Registers default options to be associated with the given named
-			Ajax handler. These options override the default options for Ajax
+			Call handler. These options override the default options for
 			calls specifically for the named handler, and may be overridden
-			when calling fst.ajax.
+			when calling fst.call.
 
-			If opts is passed as null, options for the named Ajax handler are deleted.
+			If opts is passed as null, options for the named Call handler are deleted.
 			***********************************************************************/
 			_options: { _default: { } },
 			options: Object.assign(
@@ -156,45 +164,45 @@ const fst = {
 
 					// Type checks
 					if (!(typeof name == 'string' || name instanceof String))
-						throw new TypeError("fst.ajax.options(): 'name' must be a string");
+						throw new TypeError("fst.call.options(): 'name' must be a string");
 					if (name == '_default')
-						throw new TypeError("fst.ajax.options(): cannot set default options, use fst.ajax.options.default()");
+						throw new TypeError("fst.call.options(): cannot set default options, use fst.call.options.default()");
 					if (!(options === null || typeof options == 'object'))
-						throw new TypeError("fst.ajax.options(): 'options' must be an object or must be specified as null");
+						throw new TypeError("fst.call.options(): 'options' must be an object or must be specified as null");
 
-					try { fst.ajax.options._validate(options); }
-					catch (err) { throw new TypeError(`fst.ajax.options(): ${err.message}`); }
+					try { fst.call.options._validate(options); }
+					catch (err) { throw new TypeError(`fst.call.options(): ${err.message}`); }
 
 					if (options === null)
-						delete fst.ajax._options[name];
+						delete fst.call._options[name];
 					else
-						fst.ajax._options[name] = options;
+						fst.call._options[name] = options;
 				}, {
 					/***********************************************************************
-					## fst.ajax.options.default (Object options) {#fst-ajax-callback}
+					## fst.call.options.default (Object options) {#fst-call-callback}
 
-					Register options for an Ajax handler.
+					Register options for an Call handler.
 
-					- ***options***: Default Ajax handler options (see fst-ajax)
+					- ***options***: Default Call handler options (see fst-call)
 
-					Registers default options to be associated with Ajax calls. Upon
-					initiating an Ajax call, any options specified by the named Ajax
-					action and/or by call to fst.ajax() will extend the default options.
+					Registers default options to be associated with calls. Upon
+					initiating a call, any options specified by the named Call
+					method and/or by call to fst.call() will extend the default options.
 					***********************************************************************/
 					default: options => {
 
 						// Type checks
-						try { fst.ajax.options._validate(options); }
+						try { fst.call.options._validate(options); }
 						catch (err) { throw new TypeError(`fst.form.options.default(): ${err.message}`); }
 
 						if (options === null)
-							fst.ajax._options['_default'] = { };
+							fst.call._options['_default'] = { };
 						else
-							fst.ajax._options['_default'] = options;
+							fst.call._options['_default'] = options;
 					},
 
 					_validate: options => {
-						// Validate Ajax options object
+						// Validate Call options object
 						if (options.callback && !(typeof options.callback == 'function'))
 							throw new TypeError("'callback' option must be a function");
 						if (options.confirm && !(typeof options.confirm == 'string' || options.confirm instanceof String))
@@ -212,11 +220,11 @@ const fst = {
 	/***********************************************************************
 	## fst.content (String area) {#fst-content}
 
-	Populate framework content area via Ajax
+	Populate framework content area via Call
 
 	- ***name***: Name of content area (from template), optional
 
-	Sends an Ajax request to the framework, which produces HTML content to
+	Sends a Call request to the framework, which produces HTML content to
 	replace the content of the named content area in the page. The content
 	area is an HTML element that was generated when the framework
 	initially produced the page. If name is not given, replaces the
@@ -274,8 +282,8 @@ const fst = {
 				return;
 			}
 
-			// Get content via ajax
-			fst.ajax('_content', {
+			// Get content via call
+			fst.call('_content', {
 				callback: resp => fst.content.element(name).innerHTML = resp,
 				data: { _content: name }
 			});
@@ -318,7 +326,7 @@ const fst = {
 					if (options === null)
 						delete fst.content._options[name];
 					else
-						fst.ajax._options[name] = options;
+						fst.content._options[name] = options;
 				} , {
 					default: options => {
 
@@ -329,13 +337,13 @@ const fst = {
 						catch (err) { throw new TypeError(`fst.content.options(): ${err.message}`); }
 
 						if (options === null)
-							fst.ajax._options['_default'] = { };
+							fst.content._options['_default'] = { };
 						else
 							fst.content._options[_default] = options;
 					},
 
 					_validate: options => {
-						// Validate Ajax options object
+						// Validate content options object
 						if (options.confirm && !(typeof options.confirm == 'string' || options.confirm instanceof String))
 							throw new TypeError("'confirm' option must be a string");
 						if (options.preprocess && !(typeof options.preprocess == 'function'))
@@ -575,7 +583,7 @@ const fst = {
 				if (!(typeof opts.callback == 'function'))
 					throw new TypeError("fst.dialog.alert(): option 'callback' must be a function");
 
-				fst.ajax('_content', {
+				fst.call('_content', {
 					data: {...opts.data, _content: name },
 					callback: resp => {
 						fst.dialog(resp, opts.callback, opts.buttons, opts);
@@ -647,7 +655,7 @@ const fst = {
 						fst.form._options[name] = options;
 				}, {
 					/***********************************************************************
-					## fst.form.options.default (Object options) {#fst-ajax-callback}
+					## fst.form.options.default (Object options) {#fst-form-options-default}
 
 					Register default form options.
 
@@ -1026,7 +1034,7 @@ const fst = {
 
 	Associates the given function with the given trigger name. Once a trigger
 	is registered, following a link with href ?NAME cause the trigger function
-	to be called (by default, triggers initiate an Ajax call). Passing null
+	to be called (by default, triggers initiate a Call). Passing null
 	as the function deletes the previously registered trigger.
 	***********************************************************************/
 	_triggers: [],
@@ -1151,7 +1159,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				if (fst._triggers[action])
 					fst._triggers[action].call(evt.target);
 
-				// Else initiate an Ajax call
+				// Else initiate a Call
 				else {
 					// Gather any data, removing any FST-related attributes
 					const data = { ...evt.target.dataset };
@@ -1160,8 +1168,7 @@ window.addEventListener('DOMContentLoaded', () => {
 						if (re.test(key))
 							delete data[key];
 					});
-					// Ajax call
-					fst.ajax(href, { data: data });
+					fst.call(href, { data: data });
 				}
 			}
 
@@ -1198,8 +1205,8 @@ window.addEventListener('DOMContentLoaded', () => {
 				delete data[key];
 		});
 
-		// Initiate Ajax call
-		fst.ajax(action, { data: data });
+		// Initiate Call
+		fst.call(action, { data: data });
 	});
 });
 
