@@ -24,11 +24,11 @@ namespace FST;
 abstract class CalendarEngine extends TableEngine {
 
 	/** @ignore */
-	protected $ym; // Year and month, YYYY-MM
+	protected string $ym; // Year and month, YYYY-MM
 	/** @ignore */
-	protected $dt; // Date of Sunday of first week in calendar
+	protected string $dt; // Date of Sunday of first week in calendar
 	/** @ignore */
-	protected $weeks; // Number of weeks in calendar
+	protected int $weeks; // Number of weeks in calendar
 
 	/**
 	 * Constructor, set up the calendar month.
