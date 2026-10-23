@@ -55,7 +55,7 @@ class Framework {
 
 	// Minimum PHP version required
 	/** @ignore */
-	const VERSION_PHP_MIN = '8.1';
+	const VERSION_PHP_MIN = '8.2';
 
 	// For control of FST copyright comment in HTML output
 	/** Default FST copyright output location. */
