@@ -26,13 +26,13 @@ namespace FST;
 final class MySQL {
 
 	/** @ignore */
-	static private $_databases = []; // PDO Database connections
+	static private array $_databases = []; // PDO Database connections
 	/** @ignore */
-	static private $_database_default = false; // Default database connection
+	static private ?\PDO $_database_default = null; // Default database connection
 	/** @ignore */
-	static private $_user = null; // Username for database access
+	static private ?string $_user = null; // Username for database access
 	/** @ignore */
-	static private $_user_pass = null; // Password for database access
+	static private ?string $_user_pass = null; // Password for database access
 
 	/**
 	 * Provides user authorization information to the database manager.
@@ -63,7 +63,7 @@ final class MySQL {
 	 * @param string $host Database host name/address (default localhost)
 	 * @param string $engine Database engine (default mysql)
 	 */
-	static public function database ($alias, $database=null, $host='localhost', $engine='mysql') {
+	static public function database (string $alias, ?string $database=null, string $host='localhost', string $engine='mysql') {
 		if (!$database)
 			$database = $alias;
 		if (array_key_exists($alias, static::$_databases))
@@ -88,7 +88,7 @@ final class MySQL {
 	 * @param string $alias Database alias (optional)
 	 * @return string Id of the most recent insert
 	 */
-	static public function insert_id ($alias=null)
+	static public function insert_id (?string $alias=null)
 		{ return static::_db($alias)->lastInsertId(); }
 
 	/**
@@ -146,7 +146,7 @@ final class MySQL {
 	 * @param string $alias Database alias (optional)
 	 * @return \PDO PDO database object
 	 */
-	static public function _db ($alias=null) {
+	static public function _db (?string $alias=null) {
 		if (!$alias && static::$_database_default)
 			return static::$_database_default;
 		if (!$alias || !array_key_exists($alias, static::$_databases))
@@ -181,7 +181,7 @@ abstract class MySQLModel {
 	 * must have been defined using MySQL::database prior to instantion of
 	 * the first object from the derived class.
 	 */
-	static protected $database = null; /// Database alias name
+	static protected ?string $database = null; /// Database alias name
 
 	/**
 	 * Defines the database table name.
@@ -192,7 +192,7 @@ abstract class MySQLModel {
 	 * characters in the name (except the first character) with an underscore,
 	 * converting all characters to lowercase, and adding 's'.
 	 */
-	static protected $table = null; /// Table name
+	static protected ?string $table = null; /// Table name
 
 	/**
 	 * Defines the name of the primary key field.
@@ -201,7 +201,7 @@ abstract class MySQLModel {
 	 * primary key field. If the derived class does not override this
 	 * property, 'id' is used.
 	 */
-	static protected $key = 'id'; /// Primary key field
+	static protected string $key = 'id'; /// Primary key field
 
 	/** 
 	 * Defines documents which reference this document.
@@ -223,7 +223,7 @@ abstract class MySQLModel {
 	 * rules for foreign key names applies. The third (optional) component
 	 * is the default sort order of the related documents.
 	 */
-	static protected $referenced_by = [];
+	static protected array $referenced_by = [];
 
 	/**
 	 * Defines referenced documents.
@@ -238,14 +238,14 @@ abstract class MySQLModel {
 	 * converted according to class-to-table-name rules, followed by "_id"
 	 * is used.
 	 */
-	static protected $references = [];
+	static protected array $references = [];
 
 	/** @ignore */
-	private $_id = null;
+	private ?string $_id = null;
 	/** @ignore */
-	private $_readonly = false;
+	private bool $_readonly = false;
 	/** @ignore */
-	private $_refs = [];
+	private array $_refs = [];
 
 	/**
 	 * Constructs a new document.
@@ -259,7 +259,7 @@ abstract class MySQLModel {
 	// derived class that refernce this class. Optional arguments to the
 	// function are the WHERE clause, the ORDER BY clause, and columns.
 	/** @ignore */
-	public function __call ($fcn, $args) {
+	public function __call (string $fcn, array $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
 			throw new UsageException("Call to undefined method: $fcn");
 
@@ -315,7 +315,7 @@ abstract class MySQLModel {
 	// If the property has a getter (method "get_" followed by a property
 	// name, that function is called to retrieve the property.
 	/** @ignore */
-	public function __get ($fld) {
+	public function __get (string $fld) {
 
 		// May get primary key value via _id. Note that this is the primary
 		// key value on the saved record. If a new record and primary key
@@ -374,19 +374,19 @@ abstract class MySQLModel {
 	// Magic method to indicate whether the _id property is set or getter
 	// exists and has non-null return value
 	/** @ignore */
-	public function __isset ($fld) {
+	public function __isset (string $fld) {
 		if ($fld == '_id')
 			return isset($this->_id);
 		return method_exists($this, "get_$fld") && !is_null(call_user_func([ $this, "get_$fld" ]));
 	}
 
 	// Magic method to set properties that are not already set. This method
-	// throws an exception on any attempt to set the _id propertie,
+	// throws an exception on any attempt to set the _id property,
 	// or any properties of referenced documents.
 	// When setting referenced objects, the object being assigned must be
 	// of the designated referenced class, else an exception is thrown.
 	/** @ignore */
-	public function __set ($fld, $val) {
+	public function __set (string $fld, mixed $val) {
 
 		// May not assign reserved properties (_id, _refs)
 		if (array_search($fld, [ '_id', '_refs' ]) !== false)
@@ -434,7 +434,7 @@ abstract class MySQLModel {
 	}
 
 	/** @ignore */
-	static public function __callStatic ($fcn, $args) {
+	static public function __callStatic (string $fcn, array $args) {
 		// Implements 'find_by_*', 'find_all_by_*', and 'count_by_*' static
 		// methods.
 

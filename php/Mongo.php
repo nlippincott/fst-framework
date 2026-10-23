@@ -25,11 +25,11 @@ namespace FST;
 final class Mongo {
 
 	/** @ignore */
-	static private $_databases = []; // Mongo database connections
+	static private array $_databases = []; // Mongo database connections
 	/** @ignore */
-	static private $_database_default = false; // Default database connection
+	static private ?string $_database_default = null; // Default database connection
 	/** @ignore */
-	static private $_manager = null; // Mongo database manager
+	static private ?\MongoDB\Driver\Manager $_manager = null; // Mongo database manager
 	/** @ignore */
 	static private $_uri = 'mongodb://localhost'; // Authentication URI
 
@@ -61,7 +61,7 @@ final class Mongo {
 	 * @param $alias string Database alias name
 	 * @param $database string Database name (optional)
 	 */
-	static public function database ($alias, $database=false) {
+	static public function database (string $alias, ?string $database=null) {
 		if (!$database)
 			$database = $alias;
 		if (array_key_exists($alias, static::$_databases))
@@ -77,10 +77,10 @@ final class Mongo {
 	 * Used to retrieve actual database name for a given alias name. This
 	 * function is provided for usage by the MongoModel base class.
 	 *
-	 * @param $alias string Database alias
+	 * @param string $alias string Database alias
 	 * @return string Database name
 	 */
-	static public function _db ($alias=false) {
+	static public function _db (?string $alias=null) {
 		if (!$alias && static::$_database_default)
 			return static::$_database_default;
 		if (!$alias || !array_key_exists($alias, static::$_databases))
@@ -94,7 +94,7 @@ final class Mongo {
 	 * Used to retrieve the database manager object. This function is provided
 	 * for usage by the MongoModel base class.
 	 *
-	 * @return \MongoDB\Manager A \\MongoDB\\Manager object
+	 * @return \MongoDB\Driver\Manager A \\MongoDB\\Manager object
 	 */
 	static public function _mgr () {
 		if (!isset(static::$_manager))
@@ -176,16 +176,16 @@ abstract class MongoModel {
 	 * another collection. Values of the associative array are the class name
 	 * corresponding to the referenced collection.
 	 */
-	static protected $references = [];
+	static protected array $references = [];
 
 	/** @ignore */
-	private $_id = null;
+	private ?\MongoDB\BSON\ObjectId $_id = null;
 	/** @ignore */
-	private $_id_refs = [];
+	private array $_id_refs = [];
 	/** @ignore */
-	private $_docs = [];
+	private array $_docs = [];
 	/** @ignore */
-	private $_readonly = false;
+	private bool $_readonly = false;
 
 	/**
 	 * Constructs a new document.
@@ -203,7 +203,7 @@ abstract class MongoModel {
 	// derived class that reference a document from this class. Optional
 	// arguments to the function are the query, sort criteria, and projection.
 	/** @ignore */
-	public function __call ($fcn, $args) {
+	public function __call (string $fcn, array $args) {
 		if (!array_key_exists($fcn, static::$referenced_by))
 			throw new UsageException("Call to undefined method: $fcn");
 
@@ -252,7 +252,7 @@ abstract class MongoModel {
 	// referenced property, an object of the referenced class is created
 	// and returned if a document is referenced, or null if none referenced.
 	/** @ignore */
-	public function __get ($fld) {
+	public function __get (string $fld) {
 
 		// If getting '_id', return Mongo Object ID
 		if ($fld == '_id')
@@ -297,7 +297,7 @@ abstract class MongoModel {
 	// Magic method to indicate whether the id property is set or getter
 	// exists and has non-null return value
 	/** @ignore */
-	public function __isset ($fld) {
+	public function __isset (string $fld) {
 		switch ($fld) {
 		case 'id':
 		case '_id':
@@ -312,7 +312,7 @@ abstract class MongoModel {
 	// When setting referenced objects, the object being assigned must be
 	// of the designated referenced class, else an exception is thrown.
 	/** @ignore */
-	public function __set ($fld, $val) {
+	public function __set (string $fld, mixed $val) {
 
 		// May not assign 'id', '_id', or '_id_refs'
 		if ($fld == 'id' || $fld == '_id' || preg_match('/^_id_/', $fld))
@@ -369,7 +369,7 @@ abstract class MongoModel {
 
 	// Magic method to unset referenced properties
 	/** @ignore */
-	public function __unset ($fld) {
+	public function __unset (string $fld) {
 
 		// If a referenced object, remove its id from referenced id's.
 		if (array_key_exists($fld, static::$references))
@@ -377,7 +377,7 @@ abstract class MongoModel {
 	}
 
 	/** @ignore */
-	static public function __callStatic ($fcn, $args) {
+	static public function __callStatic (string $fcn, array $args) {
 		// Implements 'find_by_*' and 'find_all_by_*' and 'count_by_*' static
 		//	methods.
 
@@ -568,7 +568,7 @@ abstract class MongoModel {
 	 * @param array $qry Query to qualify document in collection (optional)
 	 * @return int Number of documents
 	 */
-	static public function count ($qry=null) {
+	static public function count (?array $qry=null) {
 
 		// Convert references in query.
 		$qry = static::_query($qry);
@@ -592,7 +592,7 @@ abstract class MongoModel {
 	 *
 	 * @param array $qry Query for qualifying documents
 	 */
-	static public function delete_all ($qry) {
+	static public function delete_all (mixed $qry) {
 
 		if ($qry === true)
 			// Delete all documents in the collection
@@ -832,7 +832,7 @@ abstract class MongoModel {
 
 	// Helper function to preprocess queries
 	/** @ignore */
-	static private function _query ($qry) {
+	static private function _query (?array $qry) {
 
 		// Ensure query is given as an array or as null.
 		if (!$qry) $qry = [];
