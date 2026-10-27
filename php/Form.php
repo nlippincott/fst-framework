@@ -145,7 +145,7 @@ class Form {
 	 * with the given name exists, returns null.
 	 *
 	 * @param string $name Field name
-	 * @return FormControl|null FormControl object or null
+	 * @return object|null FormControl-derived object or null
 	 */
 	public function ctrl ($name)
 		{ return isset($this->fld[$name]) ? $this->fld[$name] : false; }
