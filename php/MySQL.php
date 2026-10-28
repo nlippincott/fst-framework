@@ -34,6 +34,10 @@ final class MySQL {
 	/** @ignore */
 	static private ?string $_user_pass = null; // Password for database access
 
+	// Prevent instantiation of this class
+	/** @ignore */
+	private function __construct () { }
+
 	/**
 	 * Provides user authorization information to the database manager.
 	 *
