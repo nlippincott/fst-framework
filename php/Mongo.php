@@ -37,15 +37,16 @@ final class Mongo {
 	 * Provides authorization string to database manager.
 	 *
 	 * Provides the username, password, and authentication database to be
-	 * used for database connections. Optionally, the hostname of the
-	 * authentication database may be provided (default is localhost).
+	 * used for database connections. Optionally, the database name and
+	 * hostname of the authentication database may be provided (defaults
+	 * are admin and localhost respectively).
 	 *
 	 * @param string $user Database username
 	 * @param string $pass Database password
-	 * @param string $auth Authenticaion database
+	 * @param string $auth Authenticaion database (optional)
 	 * @param string $host Authentication database host name (optional)
 	 */
-	static public function auth ($user, $pass, $auth, $host='localhost')
+	static public function auth (string $user, string $pass, string $auth='admin', string $host='localhost')
 		{ static::$_uri = "mongodb://$user:$pass@$host/$auth"; }
 
 	/**
