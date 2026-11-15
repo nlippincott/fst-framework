@@ -174,9 +174,9 @@ class Framework {
 	 * from class Controller and represents the controller object that is
 	 * handling the current request.
 	 * 
-	 * @return Controller Current Controller object
+	 * @return object Current Controller object
 	 */
-	public static function ctrl () { return self::$_ctrl; }
+	public static function ctrl () : object { return self::$_ctrl; }
 
 	/**
 	 * Get controller name.

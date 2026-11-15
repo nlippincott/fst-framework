@@ -158,9 +158,9 @@ function __button_img ($uri, $src, $alt, $attr=[])
  *
  * This is a convenience function for returning current FST controller.
  * 
- * @return FST\Controller The Controller object for the current request
+ * @return object The Controller object for the current request
  */
-function _ctrl () { return FST\Framework::ctrl(); }
+function _ctrl () : object { return FST\Framework::ctrl(); }
 
 /**
  * Get name of the current FST Controller.
