@@ -1025,6 +1025,29 @@ const fst = {
 	reload: () => window.location.reload(),
 	
 	/***********************************************************************
+	## fst.replace (String uri) {#fst-replace}
+
+	Replace the current page in history with the given location
+
+	- ***uri***: Relative or absolute URI
+
+	Redirect the browser to the given location, replacing the current page's
+	location in the browser history.
+	***********************************************************************/
+	replace: Object.assign(
+		uri => {
+			window.location.replace(fst.uri(uri));
+		}, {
+			/***********************************************************************
+			## fst.replace.home () {#fst-replace-home}
+
+			Replace the current page in history with the home page
+			***********************************************************************/
+			home: () => fst.replace('')
+		}
+	),
+	
+	/***********************************************************************
 	## fst.trigger (String name, function fcn) {#fst-trigger}
 
 	Registers a trigger function.
