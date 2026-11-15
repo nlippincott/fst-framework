@@ -22,18 +22,6 @@ namespace FST;
  * The find static method is used to create objects of this class to
  * represent individual records from the table. Instantiation of a new object
  * of the derived class represents creation of a new record.
- * 
- * Due to PHP 8.2 deprecating dynamically created properties, this class
- * received a major overhaul with FST 6.2. Functionality remains backward
- * compatible, with these exceptions: 1) Database fields are now accessed
- * via __get and __set, not dynamically created properties. Any declared
- * database field properties will generate a UsageException upon first
- * instantiation. 2) Methods read and write are now used to access and update
- * database values bypassing __get and __set. These methods are not backward
- * compatible. Previously used for conversions of field values between
- * database and instantiated object, such situations should now be handled
- * with getters and setters, which may use read and write to access the
- * underlying field value.
  */
 abstract class MySQLModel {
 
@@ -110,7 +98,7 @@ abstract class MySQLModel {
 	/** @ignore */
 	private bool $__readonly = false; // Read-only flag
 	/** @ignore */
-	private array $__rec = []; // Database record
+	private array $__rec = []; // Database record, less explicitly declared properties
 	/** @ignore */
 	private array $__refs = []; // Any referenced objects
 
@@ -135,8 +123,15 @@ abstract class MySQLModel {
 				static::$__rec_init[$cls][$row->Field] = $row->Default;
 		}
 
-		// Initialize the record
-		$this->__rec = static::$__rec_init[$cls];
+		// Initialize properties (may be explicitly declared or dynamic)
+		foreach (static::$__rec_init[$cls] as $k=>$v) {
+			if (property_exists($this, $k))
+				$this->$k = $v;
+			else
+				$this->__rec[$k] = $v;
+		}
+
+		// Set properties if specified
 		if ($properties)
 			$this->set($properties);
 	}
@@ -376,16 +371,25 @@ abstract class MySQLModel {
 	}
 
 	/**
-	 * Retrieve field value from database record
-	 * 
-	 * Retrieves value of a database field bypassing any getter function.
+	 * Post-process database fields after read.
 	 *
-	 * @param string $fld Field name
-	 * @return mixed Field value from database record
+	 * Derived classes may override this method to perform any post-processing
+	 * to be done to the document's data immediately after it is read from the
+	 * database but before the record is passed to the set method to initialize
+	 * the document's properties.
+	 *
+	 * The parameter given is an associative array of actual values read
+	 * from the database, and should return an associative array of properties
+	 * to be set for the document.
+	 * 
+	 * Note that the set method does not set properties that lead with an
+	 * underscore. If such properties are needed for object context they
+	 * may be set directly in this method.
+	 *
+	 * @param array $rec Associative array of field values from database
+	 * @return array Associative array of field values for the object model
 	 */
-	protected function read (string $fld) {
-		return $this->__rec[$fld];
-	}
+	protected function read (array $rec) : array { return $rec; }
 
 	/**
 	 * Saves current document to the database.
@@ -405,6 +409,12 @@ abstract class MySQLModel {
 		if ($this->__id && $this->__id != $this->{static::$key})
 			throw new UsageException('Update of primary key ' . static::_table() . '.' . static::$key . ' is not allowed');
 
+		// Combine declared and dynamic properties
+		$rec = array_merge(get_object_vars($this), $this->__rec);
+
+		// Remove any properties with leading underscore
+		$rec = array_filter($rec, function (string $key) { return substr($key, 0, 1) != '_'; }, ARRAY_FILTER_USE_KEY);
+
 		// Convert all boolean values to 0/1, and convert all DateTime objects to string form.
 		$rec = array_map(function (mixed $val) {
 			if (is_bool($val))
@@ -412,7 +422,7 @@ abstract class MySQLModel {
 			if (is_object($val) && get_class($val) == 'DateTime')
 				return $val->format('Y-m-d H:i:s');
 			return $val;
-		}, $this->__rec);
+		}, $rec);
 
 		// Prepare the statement. If a new record, this will be an insert, otherwise an update.
 		if ($this->__id === null) {
@@ -464,16 +474,20 @@ abstract class MySQLModel {
 }
 
 	/**
-	 * Save field value to database record
-	 * 
-	 * Sets value of a database field bypassing any setter function.
+	 * Pre-process database fields before write.
 	 *
-	 * @param string $fld Field name
-	 * @param mixed $val Value to be assigned
+	 * This method may be overridden in derived classes to perform any
+	 * pre-processing that should occur just before writing the document to
+	 * the database. The parameter given is an associative array of all
+	 * properties of the document with properties having names beginning with
+	 * an underscore removed, thus representing the data just about to be
+	 * written to the database. The method should return an associative array
+	 * of actual values to be written (by either INSERT or UPDATE).
+	 *
+	 * @param array $rec Associative array of field values from the model
+	 * @return array Associative array of field values for the database
 	 */
-	protected function write (string $fld, mixed $val) {
-		$this->__rec[$fld] = $val;
-	}
+	protected function write (array $rec) : array { return $rec; }
 
 	/**
 	 * Get count of records.
@@ -637,7 +651,7 @@ abstract class MySQLModel {
 		$objs = [];
 		foreach ($rows as $row) {
 			$obj = new $cls();
-			$obj->set(get_object_vars($row));
+			$obj->set($obj->read(get_object_vars($row)));
 			$obj->__id = $obj->{static::$key};
 			$obj->__readonly = $cols != '*';
 			$objs[] = $obj;
