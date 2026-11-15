@@ -20,17 +20,6 @@ namespace FST;
 abstract class Controller {
 
 	/**
-	 * Callable client metnods.
-	 * 
-	 * This defines member functions which may be called from the client using
-	 * the fst.call function in the fst.js library. Override this member as
-	 * an array of strings, each of which is the name of a Controller method.
-	 * Any requests from the client via fst.call with a callable name not
-	 * listed here will simply return null.
-	 */
-	static protected $callables = [];
-
-	/**
 	 * Template name.
 	 *
 	 * This is used by the Template Engine during page generation. Controllers
@@ -47,6 +36,12 @@ abstract class Controller {
 	 * should set this variable as appropriate.
 	 */
 	public $title = "FST Framework Application";
+
+	// Registered callables (via fst.js). This is used by the Controller class
+	// to map calls from JS function fst.call to a Controller function.
+	// Callables are resistered using the "callable" method.
+	/** @ignore */
+	private $_callables = [];
 
 	// Registered forms for use with the form processor.
 	// This is used by the Controller class for processing forms. Forms are
@@ -107,6 +102,23 @@ abstract class Controller {
 	 * @return string[] Array of controller argument strings
 	 */
 	final protected function argv () { return Framework::argv(); }
+
+	/**
+	 * Register a callable method
+	 * 
+	 * Registers a Controller method as being callable when using the
+	 * client-side fst.js library.
+	 * 
+	 * @param string $name The callable name on the client side
+	 * @param string $fcn The Controller method name, defaults to $name
+	 */
+	final public function callable (string $name, ?string $fcn = null) {
+		if ($fcn === null)
+			$fcn = $name;
+		if (!method_exists($this, $fcn))
+			throw new UsageException("Callable function is not defined: $fcn");
+		$this->_callables[$name] = $fcn ?? $name;
+	}
 
 	/**
 	 * @brief Get controller name.
@@ -254,20 +266,21 @@ abstract class Controller {
 	// Invoke the Call handler specified by the callable name (final).
 	// This is called by the framework when the controller is instantiated
 	// via a fetch initiated by fst.call in the fst.js library. This invokes
-	// the Controller method given by the callable name ($this->action), but
-	// only if that name is listed in the static member $callables. The data
-	// object passed via fst.call is passed to the function as an associative
-	// array.
+	// the Controller method given by the callable name ($this->action). The
+	// handler is a method with the name "call_NAME", where NAME is the
+	// callable name. The data object passed via fst.call is passed to the
+	// function as an associative array.
 	final public function _invoke_call_handler (array $data) {
-		$handler = $this->action();
-		if ($handler == '_content') {
+		$name = $this->action(); // Get client-side callable name
+		if ($name == '_content') {
 			// For backward compatibility - revisit when old libraries go away
+			// TODO: Needs to be re-worked for FST 7
 			header('Content-type: application/json');
 			print json_encode($this->ajax__content($data));
 		}
-		else if (array_search($handler, static::$callables) !== false && method_exists($this, $handler)) {
+		else if (array_key_exists($name, $this->_callables)) {
 			// Call handler, save return value
-			$ret = $this->$handler($data);
+			$ret = $this->{$this->_callables[$name]}($data);
 			// If the return value is an array or an object, convert to JSON and print
 			// to pass back to the client. Otherwise, just print thus passing back
 			// plain text.
