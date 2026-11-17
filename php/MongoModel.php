@@ -88,11 +88,15 @@ abstract class MongoModel {
 	/** @ignore */
 	private ?\MongoDB\BSON\ObjectId $_id = null;
 	/** @ignore */
-	private array $_id_refs = [];
+	private mixed $id = null; // Prevent id from being explicitly declared
 	/** @ignore */
-	private array $_docs = [];
+	private array $__id_refs = [];
 	/** @ignore */
-	private bool $_readonly = false;
+	private array $__docs = [];
+	/** @ignore */
+	private array $__dyn = [];
+	/** @ignore */
+	private bool $__readonly = false;
 
 	/**
 	 * Constructs a new document.
@@ -178,13 +182,13 @@ abstract class MongoModel {
 
 		// If getting a referenced document, return object for document.
 		if (array_key_exists($fld, static::$references)) {
-			if (array_key_exists($fld, $this->_docs))
-				return $this->_docs[$fld];
-			if (isset($this->_id_refs[$fld])) {
+			if (array_key_exists($fld, $this->__docs))
+				return $this->__docs[$fld];
+			if (isset($this->__id_refs[$fld])) {
 				$cls = static::$references[$fld];
 				try {
-					$obj = $cls::find("{$this->_id_refs[$fld]}");
-					$this->_docs[$fld] = $obj;
+					$obj = $cls::find("{$this->__id_refs[$fld]}");
+					$this->__docs[$fld] = $obj;
 					return $obj;
 				}
 				catch (NotFoundException $e) { }
@@ -197,12 +201,17 @@ abstract class MongoModel {
 		if (array_key_exists($fld, static::$referenced_by))
 			return $this->$fld();
 
+		// Check if a dynamically created field.
+		if (array_key_exists($fld, $this->__dyn))
+			return $this->__dyn[$fld];
+
 		// Field does not exist, return null.
 		return null;
 	}
 
-	// Magic method to indicate whether the id property is set or getter
-	// exists and has non-null return value
+	// Magic method to indicate whether the id property is set, getter
+	// exists and has non-null return value, or dynamic property exists
+	// and is not null.
 	/** @ignore */
 	public function __isset (string $fld) {
 		switch ($fld) {
@@ -210,7 +219,11 @@ abstract class MongoModel {
 		case '_id':
 			return isset($this->_id);
 		}
-		return method_exists($this, "get_$fld") && !is_null(call_user_func([ $this, "get_$fld" ]));
+		if (method_exists($this, "get_$fld"))
+			return $this->{"get_$fld"} !== null;
+		if (array_key_exists($fld, $this->__dyn))
+			return $this->__dyn[$fld] !== null;
+		return false;
 	}
 
 	// Magic method to set properties that are not already set. This method
@@ -221,13 +234,11 @@ abstract class MongoModel {
 	/** @ignore */
 	public function __set (string $fld, mixed $val) {
 
-		// May not assign 'id', '_id', or '_id_refs'
-		if ($fld == 'id' || $fld == '_id' || preg_match('/^_id_/', $fld))
-			throw new UsageException('Assignment to id member is not allowed');
-
-		// May not assign '_docs'
-		if ($fld == '_docs')
-			throw new UsageException('Assignment to _docs member is not allowed');
+		// May not assign 'id', '_id', '_id_*', or any private properties
+		if ($fld == 'id' || $fld == '_id' || substr($fld, 0, 4) == '_id_')
+			throw new UsageException("Assignment to $fld member is not allowed");
+		if (array_search($fld, [ '__id_refs', '__docs', '__dyn', '__readonly' ]) !== false)
+			throw new UsageException("Assignment to $fld member is not allowed");
 
 		// If the field being assigned is a referenced field, value must be
 		//	a document object or an object id, in which case the object id
@@ -238,10 +249,10 @@ abstract class MongoModel {
 		if (array_key_exists($fld, static::$references)) {
 			// If $val is null, remove reference if exists.
 			if (!$val) {
-				if (isset($this->_docs[$fld]))
-					unset($this->_docs[$fld]);
-				if (isset($this->_id_refs[$fld]))
-					unset($this->_id_refs[$fld]);
+				if (isset($this->__docs[$fld]))
+					unset($this->__docs[$fld]);
+				if (isset($this->__id_refs[$fld]))
+					unset($this->__id_refs[$fld]);
 				return null;
 			}
 			// If $val is a string, attempt to convert to doc of expected type
@@ -259,8 +270,8 @@ abstract class MongoModel {
 			// $val must be a saved object (i.e. must have an _id)
 			if (!isset($val->_id))
 				throw new UsageException("Unsaved object assigned to referenced field");
-			$this->_id_refs[$fld] = $val->_id;
-			$this->_docs[$fld] = $val;
+			$this->__id_refs[$fld] = $val->_id;
+			$this->__docs[$fld] = $val;
 			return $val;
 		}
 
@@ -270,8 +281,8 @@ abstract class MongoModel {
 			return $this->$fld;
 		}
 
-		// Create public property, set, and return
-		return $this->$fld = $val;
+		// Set (or create) dynamic property
+		return $this->__dyn[$fld] = $val;
 	}
 
 	// Magic method to unset referenced properties
@@ -280,7 +291,11 @@ abstract class MongoModel {
 
 		// If a referenced object, remove its id from referenced id's.
 		if (array_key_exists($fld, static::$references))
-			unset($this->_id_refs[$fld]);
+			unset($this->__id_refs[$fld]);
+
+		// If a dynamic property, remove it
+		if (array_key_exists($fld, $this->__dyn))
+			unset($this->__dyn[$fld]);
 	}
 
 	/** @ignore */
@@ -370,7 +385,7 @@ abstract class MongoModel {
 	public function save () {
 
 		// Cannot save a read-only document
-		if ($this->_readonly)
+		if ($this->__readonly)
 			throw new DatabaseException('Cannot save read-only document');
 
 		// Create bulk write object
@@ -388,9 +403,9 @@ abstract class MongoModel {
 
 		// Convert document to an array, remove all properties leading with
 		// an underscore, and pass to the write method for pre-processing.
-		$doc = $this->write(array_filter(get_object_vars($this), function ($key) {
-			return substr($key, 0, 1) != '_';
-		}, ARRAY_FILTER_USE_KEY));
+		$doc = $this->write(
+			array_filter(array_merge(get_object_vars($this), $this->__dyn),
+				function ($key) { return substr($key, 0, 1) != '_'; }, ARRAY_FILTER_USE_KEY));
 
 		// Convert convert all DateTime objects to string form.
 		$doc = array_map(function ($val) {
@@ -400,7 +415,7 @@ abstract class MongoModel {
 		}, $doc);
 
 		// Set entries for referenced documents.
-		foreach ($this->_id_refs as $ref=>$obj_id)
+		foreach ($this->__id_refs as $ref=>$obj_id)
 			$doc["_id_$ref"] = $obj_id;
 
 		// Save document
@@ -696,7 +711,7 @@ abstract class MongoModel {
 			$obj = new $cls();
 			$obj->_init($obj->read(get_object_vars($doc)));
 			if ($prj !== null)
-				$obj->_readonly = true;
+				$obj->__readonly = true;
 			$objs[] = $obj;
 		}
 		return $objs;
@@ -713,7 +728,7 @@ abstract class MongoModel {
 		foreach ($doc as $key=>$val) {
 			// Referenced document, as described in static::$references?
 			if (substr($key, 0, 4) == '_id_' && array_key_exists(substr($key, 4), static::$references))
-				$this->_id_refs[substr($key, 4)] = $val;
+				$this->__id_refs[substr($key, 4)] = $val;
 			// All other properties, except '_id'.
 			else if ($key != '_id')
 				$this->$key = $val;
