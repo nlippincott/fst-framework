@@ -234,7 +234,7 @@ const fst = {
 		(name, options) => {
 
 			// Type checks
-			if (!(typeof name == 'string' || name instanceof String))
+			if (name !== undefined && !(typeof name == 'string' || name instanceof String))
 				throw new TypeError("fst.content(): 'name' must be a string");
 			if (options && !(typeof options == 'object'))
 				throw new TypeError("fst.content(): 'options' must be an object");
@@ -301,7 +301,7 @@ const fst = {
 			element: name => {
 
 				// Type check
-				if (!(typeof name == 'string' || name instanceof String))
+				if (name !== undefined && !(typeof name == 'string' || name instanceof String))
 					throw new TypeError("fst.content.element(): 'name' must be a string");
 
 				return document.querySelector(name ? `[data-fst="content-${name}"]` : '[data-fst="content"');
