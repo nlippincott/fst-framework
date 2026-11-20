@@ -88,8 +88,6 @@ abstract class MongoModel {
 	/** @ignore */
 	private ?\MongoDB\BSON\ObjectId $_id = null;
 	/** @ignore */
-	private mixed $id = null; // Prevent id from being explicitly declared
-	/** @ignore */
 	private array $__id_refs = [];
 	/** @ignore */
 	private array $__docs = [];
