@@ -120,7 +120,7 @@ const fst = {
 							// Failed to parse JSON response, log the response to the console
 							const text = await response_clone.text();
 							console.warn("Server did not return JSON. Raw output logged below:");
-							console.error(text);
+							console.log(text);
 						}
 					}
 					else {
@@ -410,10 +410,10 @@ const fst = {
 			dlg.dataset.fst = 'dialog';
 
 			// Create the dialog content
-			dlg.innerHTML = buttons ? `<div>${html}</div><hr /><form method="dialog"></form>` : `<div>${html}</div>`;
+			dlg.innerHTML = buttons ? `<div>${html}</div><hr /><form data-fst="dialog-controls" method="dialog"></form>` : `<div>${html}</div>`;
 
 			// Add the buttons
-			const frm = dlg.querySelector('form');
+			const frm = dlg.querySelector('form[method="dialog"]');
 			buttons.forEach(text => {
 				const btn = document.createElement('button');
 				btn.value = text;
@@ -544,7 +544,7 @@ const fst = {
 			},
 
 			/***********************************************************************
-			## fst.dialog.content (String name, Object options) {#fst-dialog-alert}
+			## fst.dialog.content (String name, Object options) {#fst-dialog-content}
 
 			Opens a modal informational dialog box with Controller-provided content
 
@@ -588,6 +588,115 @@ const fst = {
 					callback: resp => {
 						fst.dialog(resp, opts.callback, opts.buttons, opts);
 					}
+				});
+			},
+
+			/***********************************************************************
+			## fst.dialog.form (String name, Object options) {#fst-dialog-form}
+
+			Opens a dialog box with form content provided by the Controller. Content
+			is assumed to include a form. Two buttons are provided, one to submit the
+			form and another to cancel.
+
+			- ***name***: String, name of the content area
+			- ***options***: Object, options:
+				- button: String, text to appear on submit button, default "OK"
+				- button_cancel: String, text to appear on cancel button, default "Cancel"
+				- *callback*: Function called after successful server form processing. Receives the server response as its argument.
+				- *callback_fail*: Function called after failed server form processing. Receives the server response as its argument.
+				- *data*: Data to be passed to the Framework for content retrieval
+				- *escape*: Boolean, allow Escape key to cancel, default true
+				- *progress*: Show progress indicator. Default is true if form has a file input, false otherwise.
+
+			Upon successful form submission, the dialog is first closed then the function
+			provided by *callback* is called. If unsuccessful, function *callback_fail*
+			is called with the dialog remaining open.
+
+			The cancel button closes the dialog without submitting the form. If *button_cancel*
+			is provided as undefined or null, no cancel button is provided. However, if no
+			cancel button, the dialog may still be closed with the escape key, unless
+			*escape* os provided as false.
+			***********************************************************************/
+			form: (name, options) => {
+
+				// Type checks
+				if (!(typeof name == 'string' || name instanceof String))
+					throw new TypeError("fst.dialog.content(): 'name' must be a string");
+				if (options && !(typeof options == 'object'))
+					throw new TypeError("fst.dialog.content(): 'options' must be an object");
+
+				const opts = {
+					button: 'OK',
+					button_cancel: 'Cancel',
+					callback: resp => { },
+					callback_fail: resp => { fst.form.errors(document.querySelector('dialog[data-fst="dialog"] form'), resp.errors); },
+					data: { },
+					escape: true,
+					...(options ?? { })
+				};
+
+				// Create OK and Cancel buttons
+				const btn1 = document.createElement('button');
+				btn1.textContent = opts.button;
+				btn1.addEventListener('click', () => {
+					const frm = document.querySelector('dialog[data-fst="dialog"] form');
+					fst.form.submit(frm, {
+						callback: async resp => {
+							fst.dialog.close();
+							opts.callback(await resp);
+						},
+						callback_fail: async resp => { opts.callback_fail(await resp); }
+					});
+				});
+				const btn2 = opts.button_cancel ? document.createElement('button') : null;
+				if (btn2 !== null) {
+					btn2.textContent = opts.button_cancel;
+					btn2.addEventListener('click', () => { fst.dialog.close(); });
+				}
+
+				// Retrieve the content
+				fst.call('_content', {
+					callback: async resp => {
+
+						// Create the dialog element
+						const dlg = document.createElement('dialog');
+						dlg.dataset.fst = 'dialog';
+
+						// Create content area with form, append to dialog
+						const content = document.createElement('div');
+						content.innerHTML = await resp;
+						dlg.append(content);
+
+						// Append an HR
+						dlg.append(document.createElement('hr'));
+
+						// Create controls element, add buttons, append to dialog
+						const controls = document.createElement('div');
+						controls.dataset.fst = 'dialog-controls';
+						controls.append(btn1);
+						if (btn2 !== null)
+							controls.append(btn2);
+						dlg.append(controls);
+
+						// When the dialog closes, remove from the DOM
+						dlg.addEventListener('close', () => { dlg.remove(); });
+
+						// Prevent escape key?
+						if (!opts.escape) {
+							dlg.addEventListener('cancel', event => event.preventDefault());
+							dlg.addEventListener('keydown', event => {
+								if (event.key == 'Escape')
+									event.preventDefault();
+							});
+						}
+
+						// Add dialog to the DOM
+						document.body.appendChild(dlg);
+
+						// Show the dialog
+						dlg.showModal();
+					},
+					data: { _content: name }
 				});
 			}
 		}

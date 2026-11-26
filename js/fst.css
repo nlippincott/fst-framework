@@ -26,8 +26,8 @@ dialog[data-fst="dialog"] {
 
 /* Dialog components */
 dialog[data-fst="dialog"] > hr { margin-top: 8px; margin-bottom: 8px; }
-dialog[data-fst="dialog"] > form { text-align: right; }
-dialog[data-fst="dialog"] > form button {
+dialog[data-fst="dialog"] > [data-fst="dialog-controls"] { text-align: right; }
+dialog[data-fst="dialog"] > [data-fst="dialog-controls"] button {
 	margin-left: 4px; padding: 4px;
 	border-radius: 4px;
 	background-color: #ddd;
