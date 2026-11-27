@@ -32,6 +32,8 @@ dialog[data-fst="dialog"] > [data-fst="dialog-controls"] button {
 	border-radius: 4px;
 	background-color: #ddd;
 }
+dialog[data-fst="dialog"].no-controls > hr { display: none; }
+dialog[data-fst="dialog"].no-controls > [data-fst="dialog-controls"] { display: none; }
 
 /* Dialog full-screen backdrop */
 dialog[data-fst="dialog"]::backdrop {

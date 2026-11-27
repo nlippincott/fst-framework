@@ -383,10 +383,6 @@ const fst = {
 	dialog: Object.assign(
 		(html, callback, buttons, options) => {
 
-			// Ensure no dialog is currently open
-			if (document.querySelector('dialog[data-fst="dialog"]'))
-				return;
-
 			// Type checks
 			if (!(typeof html == 'string' || html instanceof String))
 				throw new TypeError("fst.dialog(): 'html' must be a string");
@@ -405,43 +401,33 @@ const fst = {
 			// Apply default options
 			const opts = { escape: true, ...(options ?? { }) }
 
-			// Create the dialog element
-			const dlg = document.createElement('dialog');
-			dlg.dataset.fst = 'dialog';
-
-			// Create the dialog content
-			dlg.innerHTML = buttons ? `<div>${html}</div><hr /><form data-fst="dialog-controls" method="dialog"></form>` : `<div>${html}</div>`;
+			// Populate the dialog content
+			fst._dialog_content.innerHTML = html;
 
 			// Add the buttons
-			const frm = dlg.querySelector('form[method="dialog"]');
-			buttons.forEach(text => {
-				const btn = document.createElement('button');
-				btn.value = text;
-				btn.textContent = text;
-				frm.appendChild(btn);
-			});
+			if (buttons) {
+				const frm = document.createElement('form');
+				frm.method = 'dialog';
+				buttons.forEach(text => {
+					const btn = document.createElement('button');
+					btn.value = text;
+					btn.textContent = text;
+					frm.appendChild(btn);
+				});
+				fst._dialog_controls.replaceChildren(frm);
+				fst._dialog.classList.remove('no-controls');
+			}
+			else
+				fst._dialog.classList.add('no-controls');
 
-			// When the dialog closes...
-			dlg.addEventListener('close', () => {
-				callback(dlg.returnValue)
-				dlg.remove();
-			});
+			// Set up dialog close callback
+			fst._dialog_callback = callback;
 
 			// Prevent escape key?
-			if (!opts.escape) {
-				dlg.addEventListener('cancel', event => event.preventDefault());
-				dlg.addEventListener('keydown', event => {
-					if (event.key == 'Escape')
-						event.preventDefault();
-				});
-			}
-
-			// Add dialog to the DOM
-			document.body.appendChild(dlg);
+			fst._dialog_escape = opts.escape;
 
 			// Show the dialog
-			dlg.showModal();
-
+			fst._dialog.showModal();
 		}, {
 			/***********************************************************************
 			## fst.dialog.alert (String html, Object options) {#fst-dialog-alert}
@@ -492,11 +478,7 @@ const fst = {
 
 			Closes the dialog box
 			***********************************************************************/
-			close: () => {
-				const dlg = document.querySelector('dialog[data-fst="dialog"]');
-				if (dlg)
-					dlg.close();
-			},
+			close: () => { fst._dialog.close(); },
 
 			/***********************************************************************
 			## fst.dialog.confirm (String message, Function callback, Object options) {#fst-dialog-confirm}
@@ -625,82 +607,70 @@ const fst = {
 				if (options && !(typeof options == 'object'))
 					throw new TypeError("fst.dialog.content(): 'options' must be an object");
 
-				const opts = {
-					button: 'OK',
-					button_cancel: 'Cancel',
-					callback: resp => { },
-					callback_fail: resp => { fst.form.errors(document.querySelector('dialog[data-fst="dialog"] form'), resp.errors); },
-					data: { },
-					escape: true,
-					...(options ?? { })
-				};
 
-				// Create OK and Cancel buttons
-				const btn1 = document.createElement('button');
-				btn1.textContent = opts.button;
-				btn1.addEventListener('click', () => {
-					const frm = document.querySelector('dialog[data-fst="dialog"] form');
-					fst.form.submit(frm, {
-						callback: async resp => {
-							fst.dialog.close();
-							opts.callback(await resp);
-						},
-						callback_fail: async resp => { opts.callback_fail(await resp); }
-					});
-				});
-				const btn2 = opts.button_cancel ? document.createElement('button') : null;
-				if (btn2 !== null) {
-					btn2.textContent = opts.button_cancel;
-					btn2.addEventListener('click', () => { fst.dialog.close(); });
-				}
-
-				// Retrieve the content
+				// Retrieve and update dialog content, show the dialog
 				fst.call('_content', {
 					callback: async resp => {
 
-						// Create the dialog element
-						const dlg = document.createElement('dialog');
-						dlg.dataset.fst = 'dialog';
+						// Populate the dialog content
+						fst._dialog_content.innerHTML = await resp;
 
-						// Create content area with form, append to dialog
-						const content = document.createElement('div');
-						content.innerHTML = await resp;
-						dlg.append(content);
+						// Ensure content contains a form
+						const frm = fst._dialog_content.querySelector('form[data-fst="form"]');
+						if (!frm)
+							throw new Error("fst.dialog.form(): Dialog content does not include a form");
 
-						// Append an HR
-						dlg.append(document.createElement('hr'));
+						// Apply default options
+						const opts = {
+							button: 'OK',
+							button_cancel: 'Cancel',
+							callback: resp => { },
+							callback_fail: resp => { fst.form.errors(frm, resp.errors); },
+							data: { },
+							escape: true,
+							...(options ?? { })
+						};
 
-						// Create controls element, add buttons, append to dialog
+						// Create OK and Cancel buttons
+						const btn1 = document.createElement('button');
+						btn1.textContent = opts.button;
+						btn1.addEventListener('click', () => {
+							// TODO: Consider 'this' context on callbacks?
+							fst.form.submit(frm, {
+								callback: async resp => {
+									fst.dialog.close();
+									opts.callback.call(frm, await resp);
+								},
+								callback_fail: async resp => { opts.callback_fail.call(frm, await resp); }
+							});
+						});
+						const btn2 = opts.button_cancel ? document.createElement('button') : null;
+						if (btn2 !== null) {
+							btn2.textContent = opts.button_cancel;
+							btn2.addEventListener('click', () => { fst.dialog.close(); });
+						}
+
+						// Populate the dialog controls
 						const controls = document.createElement('div');
-						controls.dataset.fst = 'dialog-controls';
 						controls.append(btn1);
 						if (btn2 !== null)
 							controls.append(btn2);
-						dlg.append(controls);
-
-						// When the dialog closes, remove from the DOM
-						dlg.addEventListener('close', () => { dlg.remove(); });
-
-						// Prevent escape key?
-						if (!opts.escape) {
-							dlg.addEventListener('cancel', event => event.preventDefault());
-							dlg.addEventListener('keydown', event => {
-								if (event.key == 'Escape')
-									event.preventDefault();
-							});
-						}
-
-						// Add dialog to the DOM
-						document.body.appendChild(dlg);
+						fst._dialog_controls.replaceChildren(controls);
+						fst._dialog.classList.remove('no-controls');
 
 						// Show the dialog
-						dlg.showModal();
+						fst._dialog.showModal();
 					},
 					data: { _content: name }
 				});
 			}
 		}
 	),
+	_dialog: null,
+	_dialog_callback: null,
+	_dialog_content: null,
+	_dialog_controls: null,
+	_dialog_escape: true,
 	
 	/***********************************************************************
 	## fst.form (String|Object form) {#fst-form}
@@ -1373,7 +1343,34 @@ window.addEventListener('load', () => {
 	wait.innerHTML = '<div class="spinner"></div>';
 	document.body.appendChild(wait);
 
-	// TODO: Create styles for overlays???
+	// Create dialog element
+	fst._dialog = document.createElement('dialog');
+	fst._dialog_content = document.createElement('div');
+	fst._dialog_controls = document.createElement('div');
+
+	fst._dialog.dataset.fst = 'dialog';
+	fst._dialog_content.dataset.fst = 'dialog-content';
+	fst._dialog_controls.dataset.fst = 'dialog-controls';
+
+	fst._dialog.append(fst._dialog_content);
+	fst._dialog.append(document.createElement('hr'));
+	fst._dialog.append(fst._dialog_controls);
+
+	document.body.appendChild(fst._dialog);
+
+	fst._dialog.addEventListener('close', () => {
+		if (fst._dialog_callback !== null)
+			fst._dialog_callback(fst._dialog.returnValue)
+	});
+
+	fst._dialog.addEventListener('cancel', event => {
+		if (!fst._dialog_escape)
+			event.preventDefault();
+	});
+	fst._dialog.addEventListener('keydown', event => {
+		if (!fst._dialog_escape && event.key == 'Escape')
+			event.preventDefault();
+	});
 });
 
 // window.addEventListener('beforeunload', (evt) => {
